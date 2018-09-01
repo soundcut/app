@@ -1,0 +1,86 @@
+// ------ Colors ---------------------------------------------------------------
+
+$color-blue: #17384b;
+$color-blue-light: #24adc2;
+$color-blue-lighter: #166a77;
+$color-blue-darker: #113042;
+$color-dark: #0b2331;
+
+$color-sand: #f4ffdc;
+
+$color-green: #37f0c2;
+$color-primary: $color-green;
+
+$color-grey: #ccc;
+$color-anthracite: #333;
+
+$color-red: #cc0000;
+
+// Status: alerts, notifications, highlights, etc.
+$color-info: #0099cc;
+$color-success: #00aa00;
+$color-warning: #ff9900;
+$color-danger: $color-red;
+$color-progress: $color-info;
+
+// Aliases.
+$color-text: #fff;
+$color-text-light: #7e7e7e;
+
+// ------ Spacing and measurements ---------------------------------------------
+$spacing-xsmall: 5px;
+$spacing-small: 10px;
+$spacing: 20px;
+$spacing-medium: 40px;
+$spacing-large: 60px;
+
+// ------ Breakpoints ----------------------------------------------------------
+
+// Shortcuts: xsm, sm, md, lg, xlg, xxlg, wd, xwd
+
+$baseem: 0.0625; // 1em / 16px
+
+$screen-xsmall: 27em; // 432px
+$screen-small: 40em; // 640px
+$screen-medium: 48em; // 768px
+$screen-large: 62.5em; // 1000px
+$screen-xlarge: 75em; // 1200px
+$screen-xxlarge: 90em; // 1440px
+$screen-3xlarge: 105em; // 1680px
+$screen-4xlarge: 120em; // 1920px
+
+// Aliases.
+$screen-wide: $screen-3xlarge;
+$screen-xwide: $screen-4xlarge;
+
+// ------ Fonts ----------------------------------------------------------------
+
+$font-family: Montserrat, Helvetica, Arial, sans-serif;
+
+$font-size-small: 11px;
+$font-size-base: 14px;
+$font-size-medium: 16px;
+$font-size-big: 18px;
+$font-size-bigger: 26px;
+
+$font-size-h1: $font-size-bigger;
+$font-size-h2: $font-size-big;
+$font-size-h3: $font-size-big;
+$font-size-h4: $font-size-medium;
+$font-size-h5: $font-size-medium;
+$font-size-h6: $font-size-medium;
+
+$line-height-base: 1.15;
+
+// ------ Forms ----------------------------------------------------------------
+
+$form-widget-height: 40px;
+$form-widget-height-small: 28px;
+
+// ------ Misc -----------------------------------------------------------------
+
+$border-width: 1px;
+$border-width-medium: 2px;
+$border-width-large: 4px;
+
+$border-radius: 6px;

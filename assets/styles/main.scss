@@ -1,0 +1,32 @@
+@import 'normalize.css/normalize';
+
+@import './abstracts/variables.scss';
+
+@import './base/fonts.scss';
+@import './base/base.scss';
+@import './base/header.scss';
+@import './base/links.scss';
+@import './base/buttons.scss';
+@import './base/typography.scss';
+@import './base/forms.scss';
+
+@import './misc/forms.scss';
+
+@import './helpers/flex.scss';
+
+@import './components/FileField.scss';
+@import './components/LocalPlay.scss';
+
+body {
+  background-color: $color-blue;
+}
+
+#wrapper {
+  padding: 0 $spacing;
+  max-width: $screen-large;
+  margin: 0 auto;
+}
+
+main {}
+
+

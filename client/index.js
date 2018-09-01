@@ -1,0 +1,44 @@
+require('document-register-element');
+import hyperApp from 'hyperhtml-app';
+import { wire } from 'hypermorphic';
+
+import Home from '../shared/components/Home';
+import Upload from '../shared/components/Upload';
+import About from '../shared/components/About';
+
+const app = hyperApp();
+
+function initialize() {
+  const render = require('./render').default();
+
+  const title = 'Sound Slice';
+
+  let last;
+  app.get('/', function home() {
+    document.title = title;
+    const home = new Home();
+    render.main(home);
+  });
+
+  app.get('/upload', function upload() {
+    document.title = title;
+    const upload = new Upload();
+    render.main(upload);
+  });
+
+  app.get('/about', function about() {
+    document.title = `About | ${title}`;
+    const about = About(wire());
+    render.main(about);
+  });
+
+  setTimeout(() => {
+    app.navigate(location.pathname);
+  }, 0);
+}
+
+if (document.readyState !== 'loading') {
+  initialize();
+} else {
+  document.addEventListener('DOMContentLoaded', initialize);
+}

@@ -1,0 +1,4 @@
+node_modules/*
+dist/*
+shared/views/*
+.vscode/

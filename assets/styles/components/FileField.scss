@@ -1,0 +1,35 @@
+@import '../abstracts/variables.scss';
+
+fieldset.FileField {
+  margin-bottom: $spacing;
+  text-align: center;
+
+  em {
+    font-size: 0.9em;
+  }
+
+  legend {
+    display: flex;
+  }
+
+  label {
+    display: inline-block;
+    padding: $spacing;
+    border: 4px dashed $color-blue-light;
+    border-radius: 3px;
+    background-color: $color-blue-lighter;
+    color: $color-green;
+
+    em {
+      display: block;
+    }
+  }
+
+  input[type='file'] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    font-size: 0;
+    overflow: hidden;
+  }
+}

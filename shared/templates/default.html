@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>${props.title}</title>
+    <link rel="stylesheet" media="all" href="/public/stylesheets/main.css" />
+    <link rel="icon" href="/favicon.ico" />
+    <script async src="/public/js/main.js"></script>
+  </head>
+  <body>
+    <div id="wrapper">
+      <header>
+        <h1>
+          <a href="/" title="Sound Slice">
+            <img
+              id="logo"
+              src="/public/img/logo.png"
+              alt="Sound Slice"
+            />
+          </a>
+        </h1>
+      </header>
+      <nav>
+        <ul>
+          ${props.links
+            .concat({ name: 'About', path: 'about' })
+            .map((link) => `
+              <li>
+                <a
+                  class="${props.path === link.path ? 'selected' : ''}"
+                  href="${link.path}"
+                >
+                  ${link.name}
+                </a>
+              </li>
+            `)
+          }
+        </ul>
+      </nav>
+      <main>${props.main}</main>
+      <footer>
+        <p>
+          Stay in touch on:
+        </p>
+        <ul>
+          <li>
+            <a href="https://github.com/">
+              GitHub
+            </a>
+          </li>
+          <li>
+            <a href="https://twitter.com/">
+              Twitter
+            </a>
+          </li>
+        </ul>
+      </footer>
+    </div>
+  </body>
+</html>

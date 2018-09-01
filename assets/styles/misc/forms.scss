@@ -1,0 +1,26 @@
+/**
+ * Fix iPhone browsers triggering an unwanted zoom on focus of form elements.
+ * 736px is the highest device-width amongst all iPhones at the moment (iPhone 7+, landscape mode)
+ * -webkit-min-device-pixel-ratio:0 will match all webkit/safari browsers,
+ * minimum ratio value can be set to `2` as only the Orginal/3GS iPhones have a pixel-ratio < 2
+ */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (max-device-width: 736px) {
+  select,
+  textarea,
+  input[type='text'],
+  input[type='password'],
+  input[type='datetime'],
+  input[type='datetime-local'],
+  input[type='date'],
+  input[type='month'],
+  input[type='time'],
+  input[type='week'],
+  input[type='number'],
+  input[type='email'],
+  input[type='url'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='color'] {
+    font-size: 16px;
+  }
+}
