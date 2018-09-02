@@ -2,10 +2,12 @@ const util = require('util');
 const path = require('path');
 const express = require('express');
 const favicon = require('serve-favicon');
+const bodyParser = require('body-parser');
 const multiparty = require('multiparty');
 const serveStatic = require('serve-static');
 const { wire } = require('hypermorphic');
 const Home = require('../shared/components/Home');
+const { spawnYouTubeDL } = require('../lib/index');
 
 const views = {
   default: require('../shared/views/default'),
@@ -43,6 +45,12 @@ app.post('/api/upload/mp3', function(req, res) {
   });
 
   return;
+});
+
+const jsonParser = bodyParser.json();
+app.post('/api/link', jsonParser, function(req, res) {
+  if (!req.body) return res.sendStatus(400);
+  spawnYouTubeDL(req.body.url)
 });
 
 app.get('/', function(req, res) {

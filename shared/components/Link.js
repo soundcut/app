@@ -2,7 +2,7 @@
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
 
-const linkPath = '/link';
+const linkPath = '/api/link';
 
 const initialState = {};
 
@@ -16,6 +16,7 @@ class Link extends Component {
 
   onconnected() {
     this.setState(initialState);
+    document.getElementById('source').focus();
   }
 
   handleReset() {
@@ -27,10 +28,20 @@ class Link extends Component {
   }
 
   handleSubmit(evt) {
-    // No need to submit the form ATM.
-    return;
-    // eslint-disable-next-line no-unreachable
-    const target = evt.target;
+    evt.preventDefault();
+    const url = document.getElementById('source').value;
+
+    if (url) {
+      fetch(linkPath, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      });
+    }
   }
 
   render() {
@@ -39,7 +50,7 @@ class Link extends Component {
             onSubmit=${this.handleSubmit}
             onReset=${this.handleReset}
             method="get"
-            action="${linkPath}"
+            action="/link"
       >
         <fieldset>
           <legend>
