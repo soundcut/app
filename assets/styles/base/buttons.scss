@@ -8,7 +8,7 @@ a.button,
 button {
   padding: $spacing-small;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: $border-radius;
   background-color: $color-blue-lighter;
   color: $color-green;
 }

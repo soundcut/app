@@ -5,6 +5,7 @@ import { wire } from 'hypermorphic';
 import Home from '../shared/components/Home';
 import Upload from '../shared/components/Upload';
 import About from '../shared/components/About';
+import Link from '../shared/components/Link';
 
 const app = hyperApp();
 
@@ -20,8 +21,14 @@ function initialize() {
     render.main(home);
   });
 
+  app.get('/link', function link() {
+    document.title = `Link external media | ${title}`;
+    const link = new Link();
+    render.main(link);
+  });
+
   app.get('/upload', function upload() {
-    document.title = title;
+    document.title = `Upload an audio file | ${title}`;
     const upload = new Upload();
     render.main(upload);
   });

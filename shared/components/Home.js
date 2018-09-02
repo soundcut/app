@@ -10,13 +10,11 @@ class Home extends Component {
       <section id="home">
         <p class="flex flex-justify-content-center">
           <a href="/link"
-             onclick=${this.set}
              class="button"
           >
             Link
           </a>
           <a href="/upload"
-             onclick=${this.set}
              class="button"
           >
             Upload

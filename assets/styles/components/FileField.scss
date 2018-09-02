@@ -1,16 +1,7 @@
 @import '../abstracts/variables.scss';
 
 fieldset.FileField {
-  margin-bottom: $spacing;
   text-align: center;
-
-  em {
-    font-size: 0.9em;
-  }
-
-  legend {
-    display: flex;
-  }
 
   label {
     display: inline-block;

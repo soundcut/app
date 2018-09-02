@@ -1,13 +1,17 @@
 @import '../abstracts/variables.scss';
 
 fieldset {
-  margin: 0;
+  margin-bottom: $spacing;
   padding: 0;
   border: 1px solid transparent;
+
+  em {
+    font-size: 0.9em;
+  }
 }
 
 legend {
-  display: block;
+  display: flex;
   width: 100%;
   margin-bottom: $spacing-small;
   text-align: center;
@@ -15,6 +19,16 @@ legend {
   color: $color-sand;
 }
 
-input[type='range'] {
+input[type='text'],
+input[type='url'] {
+  border-radius: $border-radius;
+  border: 1px solid transparent;
+  height: $form-widget-height-small;
+  padding: $spacing-xsmall;
+}
+
+
+input[type='range'],
+input[type='url'] {
   width: 100%;
 }
