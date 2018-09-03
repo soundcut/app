@@ -1,10 +1,13 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
+const LocalPlay = require('./LocalPlay');
 
 const linkPath = '/api/link';
 
-const initialState = {};
+const initialState = {
+  file: undefined,
+};
 
 class Link extends Component {
   constructor(...args) {
@@ -27,12 +30,12 @@ class Link extends Component {
     const target = evt.target;
   }
 
-  handleSubmit(evt) {
+  async handleSubmit(evt) {
     evt.preventDefault();
     const url = document.getElementById('source').value;
 
     if (url) {
-      fetch(linkPath, {
+      const response = await fetch(linkPath, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
@@ -41,6 +44,10 @@ class Link extends Component {
           url,
         }),
       });
+
+      const blob = await response.blob();
+      const file = new File([blob], response.headers.get('x-title'));
+      this.setState({ file });
     }
   }
 
@@ -74,6 +81,7 @@ class Link extends Component {
             Extract audio
           </button>
         </p>
+        ${[this.state.file ? new LocalPlay(this.state.file) : '']}
       </form>
     `;
   }
