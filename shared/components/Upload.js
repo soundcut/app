@@ -151,14 +151,10 @@ class Upload extends Component {
             action="${uploadPath}"
       >
         ${[
-          file && !isValidFileSize(file.size)
-            ? InvalidFileSize(file.size)
-            : '',
+          file && !isValidFileSize(file.size) ? InvalidFileSize(file.size) : '',
         ]}
         ${[
-          file && !isValidFileType(file.type)
-            ? InvalidFileType(file.type)
-            : '',
+          file && !isValidFileType(file.type) ? InvalidFileType(file.type) : '',
         ]}
         ${[file && state.error ? ErrorMessage(state.error) : '']}
         <fieldset class="FileField">

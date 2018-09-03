@@ -56,10 +56,9 @@ app.post('/api/link', jsonParser, async function(req, res) {
     201,
     Object.keys(ret)
       .filter(key => key !== 'fileStream')
-      .reduce(
-        (acc, key) => Object.assign({ [`x-${key}`]: ret[key] }, acc),
-        { 'content-type': 'audio/mp3' }
-      )
+      .reduce((acc, key) => Object.assign({ [`x-${key}`]: ret[key] }, acc), {
+        'content-type': 'audio/mp3',
+      })
   );
   ret.fileStream.pipe(res);
 });
