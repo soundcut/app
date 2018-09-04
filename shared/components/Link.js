@@ -6,6 +6,8 @@ const LocalPlay = require('./LocalPlay');
 const linkPath = '/api/link';
 
 const initialState = {
+  hasValue: false,
+  loading: false,
   file: undefined,
 };
 
@@ -19,35 +21,63 @@ class Link extends Component {
 
   onconnected() {
     this.setState(initialState);
-    document.getElementById('source').focus();
+    this.source = document.getElementById('source');
+    this.source.focus();
   }
 
   handleReset() {
     this.setState(initialState);
   }
 
-  handleChange(evt) {
-    const target = evt.target;
+  handleChange() {
+    const value = this.source.value;
+    if (value && !this.state.hasValue) {
+      this.setState({ hasValue: true });
+    }
+
+    if (!value && this.state.hasValue) {
+      this.setState({ hasValue: false });
+    }
   }
 
   async handleSubmit(evt) {
     evt.preventDefault();
-    const url = document.getElementById('source').value;
+    const url = this.source.value;
+
+    if (this.state.file) {
+      this.setState({ file: undefined });
+    }
+
+    const fetchPromise = fetch(linkPath, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify({
+        url,
+      }),
+    });
 
     if (url) {
-      const response = await fetch(linkPath, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
-        body: JSON.stringify({
-          url,
-        }),
-      });
+      this.setState({ loading: true });
+      try {
+        const response = await fetchPromise;
 
-      const blob = await response.blob();
-      const file = new File([blob], response.headers.get('x-title'));
-      this.setState({ file });
+        if (response.status === 201) {
+          const blob = await response.blob();
+          const file = new File([blob], response.headers.get('x-title'));
+          this.setState({
+            file,
+            loading: false,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        this.setState({
+          error: true,
+          loading: false,
+        });
+      }
     }
   }
 
@@ -67,18 +97,26 @@ class Link extends Component {
           <label for="source">
             URL
           </label>
-          <input onChange=${this.handleChange}
+          <input onInput=${this.handleChange}
                  type="url"
                  id="source"
                  name="source"
+                 disabled=${this.state.loading}
           />
         </fieldset>
         <p class="flex flex-justify-content-center">
-          <button type="reset">
+          <button type="reset"
+                  disabled=${this.state.loading}
+          >
             Reset
           </button>
-          <button type="submit">
-            Extract audio
+          <button type="submit"
+                  disabled=${!this.state.hasValue || this.state.loading}
+                  title="${
+                    this.state.loading ? 'This can take up to a minute...' : ''
+                  }"
+          >
+            ${this.state.loading ? 'Extracting audio...' : 'Extract audio'}
           </button>
         </p>
         ${[this.state.file ? new LocalPlay(this.state.file) : '']}
