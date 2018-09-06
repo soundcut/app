@@ -50,17 +50,21 @@ app.post('/api/upload/mp3', function(req, res) {
 const jsonParser = bodyParser.json();
 app.post('/api/link', jsonParser, async function(req, res) {
   if (!req.body) return res.sendStatus(400);
-  const ret = await spawnYouTubeDL(req.body.url);
-
-  res.writeHead(
-    201,
-    Object.keys(ret)
-      .filter(key => key !== 'fileStream')
-      .reduce((acc, key) => Object.assign({ [`x-${key}`]: ret[key] }, acc), {
-        'content-type': 'audio/mp3',
-      })
-  );
-  ret.fileStream.pipe(res);
+  try {
+    const ret = await spawnYouTubeDL(req.body.url);
+    res.writeHead(
+      201,
+      Object.keys(ret)
+        .filter(key => key !== 'fileStream')
+        .reduce((acc, key) => Object.assign({ [`x-${key}`]: ret[key] }, acc), {
+          'content-type': 'audio/mp3',
+        })
+    );
+    ret.fileStream.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 });
 
 app.get('/', function(req, res) {
