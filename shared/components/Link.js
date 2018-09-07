@@ -11,6 +11,10 @@ const initialState = {
   file: undefined,
 };
 
+function ErrorMessage() {
+  return wire()`<p>Oops! Something went wrong.</p>`;
+}
+
 class Link extends Component {
   constructor(...args) {
     super(...args);
@@ -62,15 +66,16 @@ class Link extends Component {
       this.setState({ loading: true });
       try {
         const response = await fetchPromise;
-
-        if (response.status === 201) {
-          const blob = await response.blob();
-          const file = new File([blob], response.headers.get('x-title'));
-          this.setState({
-            file,
-            loading: false,
-          });
+        if (response.status !== 201) {
+          throw response;
         }
+
+        const blob = await response.blob();
+        const file = new File([blob], response.headers.get('x-title'));
+        this.setState({
+          file,
+          loading: false,
+        });
       } catch (err) {
         console.error(err);
         this.setState({
@@ -94,6 +99,7 @@ class Link extends Component {
             Link to an external media (YouTube, ...)
             <em>Audio will be extracted for you to slice</em>
           </legend>
+          ${[this.state.error ? ErrorMessage() : '']}
           <label for="source">
             URL
           </label>
