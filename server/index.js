@@ -50,8 +50,9 @@ app.post('/api/upload/mp3', function(req, res) {
 const jsonParser = bodyParser.json();
 app.post('/api/link', jsonParser, async function(req, res) {
   if (!req.body) return res.sendStatus(400);
+
   try {
-    const ret = await spawnYouTubeDL(req.body.url);
+    const ret = await spawnYouTubeDL(req.body.url, req);
     res.writeHead(
       201,
       Object.keys(ret)
