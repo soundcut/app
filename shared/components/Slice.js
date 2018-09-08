@@ -13,13 +13,21 @@ class Slice extends Component {
     this.file = file;
     this.state = {
       audio,
+      loading: false,
+      loop: false,
       start: 0,
       end: maxSliceLength,
       downloadInProgress: false,
     };
     this.handleSliceChange = this.handleSliceChange.bind(this);
-    this.handleCreateClick = this.handleCreateClick.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
+    this.handlePlayClick = this.handlePlayClick.bind(this);
+    this.handlePauseClick = this.handlePauseClick.bind(this);
+    this.handleLoopClick = this.handleLoopClick.bind(this);
+  }
+
+  onconnected() {
+    this.createSlice();
   }
 
   ondisconnected() {
@@ -57,6 +65,8 @@ class Slice extends Component {
           [opposite]: which === 'start' ? parsedValue + 1 : parsedValue - 1,
         });
       }
+
+      this.createSlice();
     } else {
       this.setState({
         [which]: this.state[which],
@@ -64,10 +74,24 @@ class Slice extends Component {
     }
   }
 
-  handleCreateClick(evt) {
+  async handlePlayClick(evt) {
     evt.preventDefault();
+    if (!this.slice) {
+      await this.createSlice();
+    }
+    this.slice.play();
+  }
 
-    this.createSlice();
+  handlePauseClick(evt) {
+    evt.preventDefault();
+    this.slice.pause();
+  }
+
+  async handleLoopClick(evt) {
+    evt.preventDefault();
+    this.setState({ loop: !this.state.loop, loading: true });
+    await this.createSlice();
+    this.setState({ loading: false });
   }
 
   handleDownloadClick(evt) {
@@ -94,49 +118,53 @@ class Slice extends Component {
   createSlice() {
     const state = this.state;
 
-    let fileReader = new FileReader();
-    fileReader.onloadend = () => {
-      const sourceArrayBuffer = fileReader.result;
-      const duration = state.end - state.start;
-      const bytesPerSecond = Math.floor(
-        sourceArrayBuffer.byteLength / state.audio.duration
-      );
-      const offset = Math.floor(state.start * bytesPerSecond);
-      const length = Math.floor(duration * bytesPerSecond);
-      const sliceArrayBuffer = sourceArrayBuffer.slice(offset, length);
+    return new Promise((resolve, reject) => {
+      let fileReader = new FileReader();
+      fileReader.onloadend = () => {
+        const sourceArrayBuffer = fileReader.result;
+        const duration = state.end - state.start;
+        const bytesPerSecond = Math.floor(
+          sourceArrayBuffer.byteLength / state.audio.duration
+        );
+        const offset = Math.floor(state.start * bytesPerSecond);
+        const length = Math.floor(duration * bytesPerSecond);
+        const sliceArrayBuffer = sourceArrayBuffer.slice(offset, length);
 
-      console.log('---------', {
-        duration,
-        bytesPerSecond,
-        sliceArrayBuffer,
-        sourceArrayBuffer,
-        offset,
-        length,
-      });
-
-      if (!sliceArrayBuffer.byteLength) {
-        console.error('Empty sliceArrayBuffer', {
+        console.log('---------', {
+          duration,
+          bytesPerSecond,
           sliceArrayBuffer,
           sourceArrayBuffer,
+          offset,
+          length,
         });
-        return;
-      }
 
-      if (this.slice) {
-        this.slice.pause();
-        this.slice = undefined;
-      }
+        if (!sliceArrayBuffer.byteLength) {
+          const error = new Error('Empty sliceArrayBuffer');
+          console.error(error, {
+            sliceArrayBuffer,
+            sourceArrayBuffer,
+          });
+          return reject(error);
+        }
 
-      arrayBufferToObjectURL(sliceArrayBuffer, result => {
-        const slice = new Audio();
-        this.slice = slice;
-        slice.src = result;
-        this.render();
-        // slice.play();
-      });
-    };
+        if (this.slice) {
+          this.slice.pause();
+          this.slice = undefined;
+        }
 
-    fileReader.readAsArrayBuffer(this.file);
+        arrayBufferToObjectURL(sliceArrayBuffer, result => {
+          const slice = new Audio();
+          slice.loop = state.loop;
+          this.slice = slice;
+          slice.src = result;
+          this.render();
+          resolve();
+        });
+      };
+
+      fileReader.readAsArrayBuffer(this.file);
+    });
   }
 
   render() {
@@ -187,15 +215,24 @@ class Slice extends Component {
           Slice duration: ${state.end - state.start}
         </p>
         <p>
-          <button type="button" disabled>Play slice</button>
-          <button type="button" disabled>Pause slice</button>
+          <button type="button"
+            onclick=${this.handleLoopClick}
+          >
+            ${!this.state.loop ? 'Set loop mode' : 'Unset loop mode'}
+          </button>
+          <button type="button"
+                  onclick=${this.handlePlayClick}
+          >
+            Play slice
+          </button>
+          <button type="button"
+                  disabled=${!this.slice}
+                  onclick=${this.handlePauseClick}
+          >
+            Pause slice
+          </button>
         </p>
         <p class="flex flex-justify-content-center">
-          <button type="button"
-                  onClick=${this.handleCreateClick}
-          >
-            Create a slice!
-          </button>
           <button type="button"
                   onClick=${this.handleDownloadClick}
                   disabled=${!this.slice || this.state.downloadInProgress}
