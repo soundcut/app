@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const multiparty = require('multiparty');
 const serveStatic = require('serve-static');
 const { wire } = require('hypermorphic');
+const { encode } = require('punycode');
 const { spawnYouTubeDL } = require('../lib/index');
 const Home = require('../shared/components/Home');
 const Upload = require('../shared/components/Upload');
@@ -55,13 +56,15 @@ app.post('/api/link', jsonParser, async function(req, res) {
 
   try {
     const ret = await spawnYouTubeDL(req.body.url, req);
+    const headers = Object.keys(ret)
+      .filter(key => key !== 'fileStream')
+      .reduce((acc, key) => Object.assign({ [`x-${key}`]: encode(ret[key]) }, acc), {
+        'content-type': 'audio/mp3',
+      });
+
     res.writeHead(
       201,
-      Object.keys(ret)
-        .filter(key => key !== 'fileStream')
-        .reduce((acc, key) => Object.assign({ [`x-${key}`]: ret[key] }, acc), {
-          'content-type': 'audio/mp3',
-        })
+      headers,
     );
     ret.fileStream.pipe(res);
   } catch (err) {

@@ -32,6 +32,7 @@
     "hyperhtml-app": "^0.2.1",
     "hypermorphic": "^0.6.3",
     "multiparty": "^4.1.4",
+    "punycode": "1.4.1",
     "serve-favicon": "^2.5.0",
     "serve-static": "^1.13.2"
   },
