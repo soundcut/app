@@ -1,3 +1,4 @@
+const { decode } = require('punycode');
 const { Component } = require('hypermorphic');
 
 const maxSliceLength = 90;
@@ -98,7 +99,9 @@ class Slice extends Component {
       const link = document.createElement('a');
       link.style = 'display: none;';
       link.href = src;
-      link.download = 'Slice.mp3';
+      const filename = decode(this.file.name) || 'Untitled';
+      const range = `${this.state.start}-${this.state.end}`;
+      link.download = `${filename} - Sound Slice [${range}].mp3`;
       // Firefox appears to be require appending the element to the DOM..
       // but FileSaver.js does not need to and it still works for some reason.
       document.body.appendChild(link);
