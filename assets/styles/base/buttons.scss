@@ -13,14 +13,39 @@ button {
   color: $color-green;
 }
 
-a.button + a.button,
-button + button {
-  margin-left: $spacing;
-}
-
 a.button[disabled],
 button[disabled] {
   opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.button-container {
+  a.button,
+  button {
+    width: 100%;
+
+    @media screen and (min-width: $screen-small) {
+      width: auto;
+    }
+  }
+
+  a.button + a.button,
+  button + button {
+    margin-top: $spacing;
+    margin-left: 0;
+
+    @media screen and (min-width: $screen-small) {
+      margin-top: 0;
+      margin-left: $spacing;
+    }
+  }
+}
+
+.button-container + .button-container {
+  margin-left: $spacing;
+
+  @media screen and (min-width: $screen-small) {
+    margin-left: 0;
+  }
 }

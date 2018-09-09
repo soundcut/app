@@ -8,7 +8,7 @@ class Home extends Component {
   render() {
     return this.html`
       <section id="home">
-        <p class="flex flex-justify-content-center">
+        <p class="button-container flex flex-wrap flex-justify-content-center">
           <a href="/link"
              class="button"
           >

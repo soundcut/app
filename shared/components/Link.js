@@ -6,6 +6,7 @@ const LocalPlay = require('./LocalPlay');
 const linkPath = '/api/link';
 
 const initialState = {
+  error: false,
   hasValue: false,
   loading: false,
   file: undefined,
@@ -110,7 +111,7 @@ class Link extends Component {
                  disabled=${this.state.loading}
           />
         </fieldset>
-        <p class="flex flex-justify-content-center">
+        <p class="button-container flex flex-wrap flex-justify-content-center">
           <button type="reset"
                   disabled=${this.state.loading}
           >

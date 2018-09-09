@@ -13,7 +13,6 @@ class Slice extends Component {
     this.file = file;
     this.state = {
       audio,
-      loading: false,
       loop: false,
       start: 0,
       end: maxSliceLength,
@@ -74,11 +73,8 @@ class Slice extends Component {
     }
   }
 
-  async handlePlayClick(evt) {
+  handlePlayClick(evt) {
     evt.preventDefault();
-    if (!this.slice) {
-      await this.createSlice();
-    }
     this.slice.play();
   }
 
@@ -89,9 +85,8 @@ class Slice extends Component {
 
   async handleLoopClick(evt) {
     evt.preventDefault();
-    this.setState({ loop: !this.state.loop, loading: true });
+    this.setState({ loop: !this.state.loop });
     await this.createSlice();
-    this.setState({ loading: false });
   }
 
   handleDownloadClick(evt) {
@@ -168,10 +163,11 @@ class Slice extends Component {
   }
 
   render() {
+    /* eslint-disable indent */
     const state = this.state;
 
     return this.html`
-      <div ondisconnected=${this}>
+      <div onconnected=${this} ondisconnected=${this}>
         <h3>
           Drag handles to slice
         </h3>
@@ -212,9 +208,10 @@ class Slice extends Component {
           </output>
         </p>
         <p>
-          Slice duration: ${state.end - state.start}
+          Slice duration: ${state.end - state.start} seconds
         </p>
-        <p>
+        <div class="flex flex-justify-content-between">
+        <p class="button-container">
           <button type="button"
             onclick=${this.handleLoopClick}
           >
@@ -232,19 +229,20 @@ class Slice extends Component {
             Pause slice
           </button>
         </p>
-        <p class="flex flex-justify-content-center">
+        <p class="button-container flex flex-justify-content-end">
           <button type="button"
                   onClick=${this.handleDownloadClick}
                   disabled=${!this.slice || this.state.downloadInProgress}
                   title=${
-  !this.slice
-    ? 'Select slice boundaries and click "Create a slice!" before you can download it.'
-    : 'Your browser\'s download dialog should open instantly.'
-}
+                    !this.slice
+                      ? 'Select slice boundaries and click "Create a slice!" before you can download it.'
+                      : 'Your browser\'s download dialog should open instantly.'
+                  }
           >
             Download slice!
           </button>
         </p>
+        </div>
       </div>
     `;
   }

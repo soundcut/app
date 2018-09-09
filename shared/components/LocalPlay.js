@@ -70,7 +70,7 @@ class LocalPlay extends Component {
         <h6>${state.file.name || 'Untitled file'} (${humanizedSize})</h6>
         ${[isMediaLoaded(state.audio) ? new Volume(state.audio) : '']}
         ${[isMediaLoaded(state.audio) ? new Duration(state.audio) : '']}
-        <p>
+        <p class="button-container">
           <button type="button"
                   onClick=${this.handlePlay}
                   disabled="${state.audio ? false : true}"
