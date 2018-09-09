@@ -68,7 +68,8 @@ class LocalPlay extends Component {
     return this.html`
       <div class="LocalPlay" onconnected=${this} ondisconnected=${this}>
         <h3>Play source file</h3>
-        <h6>${decode(state.file.name) || 'Untitled file'} (${humanizedSize})</h6>
+        <h6>${decode(state.file.name) ||
+          'Untitled file'} (${humanizedSize})</h6>
         ${[isMediaLoaded(state.audio) ? new Volume(state.audio) : '']}
         ${[isMediaLoaded(state.audio) ? new Duration(state.audio) : '']}
         <p class="button-container">

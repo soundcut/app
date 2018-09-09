@@ -58,14 +58,14 @@ app.post('/api/link', jsonParser, async function(req, res) {
     const ret = await spawnYouTubeDL(req.body.url, req);
     const headers = Object.keys(ret)
       .filter(key => key !== 'fileStream')
-      .reduce((acc, key) => Object.assign({ [`x-${key}`]: encode(ret[key]) }, acc), {
-        'content-type': 'audio/mp3',
-      });
+      .reduce(
+        (acc, key) => Object.assign({ [`x-${key}`]: encode(ret[key]) }, acc),
+        {
+          'content-type': 'audio/mp3',
+        }
+      );
 
-    res.writeHead(
-      201,
-      headers,
-    );
+    res.writeHead(201, headers);
     ret.fileStream.pipe(res);
   } catch (err) {
     console.error(err);
