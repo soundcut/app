@@ -6,8 +6,10 @@ const bodyParser = require('body-parser');
 const multiparty = require('multiparty');
 const serveStatic = require('serve-static');
 const { wire } = require('hypermorphic');
-const Home = require('../shared/components/Home');
 const { spawnYouTubeDL } = require('../lib/index');
+const Home = require('../shared/components/Home');
+const Upload = require('../shared/components/Upload');
+const Link = require('../shared/components/Link');
 
 const views = {
   default: require('../shared/views/default'),
@@ -79,6 +81,38 @@ app.get('/', function(req, res) {
       title: title,
       links: links,
       main: new Home(),
+    })
+  );
+  res.end();
+});
+
+app.get('/upload', function(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/html',
+  });
+
+  res.write(
+    views.default(wire(), {
+      path: req.path,
+      title: title,
+      links: links,
+      main: new Upload(),
+    })
+  );
+  res.end();
+});
+
+app.get('/link', function(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/html',
+  });
+
+  res.write(
+    views.default(wire(), {
+      path: req.path,
+      title: title,
+      links: links,
+      main: new Link(),
     })
   );
   res.end();
