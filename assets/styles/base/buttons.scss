@@ -25,7 +25,7 @@ button[disabled] {
   button {
     width: 100%;
 
-    @media screen and (min-width: $screen-small) {
+    @media screen and (min-width: $screen-medium) {
       width: auto;
     }
   }
@@ -35,7 +35,7 @@ button[disabled] {
     margin-top: $spacing;
     margin-left: 0;
 
-    @media screen and (min-width: $screen-small) {
+    @media screen and (min-width: $screen-medium) {
       margin-top: 0;
       margin-left: $spacing;
     }
@@ -45,7 +45,7 @@ button[disabled] {
 .button-container + .button-container {
   margin-left: $spacing;
 
-  @media screen and (min-width: $screen-small) {
+  @media screen and (min-width: $screen-medium) {
     margin-left: 0;
   }
 }

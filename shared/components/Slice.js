@@ -1,29 +1,51 @@
 const { decode } = require('punycode');
-const { Component } = require('hypermorphic');
+const { Component, wire } = require('hypermorphic');
 
 const maxSliceLength = 90;
 
 function arrayBufferToObjectURL(buffer, callback) {
   const blob = new Blob([buffer], { type: 'audio/mpeg' });
-  setTimeout(() => callback(URL.createObjectURL(blob)), 0);
+  setTimeout(() => callback(URL.createObjectURL(blob), blob), 0);
 }
+
+function blobToBase64DataURL(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = function (evt) {
+      resolve(evt.target.result);
+    };
+  });
+}
+
+function ShareInput(base64DataURL) {
+  return wire()`
+  <p>
+    <input class="full-width" type="text" value=${base64DataURL} />
+  </p>
+  `;
+}
+
+const initialState = {
+  audio: undefined,
+  loop: false,
+  start: 0,
+  end: maxSliceLength,
+  loading: false,
+  base64DataURL: '',
+};
 
 class Slice extends Component {
   constructor(audio, file) {
     super();
     this.file = file;
-    this.state = {
-      audio,
-      loop: false,
-      start: 0,
-      end: maxSliceLength,
-      downloadInProgress: false,
-    };
+    this.state = Object.assign({}, initialState, { audio });
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayClick = this.handlePlayClick.bind(this);
     this.handlePauseClick = this.handlePauseClick.bind(this);
     this.handleLoopClick = this.handleLoopClick.bind(this);
+    this.handleShareClick = this.handleShareClick.bind(this);
   }
 
   onconnected() {
@@ -33,6 +55,8 @@ class Slice extends Component {
   ondisconnected() {
     this.state.audio = undefined;
     this.file = undefined;
+    this.blob = undefined;
+    this.state = initialState;
     if (this.slice) {
       this.slice.pause();
       URL.revokeObjectURL(this.slice.currentSrc);
@@ -93,24 +117,29 @@ class Slice extends Component {
   handleDownloadClick(evt) {
     evt.preventDefault();
 
-    if (this.slice) {
-      this.setState({ downloadInProgress: true });
-      const src = this.slice.currentSrc;
-      const link = document.createElement('a');
-      link.style = 'display: none;';
-      link.href = src;
-      const filename = decode(this.file.name) || 'Untitled';
-      const range = `${this.state.start}-${this.state.end}`;
-      link.download = `${filename} - Sound Slice [${range}].mp3`;
-      // Firefox appears to be require appending the element to the DOM..
-      // but FileSaver.js does not need to and it still works for some reason.
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        document.body.removeChild(link);
-        this.setState({ downloadInProgress: false });
-      }, 0);
-    }
+    this.setState({ loading: true });
+    const src = this.slice.currentSrc;
+    const link = document.createElement('a');
+    link.style = 'display: none;';
+    link.href = src;
+    const filename = decode(this.file.name) || 'Untitled';
+    const range = `${this.state.start}-${this.state.end}`;
+    link.download = `${filename} - Sound Slice [${range}].mp3`;
+    // Firefox appears to be require appending the element to the DOM..
+    // but FileSaver.js does not need to and it still works for some reason.
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+      this.setState({ downloadInProgress: false });
+    }, 0);
+  }
+
+  async handleShareClick(evt) {
+    evt.preventDefault();
+
+    const base64DataURL = await blobToBase64DataURL(this.blob);
+    this.setState({ base64DataURL });
   }
 
   createSlice() {
@@ -151,11 +180,12 @@ class Slice extends Component {
           this.slice = undefined;
         }
 
-        arrayBufferToObjectURL(sliceArrayBuffer, result => {
+        arrayBufferToObjectURL(sliceArrayBuffer, (objectURL, blob) => {
           const slice = new Audio();
           slice.loop = state.loop;
           this.slice = slice;
-          slice.src = result;
+          slice.src = objectURL;
+          this.blob = blob;
           this.render();
           resolve();
         });
@@ -214,34 +244,44 @@ class Slice extends Component {
           Slice duration: ${state.end - state.start} seconds
         </p>
         <div class="flex flex-justify-content-between">
-        <p class="button-container">
-          <button type="button"
-            onclick=${this.handleLoopClick}
-          >
-            ${!this.state.loop ? 'Set loop mode' : 'Unset loop mode'}
-          </button>
-          <button type="button"
-                  onclick=${this.handlePlayClick}
-          >
-            Play slice
-          </button>
-          <button type="button"
-                  disabled=${!this.slice}
-                  onclick=${this.handlePauseClick}
-          >
-            Pause slice
-          </button>
-        </p>
-        <p class="button-container flex flex-justify-content-end">
-          <button type="button"
-                  onClick=${this.handleDownloadClick}
-                  disabled=${!this.slice || this.state.downloadInProgress}
-                  title="Your browser's download dialog should open instantly."
-          >
-            Download slice!
-          </button>
-        </p>
+          <p class="button-container">
+            <button type="button"
+              onclick=${this.handleLoopClick}
+            >
+              ${!this.state.loop ? 'Set loop mode' : 'Unset loop mode'}
+            </button>
+            <button type="button"
+                    onclick=${this.handlePlayClick}
+            >
+              Play slice
+            </button>
+            <button type="button"
+                    disabled=${!this.slice}
+                    onclick=${this.handlePauseClick}
+            >
+              Pause slice
+            </button>
+          </p>
+          <p class="button-container">
+            <button type="button"
+                    onClick=${this.handleDownloadClick}
+                    disabled=${!this.slice || this.state.loading}
+                    title="Your browser's download dialog should open instantly."
+            >
+              Download slice!
+            </button>
+            <button type="button"
+                    onClick=${this.handleShareClick}
+                    disabled=${!this.slice}
+                    title="A unique URL will be generated for you to share your slice."
+            >
+              Share slice!
+            </button>
+          </p>
         </div>
+        ${[
+          state.base64DataURL ? ShareInput(state.base64DataURL) : '',
+        ]}
       </div>
     `;
   }
