@@ -9,10 +9,10 @@ function arrayBufferToObjectURL(buffer, callback) {
 }
 
 function blobToBase64DataURL(blob) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const reader = new FileReader();
     reader.readAsDataURL(blob);
-    reader.onloadend = function (evt) {
+    reader.onloadend = function(evt) {
       resolve(evt.target.result);
     };
   });
@@ -279,9 +279,7 @@ class Slice extends Component {
             </button>
           </p>
         </div>
-        ${[
-          state.base64DataURL ? ShareInput(state.base64DataURL) : '',
-        ]}
+        ${[state.base64DataURL ? ShareInput(state.base64DataURL) : '']}
       </div>
     `;
   }
