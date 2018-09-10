@@ -236,11 +236,7 @@ class Slice extends Component {
           <button type="button"
                   onClick=${this.handleDownloadClick}
                   disabled=${!this.slice || this.state.downloadInProgress}
-                  title=${
-                    !this.slice
-                      ? 'Select slice boundaries and click "Create a slice!" before you can download it.'
-                      : 'Your browser\'s download dialog should open instantly.'
-                  }
+                  title="Your browser's download dialog should open instantly."
           >
             Download slice!
           </button>
