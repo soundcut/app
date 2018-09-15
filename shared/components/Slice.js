@@ -2,6 +2,18 @@ const { decode } = require('punycode');
 const { Component, wire } = require('hypermorphic');
 
 const maxSliceLength = 90;
+const sharePath = '/api/share';
+
+function getDisplayName(str) {
+  let ret = str;
+  try {
+    ret = decode(str);
+  } catch (err) {
+    // pass
+  }
+
+  return ret;
+}
 
 function arrayBufferToObjectURL(buffer, callback) {
   const blob = new Blob([buffer], { type: 'audio/mpeg' });
@@ -122,24 +134,34 @@ class Slice extends Component {
     const link = document.createElement('a');
     link.style = 'display: none;';
     link.href = src;
-    const filename = decode(this.file.name) || 'Untitled';
-    const range = `${this.state.start}-${this.state.end}`;
-    link.download = `${filename} - Sound Slice [${range}].mp3`;
+    const filename = getDisplayName(this.file.name) || 'Untitled';
+    link.download = `${filename} - Sound Slice [${`${this.state.start}-${
+      this.state.end
+    }`}].mp3`;
     // Firefox appears to be require appending the element to the DOM..
     // but FileSaver.js does not need to and it still works for some reason.
     document.body.appendChild(link);
     link.click();
     setTimeout(() => {
       document.body.removeChild(link);
-      this.setState({ downloadInProgress: false });
+      this.setState({ loading: false });
     }, 0);
   }
 
   async handleShareClick(evt) {
     evt.preventDefault();
 
-    const base64DataURL = await blobToBase64DataURL(this.blob);
-    this.setState({ base64DataURL });
+    const original = getDisplayName(this.file.name) || 'Untitled';
+    const filename = `${original} - Sound Slice [${`${this.state.start}-${
+      this.state.end
+    }`}].mp3`;
+    const formData = new FormData();
+    formData.append('file', this.blob, filename);
+
+    const response = await fetch(sharePath, {
+      method: 'POST',
+      body: formData,
+    });
   }
 
   createSlice() {

@@ -1,5 +1,8 @@
-const util = require('util');
+/* eslint-disable no-console */
+
 const path = require('path');
+const { rename } = require('fs');
+const { createHash } = require('crypto');
 const express = require('express');
 const favicon = require('serve-favicon');
 const bodyParser = require('body-parser');
@@ -7,6 +10,7 @@ const multiparty = require('multiparty');
 const serveStatic = require('serve-static');
 const { wire } = require('hypermorphic');
 const { encode } = require('punycode');
+const get = require('lodash/get');
 const { spawnYouTubeDL } = require('../lib/index');
 const Home = require('../shared/components/Home');
 const Upload = require('../shared/components/Upload');
@@ -15,6 +19,20 @@ const Link = require('../shared/components/Link');
 const views = {
   default: require('../shared/views/default'),
 };
+
+const env = process.env.NODE_ENV || 'development';
+
+const finalDir = env === 'development' ? '/tmp' : '/home/hosting-user/uploads';
+
+function renameAsync(oldPath, newPath) {
+  return new Promise((resolve, reject) => {
+    rename(
+      oldPath,
+      newPath,
+      err => (err ? console.err(err) || reject(err) : resolve())
+    );
+  });
+}
 
 const app = express();
 
@@ -31,20 +49,51 @@ const links = [
   },
 ];
 
-app.post('/api/upload/mp3', function(req, res) {
+app.post('/api/share', function(req, res) {
   const form = new multiparty.Form();
 
-  form.parse(req, function(err, fields, files) {
+  form.parse(req, async function(err, fields, files) {
+    // Ensure proper file type, maybe ffmpeg dry-run
     if (err) {
-      res.writeHead(400, { 'content-type': 'text/plain' });
-      res.end('invalid request: ' + err.message);
+      res.writeHead(400, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: err.message }));
       return;
     }
 
-    res.writeHead(200, { 'content-type': 'text/plain' });
-    res.write('received fields:\n\n ' + util.inspect(fields));
-    res.write('\n\n');
-    res.end('received files:\n\n ' + util.inspect(files));
+    const file = get(files, 'file[0]');
+    if (!file) {
+      res.writeHead(400, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: 'Missing file' }));
+      return;
+    }
+    // {
+    //   fieldName: 'file',
+    //   originalFilename: 'foobarbaz.mp3',
+    //   path: '/tmp/oyjfnKCrFBiphPySI9Iy2Vmj.mp3',
+    //   headers: [Object],
+    //   size: 1440000
+    // }
+    const message = `Successfuly saved ${file.originalFilename}`;
+    res.writeHead(201, { 'content-type': 'application/json' });
+
+    const output = createHash('sha256')
+      .update(file.path, 'utf8')
+      .digest('hex');
+    const destination = path.join(`${finalDir}`, output);
+    // Transaction into DB
+    try {
+      await renameAsync(file.path, destination);
+      console.info('Moved file to final location', destination);
+    } catch (err) {
+      // Cleanup temporary files.
+      res.writeHead(500, { 'content-type': 'application/json' });
+      res.end(
+        JSON.stringify({ status: 'error', message: 'Internal Server Error' })
+      );
+      return;
+    }
+
+    res.end(JSON.stringify({ status: 'success', message, id: output }));
   });
 
   return;
