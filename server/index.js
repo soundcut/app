@@ -11,7 +11,8 @@ const serveStatic = require('serve-static');
 const { wire } = require('hypermorphic');
 const { encode } = require('punycode');
 const get = require('lodash/get');
-const { spawnYouTubeDL } = require('../lib/index');
+const { getClient } = require('./db');
+const { spawnYouTubeDL } = require('../lib');
 const Home = require('../shared/components/Home');
 const Upload = require('../shared/components/Upload');
 const Link = require('../shared/components/Link');
@@ -26,11 +27,7 @@ const finalDir = env === 'development' ? '/tmp' : '/home/hosting-user/uploads';
 
 function renameAsync(oldPath, newPath) {
   return new Promise((resolve, reject) => {
-    rename(
-      oldPath,
-      newPath,
-      err => (err ? console.err(err) || reject(err) : resolve())
-    );
+    rename(oldPath, newPath, err => (err ? reject(err) : resolve()));
   });
 }
 
@@ -53,7 +50,7 @@ app.post('/api/share', function(req, res) {
   const form = new multiparty.Form();
 
   form.parse(req, async function(err, fields, files) {
-    // Ensure proper file type, maybe ffmpeg dry-run
+    // FIXME: Ensure proper file type, maybe ffmpeg dry-run
     if (err) {
       res.writeHead(400, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ status: 'error', message: err.message }));
@@ -73,19 +70,32 @@ app.post('/api/share', function(req, res) {
     //   headers: [Object],
     //   size: 1440000
     // }
-    const message = `Successfuly saved ${file.originalFilename}`;
-    res.writeHead(201, { 'content-type': 'application/json' });
 
-    const output = createHash('sha256')
+    const id = createHash('sha256')
       .update(file.path, 'utf8')
       .digest('hex');
-    const destination = path.join(`${finalDir}`, output);
-    // Transaction into DB
+    const destination = path.join(`${finalDir}`, id);
+    const client = await getClient();
     try {
+      await client.query('BEGIN');
+      console.info('BEGIN transaction', id);
+      const json = JSON.stringify({
+        path: destination,
+        name: file.originalFilename,
+      });
+      await client.query('INSERT INTO slices(id, json) VALUES($1, $2)', [
+        id,
+        json,
+      ]);
       await renameAsync(file.path, destination);
       console.info('Moved file to final location', destination);
+      await client.query('COMMIT');
+      console.info('COMMIT transaction', id);
     } catch (err) {
-      // Cleanup temporary files.
+      console.error(err);
+      await client.query('ROLLBACK');
+      console.info('ROLLBACK transaction', id);
+      // FIXME: Cleanup temporary files.
       res.writeHead(500, { 'content-type': 'application/json' });
       res.end(
         JSON.stringify({ status: 'error', message: 'Internal Server Error' })
@@ -93,7 +103,9 @@ app.post('/api/share', function(req, res) {
       return;
     }
 
-    res.end(JSON.stringify({ status: 'success', message, id: output }));
+    const message = `Successfuly saved ${file.originalFilename}`;
+    res.writeHead(201, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ status: 'success', message, id }));
   });
 
   return;
