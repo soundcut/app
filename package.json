@@ -32,6 +32,7 @@
     "hyperhtml-app": "^0.2.1",
     "hypermorphic": "^0.6.3",
     "lodash": "^4.17.11",
+    "morgan": "^1.9.1",
     "multiparty": "^4.1.4",
     "pg": "^7.4.3",
     "punycode": "1.4.1",
