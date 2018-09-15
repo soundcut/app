@@ -5,6 +5,17 @@ const Volume = require('./Volume');
 const Duration = require('./Duration');
 const Slice = require('./Slice');
 
+function getDisplayName(str) {
+  let ret = str;
+  try {
+    ret = decode(str);
+  } catch (err) {
+    // pass
+  }
+
+  return ret;
+}
+
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
   return (
@@ -68,7 +79,7 @@ class LocalPlay extends Component {
     return this.html`
       <div class="LocalPlay" onconnected=${this} ondisconnected=${this}>
         <h3>Play source file</h3>
-        <h6>${decode(state.file.name) ||
+        <h6>${getDisplayName(state.file.name) ||
           'Untitled file'} (${humanizedSize})</h6>
         ${[isMediaLoaded(state.audio) ? new Volume(state.audio) : '']}
         ${[isMediaLoaded(state.audio) ? new Duration(state.audio) : '']}
