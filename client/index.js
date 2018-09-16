@@ -24,7 +24,7 @@ function initialize() {
 
   app.get('/link', function link() {
     document.title = `Link external media | ${title}`;
-    const link = new Link();
+    const link = new Link(document.title);
     render.main(link);
   });
 

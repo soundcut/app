@@ -1,7 +1,19 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
+const { decode } = require('punycode');
 const LocalPlay = require('./LocalPlay');
+
+function getDisplayName(str) {
+  let ret = str;
+  try {
+    ret = decode(str);
+  } catch (err) {
+    // pass
+  }
+
+  return ret;
+}
 
 const linkPath = '/api/link';
 
@@ -17,8 +29,9 @@ function ErrorMessage() {
 }
 
 class Link extends Component {
-  constructor(...args) {
-    super(...args);
+  constructor(title) {
+    super();
+    this.pageTitle = title;
     this.handleChange = this.handleChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -27,10 +40,17 @@ class Link extends Component {
   onconnected() {
     this.setState(initialState);
     this.source = document.getElementById('source');
+    const initialValue = new URLSearchParams(location.search).get('from');
+    if (initialValue) {
+      this.source.value = initialValue;
+    }
+    this.handleChange();
     this.source.focus();
   }
 
   handleReset() {
+    const historyState = { value: '' };
+    history.pushState(historyState, this.pageTitle, '/link');
     this.setState(initialState);
   }
 
@@ -47,7 +67,10 @@ class Link extends Component {
 
   async handleSubmit(evt) {
     evt.preventDefault();
-    const url = this.source.value;
+
+    const value = this.source.value;
+    const historyState = { value };
+    history.pushState(historyState, this.pageTitle, `/link?from=${value}`);
 
     if (this.state.file) {
       this.setState({ file: undefined });
@@ -59,11 +82,11 @@ class Link extends Component {
         'Content-Type': 'application/json; charset=utf-8',
       },
       body: JSON.stringify({
-        url,
+        url: value,
       }),
     });
 
-    if (url) {
+    if (value) {
       this.setState({ loading: true });
       try {
         const response = await fetchPromise;
@@ -72,7 +95,11 @@ class Link extends Component {
         }
 
         const blob = await response.blob();
-        const file = new File([blob], response.headers.get('x-title'));
+        const filename = response.headers.get('x-title');
+        const file = new File([blob], filename);
+        const newTitle = `${getDisplayName(filename)} | ${this.pageTitle}`;
+        document.title = newTitle;
+
         this.setState({
           file,
           loading: false,
