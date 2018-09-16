@@ -46,7 +46,7 @@ function initialize() {
     render.main(about);
   });
 
-  app.navigate(location.pathname);
+  app.navigate(location.pathname + location.search);
 }
 
 if (document.readyState !== 'loading') {
