@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 const path = require('path');
-const { rename } = require('fs');
+const { rename, createReadStream } = require('fs');
 const { createHash } = require('crypto');
 const express = require('express');
 const favicon = require('serve-favicon');
@@ -12,11 +12,12 @@ const serveStatic = require('serve-static');
 const { wire } = require('hypermorphic');
 const { encode } = require('punycode');
 const get = require('lodash/get');
-const { getClient } = require('./db');
-const { spawnYouTubeDL } = require('../lib');
+const { getClient, query } = require('./db');
+const { spawnYouTubeDL, isFileReadable } = require('../lib');
 const Home = require('../shared/components/Home');
 const Upload = require('../shared/components/Upload');
 const Link = require('../shared/components/Link');
+const Shared = require('../shared/components/Shared');
 
 const views = {
   default: require('../shared/views/default'),
@@ -186,6 +187,103 @@ app.get('/upload', function(req, res) {
     })
   );
   res.end();
+});
+
+app.get('/slice/:id', async function(req, res) {
+  const id = req.params.id;
+
+  try {
+    const result = await query('SELECT COUNT(*) FROM slices WHERE id = $1', [
+      id,
+    ]);
+    const row = result.rows[0];
+    if (!Number.parseInt(row.count)) {
+      res.writeHead(404, {
+        'Content-Type': 'text/html',
+      });
+      res.write(
+        views.default(wire(), {
+          path: req.path,
+          title: title,
+          links: links,
+          main: new Home(),
+        })
+      );
+      res.end();
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+    res.writeHead(500, {
+      'Content-Type': 'text/html',
+    });
+    res.write(
+      views.default(wire(), {
+        path: req.path,
+        title: title,
+        links: links,
+        main: new Home(),
+      })
+    );
+    res.end();
+    return;
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/html',
+  });
+
+  res.write(
+    views.default(wire(), {
+      path: req.path,
+      title: title,
+      links: links,
+      main: new Shared(),
+    })
+  );
+  res.end();
+});
+
+app.get('/api/slice/:id', async function(req, res) {
+  const id = req.params.id;
+
+  let result;
+  try {
+    console.info('Retrieving slice json', id);
+    result = await query('SELECT json FROM slices WHERE id = $1', [id]);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+    res.end();
+    return;
+  }
+
+  const row = result.rows[0];
+  if (!row) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
+  const { path, name } = row.json;
+
+  console.info('Is file readable?', path);
+  const readOK = await isFileReadable(path);
+  if (!readOK) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
+  console.info('Retrieving slice file stream...', id);
+  const fileStream = createReadStream(path);
+  const headers = {
+    'x-title': encode(name),
+    'content-type': 'audio/mp3',
+  };
+  res.writeHead(200, headers);
+  console.info('Streaming slice back to client', name);
+  fileStream.pipe(res);
 });
 
 app.get('/link', function(req, res) {

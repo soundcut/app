@@ -6,6 +6,7 @@ import Home from '../shared/components/Home';
 import Upload from '../shared/components/Upload';
 import About from '../shared/components/About';
 import Link from '../shared/components/Link';
+import Shared from '../shared/components/Shared';
 
 const app = hyperApp();
 
@@ -33,15 +34,19 @@ function initialize() {
     render.main(upload);
   });
 
+  app.get('/slice/:id', function shared(ctx) {
+    document.title = `Listen to slice | ${title}`;
+    const shared = new Shared(ctx.params.id);
+    render.main(shared);
+  });
+
   app.get('/about', function about() {
     document.title = `About | ${title}`;
     const about = About(wire());
     render.main(about);
   });
 
-  setTimeout(() => {
-    app.navigate(location.pathname);
-  }, 0);
+  app.navigate(location.pathname);
 }
 
 if (document.readyState !== 'loading') {

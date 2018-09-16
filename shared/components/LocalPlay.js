@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+
 const { decode } = require('punycode');
 const { Component } = require('hypermorphic');
 
@@ -98,8 +100,8 @@ class LocalPlay extends Component {
           </button>
         </p>
         ${[
-    isMediaLoaded(state.audio) ? new Slice(state.audio, state.file) : '',
-  ]}
+          isMediaLoaded(state.audio) ? new Slice(state.audio, state.file) : '',
+        ]}
       </div>
     `;
   }
