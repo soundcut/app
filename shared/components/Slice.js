@@ -30,10 +30,18 @@ function blobToBase64DataURL(blob) {
   });
 }
 
-function ShareInput(base64DataURL) {
+function ErrorMessage() {
+  return wire()`<p>Oops! Something went wrong.</p>`;
+}
+
+function ShareInput(id) {
+  const url = `${window.location.origin}/slice/${id}`;
   return wire()`
   <p>
-    <input class="full-width" type="text" value=${base64DataURL} />
+    <label for="share">
+      Sharing link for this slice:
+    </label>
+    <input id="share" class="full-width" type="text" value=${url} />
   </p>
   `;
 }
@@ -44,7 +52,9 @@ const initialState = {
   start: 0,
   end: maxSliceLength,
   loading: false,
-  base64DataURL: '',
+  sharing: false,
+  id: undefined,
+  error: undefined,
 };
 
 class Slice extends Component {
@@ -158,10 +168,28 @@ class Slice extends Component {
     const formData = new FormData();
     formData.append('file', this.blob, filename);
 
-    const response = await fetch(sharePath, {
+    const promise = fetch(sharePath, {
       method: 'POST',
       body: formData,
     });
+    this.setState({ loading: true, sharing: true, error: false });
+    try {
+      const response = await promise;
+      const data = await response.json();
+      this.setState({
+        loading: false,
+        sharing: false,
+        id: data.id,
+      });
+    } catch (err) {
+      this.setState({
+        loading: false,
+        sharing: false,
+        error: true,
+      });
+      return;
+    }
+    this.setState({ loading: false, sharing: false, error: false });
   }
 
   createSlice() {
@@ -220,6 +248,7 @@ class Slice extends Component {
   render() {
     /* eslint-disable indent */
     const state = this.state;
+    const disabled = !this.slice || this.state.loading;
 
     return this.html`
       <div onconnected=${this} ondisconnected=${this}>
@@ -239,6 +268,7 @@ class Slice extends Component {
                  aria-valuemax="${state.audio.duration}"
                  aria-valuenow="${state.start}"
                  onChange=${this.handleSliceChange}
+                 disabled=${disabled}
           >
           <output for="slice-start-slider" id="slice-start-output">
             ${state.start}/${state.audio.duration.toFixed(2)}
@@ -257,6 +287,7 @@ class Slice extends Component {
                  aria-valuemax="${state.audio.duration}"
                  aria-valuenow="${state.end}"
                  onChange=${this.handleSliceChange}
+                 disabled=${disabled}
           >
           <output for="slice-end-slider" id="slice-end-output">
             ${state.end}/${state.audio.duration.toFixed(2)}
@@ -269,16 +300,18 @@ class Slice extends Component {
           <p class="button-container">
             <button type="button"
               onclick=${this.handleLoopClick}
+              disabled=${disabled}
             >
               ${!this.state.loop ? 'Set loop mode' : 'Unset loop mode'}
             </button>
             <button type="button"
+                    disabled=${disabled}
                     onclick=${this.handlePlayClick}
             >
               Play slice
             </button>
             <button type="button"
-                    disabled=${!this.slice}
+                    disabled=${disabled}
                     onclick=${this.handlePauseClick}
             >
               Pause slice
@@ -287,21 +320,24 @@ class Slice extends Component {
           <p class="button-container">
             <button type="button"
                     onClick=${this.handleDownloadClick}
-                    disabled=${!this.slice || this.state.loading}
+                    disabled=${disabled}
                     title="Your browser's download dialog should open instantly."
             >
               Download slice!
             </button>
             <button type="button"
                     onClick=${this.handleShareClick}
-                    disabled=${!this.slice}
+                    disabled=${disabled}
                     title="A unique URL will be generated for you to share your slice."
             >
-              Share slice!
+              ${
+                !this.state.sharing ? 'Share slice' : 'Generating unique URL...'
+              }
             </button>
           </p>
         </div>
-        ${[state.base64DataURL ? ShareInput(state.base64DataURL) : '']}
+        ${[state.error ? ErrorMessage() : '']}
+        ${[state.id ? ShareInput(state.id) : '']}
       </div>
     `;
   }
