@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 
-const { Component } = require('hypermorphic');
+const { Component, wire } = require('hypermorphic');
 
 const Volume = require('./Volume');
 const Duration = require('./Duration');
@@ -10,6 +10,7 @@ const getDisplayName = require('../helpers/getDisplayName');
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
   return (
+    seekable &&
     seekable.length > 0 &&
     media.seekable.start(0) === 0 &&
     seekable.end(0) === media.duration
@@ -26,22 +27,46 @@ function humanizeFileSize(bytes) {
   }
 }
 
+function Buttons(audio, handleLoopClick, handlePlay, handlePause) {
+  return wire()`
+    <p class="button-container">
+      <button type="button"
+        onclick=${handleLoopClick}
+      >
+        ${!audio.loop ? 'Set loop mode' : 'Unset loop mode'}
+      </button>
+      <button type="button"
+              onClick=${handlePlay}
+      >
+        Play
+      </button>
+      <button type="button"
+              onClick=${handlePause}
+      >
+        Pause
+      </button>
+    </p>
+  `;
+}
+
 class LocalPlay extends Component {
   constructor(file) {
     super();
-    this.state = {
-      file,
-      audio: undefined,
-    };
-    this.interval = undefined;
+    this.file = file;
     this.handlePlay = this.handlePlay.bind(this);
     this.handlePause = this.handlePause.bind(this);
+    this.handleLoop = this.handleLoop.bind(this);
   }
 
   onconnected() {
-    this.setState({ audio: new Audio(URL.createObjectURL(this.state.file)) });
+    this.objectURL = URL.createObjectURL(this.file);
+    this.audio = new Audio(this.objectURL);
     this.interval = setInterval(() => {
-      if (isMediaLoaded(this.state.audio)) {
+      if (isMediaLoaded(this.audio)) {
+        this.volume = new Volume(this.audio);
+        this.duration = new Duration(this.audio);
+        this.slice = new Slice(this.audio, this.file);
+        URL.revokeObjectURL(this.objectURL);
         clearInterval(this.interval);
       }
       this.render();
@@ -49,47 +74,52 @@ class LocalPlay extends Component {
   }
 
   ondisconnected() {
-    this.state.audio.pause();
-    this.state.audio = undefined;
+    this.audio.pause();
+    this.audio = undefined;
+    this.file = undefined;
+    URL.revokeObjectURL(this.objectURL);
     clearInterval(this.interval);
-    this.interval = undefined;
+  }
+
+  handleLoop(evt) {
+    evt.preventDefault();
+    this.audio.loop = !this.audio.loop;
+    this.render();
   }
 
   handlePlay() {
-    this.state.audio.play();
+    this.audio.play();
   }
 
   handlePause() {
-    this.state.audio.pause();
+    this.audio.pause();
   }
 
   render() {
-    const state = this.state;
-    const humanizedSize = humanizeFileSize(state.file.size);
-    const mediaIsLoaded = isMediaLoaded(state.audio);
+    const humanizedSize = humanizeFileSize(this.file.size);
+    const mediaIsLoaded = isMediaLoaded(this.audio);
+    const fullDisplayName = `${getDisplayName(this.file.name) ||
+      'Untitled file'} (${humanizedSize})`;
 
     return this.html`
       <div class="LocalPlay" onconnected=${this} ondisconnected=${this}>
         <h3>Play source file</h3>
-        <h6>${getDisplayName(state.file.name) ||
-          'Untitled file'} (${humanizedSize})</h6>
-        ${[mediaIsLoaded ? new Volume(state.audio) : '']}
-        ${[mediaIsLoaded ? new Duration(state.audio) : '']}
-        <p class="button-container">
-          <button type="button"
-                  onClick=${this.handlePlay}
-                  disabled="${!state.audio}"
-          >
-            Play
-          </button>
-          <button type="button"
-                  onClick=${this.handlePause}
-                  disabled="${!state.audio}"
-          >
-            Pause
-          </button>
-        </p>
-        ${[mediaIsLoaded ? new Slice(state.audio, state.file) : '']}
+        <h6>${fullDisplayName}</h6>
+        ${
+          mediaIsLoaded
+            ? [
+                this.volume,
+                this.duration,
+                Buttons(
+                  this.audio,
+                  this.handleLoop,
+                  this.handlePlay,
+                  this.handlePause
+                ),
+                this.slice,
+              ]
+            : ''
+        }
       </div>
     `;
   }
