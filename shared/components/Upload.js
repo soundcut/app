@@ -47,20 +47,16 @@ function ErrorMessage(error) {
   return wire({ error })`<p>${[error]}</p>`;
 }
 
-function isValidFileSize(bytes) {
+function isFileSizeValid(bytes) {
   return bytes > 0 && bytes <= fileSizeLimit;
 }
 
-function isValidFileType(type) {
+function isFileTypeValid(type) {
   return requiredFileTypes.indexOf(type) > -1;
 }
 
-function isFormValid(state) {
-  return !!(
-    state.file &&
-    isValidFileSize(state.file.size) &&
-    isValidFileType(state.file.type)
-  );
+function isFileValid(file) {
+  return !!(file && isFileSizeValid(file.size) && isFileTypeValid(file.type));
 }
 
 const initialState = {
@@ -73,7 +69,6 @@ class Upload extends Component {
     super(...args);
     this.handleChange = this.handleChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.downloadTestFile = this.downloadTestFile.bind(this);
   }
 
@@ -102,46 +97,17 @@ class Upload extends Component {
     const target = evt.target;
     const file = target.files[0];
 
-    this.setState({
-      file,
-    });
-  }
-
-  handleSubmit(evt) {
-    // No need to submit the form ATM.
-    return;
-    // eslint-disable-next-line no-unreachable
-    const target = evt.target;
-
-    if (!isFormValid(this.state)) return;
-    const file = this.state.file;
-    const formData = new FormData(target);
-
-    evt.preventDefault();
-
-    fetch(uploadPath, {
-      method: 'POST',
-      body: formData,
-    })
-      .then(response => response.text())
-      .then(responseText => {
-        document.getElementById('metadata').textContent = JSON.stringify(
-          responseText,
-          null,
-          '\t'
-        );
-      })
-      .catch(error => {
-        this.setState({
-          error: `Error uploading the file <strong>${file.name}</strong>.`,
-        });
-        console.error('Error:', error);
+    if (isFileValid(file)) {
+      this.setState({
+        file,
       });
+    }
   }
 
   render() {
     const state = this.state;
     const file = state.file;
+    const fileIsValid = isFileValid(file);
     return this.html`
       <form onconnected=${this}
             onSubmit=${this.handleSubmit}
@@ -151,10 +117,10 @@ class Upload extends Component {
             action="${uploadPath}"
       >
         ${[
-          file && !isValidFileSize(file.size) ? InvalidFileSize(file.size) : '',
+          file && !isFileSizeValid(file.size) ? InvalidFileSize(file.size) : '',
         ]}
         ${[
-          file && !isValidFileType(file.type) ? InvalidFileType(file.type) : '',
+          file && !isFileTypeValid(file.type) ? InvalidFileType(file.type) : '',
         ]}
         ${[file && state.error ? ErrorMessage(state.error) : '']}
         <fieldset class="FileField">
@@ -175,14 +141,13 @@ class Upload extends Component {
                   accept=${requiredFileTypes[0]}
           />
         </fieldset>
-        ${[isFormValid(state) ? new LocalPlay(state.file) : '']}
-        ${[isFormValid(state) ? '<pre id="metadata" />' : '']}
+        ${[isFileValid(file) ? new LocalPlay(file) : '']}
         <p hidden>
           <button type="reset">
             Reset
           </button>
           <button type="submit"
-                  disabled="${isFormValid(state) ? false : true}"
+                  disabled="${!isFileValid(file)}"
           >
             Upload
           </button>
