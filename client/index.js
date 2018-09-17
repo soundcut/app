@@ -14,7 +14,6 @@ function initialize() {
 
   const title = 'Sound Slice';
 
-  let last;
   app.get('/', function home() {
     document.title = title;
     const home = new Home();

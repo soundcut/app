@@ -41,8 +41,10 @@ class Duration extends Component {
   }
 
   render() {
-    const seekable = this.state.audio.seekable;
     const state = this.state;
+    const audio = state.audio;
+    const currentTime = audio.currentTime.toFixed(2);
+    const duration = audio.duration.toFixed(2);
 
     return this.html`
         <p onconnected=${this} ondisconnected=${this}>
@@ -50,18 +52,16 @@ class Duration extends Component {
           <input type="range"
                  id="duration-slider"
                  min="0"
-                 max="${Number.parseInt(state.audio.duration, 10)}"
-                 value="${Number.parseInt(state.audio.currentTime, 10)}"
+                 max="${Number.parseInt(audio.duration, 10)}"
+                 value="${Number.parseInt(audio.currentTime, 10)}"
                  step="1"
                  aria-valuemin="0"
-                 aria-valuemax="${Number.parseInt(state.audio.duration, 10)}"
-                 aria-valuenow="${state.audio.currentTime}"
+                 aria-valuemax="${Number.parseInt(audio.duration, 10)}"
+                 aria-valuenow="${audio.currentTime}"
                  onInput=${this.handleTimeChange}
           >
           <output for="duration-slider" id="duration">
-            ${state.audio.currentTime.toFixed(
-    2
-  )}/${state.audio.duration.toFixed(2)}
+            ${`${currentTime}/${duration}`}
           </output>
         </p>
     `;

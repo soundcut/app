@@ -1,4 +1,4 @@
-const { Component, wire } = require('hypermorphic');
+const { Component } = require('hypermorphic');
 
 class Volume extends Component {
   constructor(audio) {

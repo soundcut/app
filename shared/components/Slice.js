@@ -10,16 +10,6 @@ function arrayBufferToObjectURL(buffer, callback) {
   setTimeout(() => callback(URL.createObjectURL(blob), blob), 0);
 }
 
-function blobToBase64DataURL(blob) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onloadend = function(evt) {
-      resolve(evt.target.result);
-    };
-  });
-}
-
 function ErrorMessage() {
   return wire()`<p>Oops! Something went wrong.</p>`;
 }
