@@ -30,7 +30,7 @@ function initialize() {
 
   app.get('/upload', function upload() {
     document.title = `Upload an audio file | ${title}`;
-    const upload = new Upload();
+    const upload = new Upload(document.title);
     render.main(upload);
   });
 

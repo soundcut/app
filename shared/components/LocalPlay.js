@@ -77,31 +77,30 @@ class LocalPlay extends Component {
   render() {
     const state = this.state;
     const humanizedSize = humanizeFileSize(state.file.size);
+    const mediaIsLoaded = isMediaLoaded(state.audio);
 
     return this.html`
       <div class="LocalPlay" onconnected=${this} ondisconnected=${this}>
         <h3>Play source file</h3>
         <h6>${getDisplayName(state.file.name) ||
           'Untitled file'} (${humanizedSize})</h6>
-        ${[isMediaLoaded(state.audio) ? new Volume(state.audio) : '']}
-        ${[isMediaLoaded(state.audio) ? new Duration(state.audio) : '']}
+        ${[mediaIsLoaded ? new Volume(state.audio) : '']}
+        ${[mediaIsLoaded ? new Duration(state.audio) : '']}
         <p class="button-container">
           <button type="button"
                   onClick=${this.handlePlay}
-                  disabled="${state.audio ? false : true}"
+                  disabled="${!state.audio}"
           >
             Play
           </button>
           <button type="button"
                   onClick=${this.handlePause}
-                  disabled="${state.audio ? false : true}"
+                  disabled="${!state.audio}"
           >
             Pause
           </button>
         </p>
-        ${[
-          isMediaLoaded(state.audio) ? new Slice(state.audio, state.file) : '',
-        ]}
+        ${[mediaIsLoaded ? new Slice(state.audio, state.file) : '']}
       </div>
     `;
   }

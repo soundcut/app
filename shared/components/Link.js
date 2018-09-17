@@ -51,6 +51,7 @@ class Link extends Component {
   handleReset() {
     const historyState = { value: '' };
     history.pushState(historyState, this.pageTitle, '/link');
+    document.title = this.pageTitle;
     this.setState(initialState);
   }
 
@@ -70,7 +71,9 @@ class Link extends Component {
 
     const value = this.source.value;
     const historyState = { value };
-    history.pushState(historyState, this.pageTitle, `/link?from=${value}`);
+    const pathname = `/link?from=${value}`;
+    history.pushState(historyState, this.pageTitle, pathname);
+    document.title = this.pageTitle;
 
     if (this.state.file) {
       this.setState({ file: undefined });
@@ -86,31 +89,31 @@ class Link extends Component {
       }),
     });
 
-    if (value) {
-      this.setState({ loading: true });
-      try {
-        const response = await fetchPromise;
-        if (response.status !== 201) {
-          throw response;
-        }
-
-        const blob = await response.blob();
-        const filename = response.headers.get('x-title');
-        const file = new File([blob], filename);
-        const newTitle = `${getDisplayName(filename)} | ${this.pageTitle}`;
-        document.title = newTitle;
-
-        this.setState({
-          file,
-          loading: false,
-        });
-      } catch (err) {
-        console.error(err);
-        this.setState({
-          error: true,
-          loading: false,
-        });
+    this.setState({ loading: true });
+    try {
+      const response = await fetchPromise;
+      if (response.status !== 201) {
+        throw response;
       }
+
+      const blob = await response.blob();
+      const filename = response.headers.get('x-title');
+      const file = new File([blob], filename);
+      const newHistoryState = { value, title: filename };
+      const newTitle = `${getDisplayName(filename)} | ${this.pageTitle}`;
+      history.replaceState(newHistoryState, newTitle, pathname);
+      document.title = newTitle;
+
+      this.setState({
+        file,
+        loading: false,
+      });
+    } catch (err) {
+      console.error(err);
+      this.setState({
+        error: true,
+        loading: false,
+      });
     }
   }
 

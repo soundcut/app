@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
+const { encode, decode } = require('punycode');
 
 const LocalPlay = require('./LocalPlay');
 
@@ -10,6 +11,17 @@ const humanizedRequiredFileType = requiredFileTypes.join(', ');
 const fileSizeLimit = 1048576 * 10;
 
 const uploadPath = `/api/upload/${requiredFileTypeName}`;
+
+function getDisplayName(str) {
+  let ret = str;
+  try {
+    ret = decode(str);
+  } catch (err) {
+    // pass
+  }
+
+  return ret;
+}
 
 function humanizeFileSize(bytes) {
   if (bytes < 1024) {
@@ -65,18 +77,14 @@ const initialState = {
 };
 
 class Upload extends Component {
-  constructor(...args) {
-    super(...args);
+  constructor(title) {
+    super();
+    this.pageTitle = title;
     this.handleChange = this.handleChange.bind(this);
-    this.handleReset = this.handleReset.bind(this);
     this.downloadTestFile = this.downloadTestFile.bind(this);
   }
 
   onconnected() {
-    this.setState(initialState);
-  }
-
-  handleReset() {
     this.setState(initialState);
   }
 
@@ -98,9 +106,25 @@ class Upload extends Component {
     const file = target.files[0];
 
     if (isFileValid(file)) {
+      const filename = file.name;
+      const encodedName = encode(filename);
+      const historyState = { filename: encode(filename) };
+      const pathname = `/upload?title=${encodedName}`;
+      const newTitle = `${getDisplayName(filename)} | ${this.pageTitle}`;
+
+      if (!this.state.file) {
+        history.pushState(historyState, newTitle, pathname);
+      } else {
+        history.replaceState(historyState, newTitle, pathname);
+      }
+      document.title = newTitle;
+
       this.setState({
         file,
       });
+    } else if (isFileValid(this.state.file)) {
+      history.pushState({}, this.pageTitle, '/upload');
+      document.title = this.pageTitle;
     }
   }
 
@@ -110,8 +134,6 @@ class Upload extends Component {
     const fileIsValid = isFileValid(file);
     return this.html`
       <form onconnected=${this}
-            onSubmit=${this.handleSubmit}
-            onReset=${this.handleReset}
             enctype="multipart/form-data"
             method="post"
             action="${uploadPath}"
@@ -141,17 +163,7 @@ class Upload extends Component {
                   accept=${requiredFileTypes[0]}
           />
         </fieldset>
-        ${[isFileValid(file) ? new LocalPlay(file) : '']}
-        <p hidden>
-          <button type="reset">
-            Reset
-          </button>
-          <button type="submit"
-                  disabled="${!isFileValid(file)}"
-          >
-            Upload
-          </button>
-        </p>
+        ${[fileIsValid ? new LocalPlay(file) : '']}
       </form>
     `;
   }
