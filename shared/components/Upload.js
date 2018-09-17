@@ -1,9 +1,10 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
-const { encode, decode } = require('punycode');
+const { encode } = require('punycode');
 
 const LocalPlay = require('./LocalPlay');
+const getDisplayName = require('../helpers/getDisplayName');
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
 const requiredFileTypeName = 'mp3';
@@ -11,17 +12,6 @@ const humanizedRequiredFileType = requiredFileTypes.join(', ');
 const fileSizeLimit = 1048576 * 10;
 
 const uploadPath = `/api/upload/${requiredFileTypeName}`;
-
-function getDisplayName(str) {
-  let ret = str;
-  try {
-    ret = decode(str);
-  } catch (err) {
-    // pass
-  }
-
-  return ret;
-}
 
 function humanizeFileSize(bytes) {
   if (bytes < 1024) {

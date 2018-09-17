@@ -1,19 +1,9 @@
-const { decode } = require('punycode');
 const { Component, wire } = require('hypermorphic');
+
+const getDisplayName = require('../helpers/getDisplayName');
 
 const maxSliceLength = 90;
 const sharePath = '/api/share';
-
-function getDisplayName(str) {
-  let ret = str;
-  try {
-    ret = decode(str);
-  } catch (err) {
-    // pass
-  }
-
-  return ret;
-}
 
 function arrayBufferToObjectURL(buffer, callback) {
   const blob = new Blob([buffer], { type: 'audio/mpeg' });

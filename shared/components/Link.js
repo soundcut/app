@@ -1,19 +1,9 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
-const { decode } = require('punycode');
+
 const LocalPlay = require('./LocalPlay');
-
-function getDisplayName(str) {
-  let ret = str;
-  try {
-    ret = decode(str);
-  } catch (err) {
-    // pass
-  }
-
-  return ret;
-}
+const getDisplayName = require('../helpers/getDisplayName');
 
 const linkPath = '/api/link';
 

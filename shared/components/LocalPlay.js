@@ -1,22 +1,11 @@
 /* eslint-disable indent */
 
-const { decode } = require('punycode');
 const { Component } = require('hypermorphic');
 
 const Volume = require('./Volume');
 const Duration = require('./Duration');
 const Slice = require('./Slice');
-
-function getDisplayName(str) {
-  let ret = str;
-  try {
-    ret = decode(str);
-  } catch (err) {
-    // pass
-  }
-
-  return ret;
-}
+const getDisplayName = require('../helpers/getDisplayName');
 
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
