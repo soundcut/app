@@ -1,4 +1,3 @@
-require('document-register-element');
 import hyperApp from 'hyperhtml-app';
 import { wire } from 'hypermorphic';
 
