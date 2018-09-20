@@ -52,7 +52,7 @@ class Link extends Component {
     }
 
     if (!value && this.state.hasValue) {
-      this.setState({ hasValue: false });
+      this.handleReset();
     }
   }
 
