@@ -6,6 +6,7 @@ const Volume = require('./Volume');
 const Duration = require('./Duration');
 const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
+const getDownloadName = require('../helpers/getDownloadName');
 
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
@@ -27,7 +28,13 @@ function humanizeFileSize(bytes) {
   }
 }
 
-function Buttons(audio, handleLoopClick, handlePlay, handlePause) {
+function Buttons(
+  audio,
+  handleLoopClick,
+  handlePlay,
+  handlePause,
+  handleDownload
+) {
   return wire()`
     <p class="button-container">
       <button type="button"
@@ -45,6 +52,12 @@ function Buttons(audio, handleLoopClick, handlePlay, handlePause) {
       >
         Pause
       </button>
+      <button type="button"
+              onClick=${handleDownload}
+              title="Your browser's download dialog should open instantly."
+      >
+        Download
+      </button>
     </p>
   `;
 }
@@ -56,6 +69,7 @@ class LocalPlay extends Component {
     this.handlePlay = this.handlePlay.bind(this);
     this.handlePause = this.handlePause.bind(this);
     this.handleLoop = this.handleLoop.bind(this);
+    this.handleDownload = this.handleDownload.bind(this);
   }
 
   onconnected() {
@@ -95,6 +109,26 @@ class LocalPlay extends Component {
     this.audio.pause();
   }
 
+  handleDownload(evt) {
+    evt.preventDefault();
+
+    // generate a one-time use ObjectURL for the download
+    const src = URL.createObjectURL(this.file);
+    const link = document.createElement('a');
+    link.style = 'display: none;';
+    link.href = src;
+    const displayName = getDisplayName(this.file.name) || 'Untitled';
+    link.download = getDownloadName(displayName, 'mp3');
+    // Firefox appears to require appending the element to the DOM..
+    // but FileSaver.js does not need to and it still works for some reason.
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(src);
+    }, 0);
+  }
+
   render() {
     const humanizedSize = humanizeFileSize(this.file.size);
     const mediaIsLoaded = isMediaLoaded(this.audio);
@@ -114,7 +148,8 @@ class LocalPlay extends Component {
                   this.audio,
                   this.handleLoop,
                   this.handlePlay,
-                  this.handlePause
+                  this.handlePause,
+                  this.handleDownload
                 ),
                 this.slice,
               ]

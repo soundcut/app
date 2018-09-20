@@ -122,7 +122,6 @@ class Slice extends Component {
   handleDownloadClick(evt) {
     evt.preventDefault();
 
-    this.setState({ loading: true });
     const src = this.slice.currentSrc;
     const link = document.createElement('a');
     link.style = 'display: none;';
@@ -131,13 +130,12 @@ class Slice extends Component {
     link.download = `${filename} - Sound Slice [${`${this.state.start}-${
       this.state.end
     }`}].mp3`;
-    // Firefox appears to be require appending the element to the DOM..
+    // Firefox appears to require appending the element to the DOM..
     // but FileSaver.js does not need to and it still works for some reason.
     document.body.appendChild(link);
     link.click();
     setTimeout(() => {
       document.body.removeChild(link);
-      this.setState({ loading: false });
     }, 0);
   }
 
