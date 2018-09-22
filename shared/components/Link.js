@@ -3,6 +3,7 @@
 const { Component, wire } = require('hypermorphic');
 
 const LocalPlay = require('./LocalPlay');
+const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
 
 const linkPath = '/api/link';
@@ -25,6 +26,7 @@ class Link extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.onMediaLoaded = this.onMediaLoaded.bind(this);
   }
 
   onconnected() {
@@ -33,9 +35,13 @@ class Link extends Component {
     const initialValue = new URLSearchParams(location.search).get('from');
     if (initialValue) {
       this.source.value = initialValue;
+      if (this.source.checkValidity()) {
+        this.handleSubmit();
+      }
+    } else {
+      this.source.focus();
     }
     this.handleChange();
-    this.source.focus();
   }
 
   handleReset() {
@@ -57,7 +63,7 @@ class Link extends Component {
   }
 
   async handleSubmit(evt) {
-    evt.preventDefault();
+    if (evt) evt.preventDefault();
 
     const value = this.source.value;
     const historyState = { value };
@@ -94,6 +100,11 @@ class Link extends Component {
       history.replaceState(newHistoryState, newTitle, pathname);
       document.title = newTitle;
 
+      this.localPlay = new LocalPlay({
+        file,
+        onMediaLoaded: this.onMediaLoaded,
+      });
+
       this.setState({
         file,
         loading: false,
@@ -107,7 +118,13 @@ class Link extends Component {
     }
   }
 
+  onMediaLoaded(audio) {
+    this.slice = new Slice(audio, this.state.file);
+    this.render();
+  }
+
   render() {
+    const state = this.state;
     return this.html`
       <form onconnected=${this}
             onSubmit=${this.handleSubmit}
@@ -120,7 +137,7 @@ class Link extends Component {
             Link to an external media (YouTube, ...)
             <em>Audio will be extracted for you to slice</em>
           </legend>
-          ${[this.state.error ? ErrorMessage() : '']}
+          ${[state.error ? ErrorMessage() : '']}
           <label for="source">
             URL
           </label>
@@ -128,25 +145,26 @@ class Link extends Component {
                  type="url"
                  id="source"
                  name="source"
-                 disabled=${this.state.loading}
+                 disabled=${state.loading}
           />
         </fieldset>
         <p class="button-container flex flex-wrap flex-justify-content-center">
           <button type="reset"
-                  disabled=${this.state.loading}
+                  disabled=${state.loading}
           >
             Reset
           </button>
           <button type="submit"
-                  disabled=${!this.state.hasValue || this.state.loading}
+                  disabled=${!state.hasValue || state.loading}
                   title="${
-                    this.state.loading ? 'This can take up to a minute...' : ''
+                    state.loading ? 'This can take up to a minute...' : ''
                   }"
           >
-            ${this.state.loading ? 'Extracting audio...' : 'Extract audio'}
+            ${state.loading ? 'Extracting audio...' : 'Extract audio'}
           </button>
         </p>
-        ${[this.state.file ? new LocalPlay(this.state.file) : '']}
+        ${[this.localPlay || '']}
+        ${[this.slice || '']}
       </form>
     `;
   }

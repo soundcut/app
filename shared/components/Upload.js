@@ -4,6 +4,7 @@ const { Component, wire } = require('hypermorphic');
 const { encode } = require('punycode');
 
 const LocalPlay = require('./LocalPlay');
+const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
@@ -45,10 +46,6 @@ function InvalidFileType(type) {
   `;
 }
 
-function ErrorMessage(error) {
-  return wire({ error })`<p>${[error]}</p>`;
-}
-
 function isFileSizeValid(bytes) {
   return bytes > 0 && bytes <= fileSizeLimit;
 }
@@ -63,7 +60,6 @@ function isFileValid(file) {
 
 const initialState = {
   file: undefined,
-  error: undefined,
 };
 
 class Upload extends Component {
@@ -72,10 +68,12 @@ class Upload extends Component {
     this.pageTitle = title;
     this.handleChange = this.handleChange.bind(this);
     this.downloadTestFile = this.downloadTestFile.bind(this);
+    this.onMediaLoaded = this.onMediaLoaded.bind(this);
   }
 
   onconnected() {
     this.setState(initialState);
+    history.replaceState({}, document.title, '/upload');
   }
 
   downloadTestFile(evt) {
@@ -95,6 +93,11 @@ class Upload extends Component {
     const target = evt.target;
     const file = target.files[0];
 
+    if (!isFileValid) {
+      this.setState({ file: undefined });
+      return;
+    }
+
     if (isFileValid(file)) {
       const filename = file.name;
       const encodedName = encode(filename);
@@ -109,6 +112,10 @@ class Upload extends Component {
       }
       document.title = newTitle;
 
+      this.localPlay = new LocalPlay({
+        file,
+        onMediaLoaded: this.onMediaLoaded,
+      });
       this.setState({
         file,
       });
@@ -118,23 +125,28 @@ class Upload extends Component {
     }
   }
 
+  onMediaLoaded(audio) {
+    this.slice = new Slice(audio, this.state.file);
+    this.render();
+  }
+
   render() {
     const state = this.state;
     const file = state.file;
-    const fileIsValid = isFileValid(file);
     return this.html`
       <form onconnected=${this}
             enctype="multipart/form-data"
             method="post"
             action="${uploadPath}"
       >
-        ${[
-          file && !isFileSizeValid(file.size) ? InvalidFileSize(file.size) : '',
-        ]}
-        ${[
-          file && !isFileTypeValid(file.type) ? InvalidFileType(file.type) : '',
-        ]}
-        ${[file && state.error ? ErrorMessage(state.error) : '']}
+        ${
+          file
+            ? [
+                !isFileSizeValid(file.size) && InvalidFileSize(file.size),
+                !isFileTypeValid(file.type) && InvalidFileType(file.type),
+              ].filter(Boolean)
+            : ''
+        }
         <fieldset class="FileField">
           <legend>
             Upload a file
@@ -153,7 +165,8 @@ class Upload extends Component {
                   accept=${requiredFileTypes[0]}
           />
         </fieldset>
-        ${[fileIsValid ? new LocalPlay(file) : '']}
+        ${[this.localPlay || '']}
+        ${[this.slice || '']}
       </form>
     `;
   }

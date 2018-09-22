@@ -4,7 +4,6 @@ const { Component, wire } = require('hypermorphic');
 
 const Volume = require('./Volume');
 const Duration = require('./Duration');
-const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDownloadName = require('../helpers/getDownloadName');
 
@@ -63,9 +62,10 @@ function Buttons(
 }
 
 class LocalPlay extends Component {
-  constructor(file) {
+  constructor({ file, onMediaLoaded }) {
     super();
     this.file = file;
+    this.onMediaLoaded = onMediaLoaded;
     this.handlePlay = this.handlePlay.bind(this);
     this.handlePause = this.handlePause.bind(this);
     this.handleLoop = this.handleLoop.bind(this);
@@ -77,11 +77,13 @@ class LocalPlay extends Component {
     this.audio = new Audio(this.objectURL);
     this.interval = setInterval(() => {
       if (isMediaLoaded(this.audio)) {
+        clearInterval(this.interval);
         this.volume = new Volume(this.audio);
         this.duration = new Duration(this.audio);
-        this.slice = new Slice(this.audio, this.file);
+        if (typeof this.onMediaLoaded === 'function') {
+          this.onMediaLoaded(this.audio);
+        }
         URL.revokeObjectURL(this.objectURL);
-        clearInterval(this.interval);
       }
       this.render();
     }, 100);
@@ -151,7 +153,6 @@ class LocalPlay extends Component {
                   this.handlePause,
                   this.handleDownload
                 ),
-                this.slice,
               ]
             : ''
         }
