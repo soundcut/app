@@ -66,12 +66,13 @@ class Shared extends Component {
 
   render() {
     const state = this.state;
+    const file = state.file;
 
     return this.html`
       <div onconnected=${this}>
         ${[state.error ? ErrorMessage() : '']}
         ${[state.loading ? Loading() : '']}
-        ${[this.state.file ? new LocalPlay(this.state.file) : '']}
+        ${[file ? new LocalPlay({ file }) : '']}
       </div>
     `;
   }
