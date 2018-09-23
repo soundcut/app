@@ -48,6 +48,8 @@ class Link extends Component {
     const historyState = { value: '' };
     history.pushState(historyState, this.pageTitle, '/link');
     document.title = this.pageTitle;
+    this.localPlay = undefined;
+    this.slice = undefined;
     this.setState(initialState);
   }
 
