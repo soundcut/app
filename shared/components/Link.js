@@ -104,6 +104,7 @@ class Link extends Component {
 
       this.localPlay = new LocalPlay({
         file,
+        autoplay: true,
         onMediaLoaded: this.onMediaLoaded,
       });
 

@@ -62,9 +62,10 @@ function Buttons(
 }
 
 class LocalPlay extends Component {
-  constructor({ file, onMediaLoaded }) {
+  constructor({ file, autoplay, onMediaLoaded }) {
     super();
     this.file = file;
+    this.autoplay = !!autoplay;
     this.onMediaLoaded = onMediaLoaded;
     this.handlePlay = this.handlePlay.bind(this);
     this.handlePause = this.handlePause.bind(this);
@@ -75,6 +76,7 @@ class LocalPlay extends Component {
   onconnected() {
     this.objectURL = URL.createObjectURL(this.file);
     this.audio = new Audio(this.objectURL);
+    this.audio.autoplay = this.autoplay;
     this.interval = setInterval(() => {
       if (isMediaLoaded(this.audio)) {
         clearInterval(this.interval);
