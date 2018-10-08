@@ -39,7 +39,7 @@
     "serve-static": "^1.13.2"
   },
   "devDependencies": {
-    "chokidar-cli": "^1.2.0",
+    "chokidar-cli": "^1.2.1",
     "eslint": "^5.0.1",
     "node-sass": "^4.9.0",
     "nodemon": "^1.17.5",
