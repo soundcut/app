@@ -1,3 +1,4 @@
+const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
 const getDisplayName = require('../helpers/getDisplayName');
@@ -179,7 +180,13 @@ class Slice extends Component {
     return new Promise((resolve, reject) => {
       let fileReader = new FileReader();
       fileReader.onloadend = () => {
-        const sourceArrayBuffer = fileReader.result;
+        const _sourceArrayBuffer = fileReader.result;
+
+        // scrub source's metadata..
+        const writer = new ID3Writer(_sourceArrayBuffer);
+        writer.addTag();
+        const sourceArrayBuffer = writer.arrayBuffer;
+
         const duration = state.end - state.start;
         const bytesPerSecond = Math.floor(
           sourceArrayBuffer.byteLength / state.audio.duration

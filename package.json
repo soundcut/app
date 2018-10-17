@@ -25,6 +25,7 @@
     "NODE_ENV": "development"
   },
   "dependencies": {
+    "browser-id3-writer": "^4.1.0",
     "express": "^4.16.3",
     "flatstate": "^0.1.1",
     "glob": "^7.1.3",
