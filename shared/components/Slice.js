@@ -177,7 +177,7 @@ class Slice extends Component {
   createSlice() {
     const state = this.state;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let fileReader = new FileReader();
       fileReader.onloadend = () => {
         const _sourceArrayBuffer = fileReader.result;
@@ -187,31 +187,12 @@ class Slice extends Component {
         writer.addTag();
         const sourceArrayBuffer = writer.arrayBuffer;
 
-        const duration = state.end - state.start;
         const bytesPerSecond = Math.floor(
           sourceArrayBuffer.byteLength / state.audio.duration
         );
-        const offset = Math.floor(state.start * bytesPerSecond);
-        const length = Math.floor(duration * bytesPerSecond);
-        const sliceArrayBuffer = sourceArrayBuffer.slice(offset, length);
-
-        console.log('---------', {
-          duration,
-          bytesPerSecond,
-          sliceArrayBuffer,
-          sourceArrayBuffer,
-          offset,
-          length,
-        });
-
-        if (!sliceArrayBuffer.byteLength) {
-          const error = new Error('Empty sliceArrayBuffer');
-          console.error(error, {
-            sliceArrayBuffer,
-            sourceArrayBuffer,
-          });
-          return reject(error);
-        }
+        const start = Math.floor(state.start * bytesPerSecond);
+        const end = Math.floor(state.end * bytesPerSecond);
+        const sliceArrayBuffer = sourceArrayBuffer.slice(start, end);
 
         if (this.slice) {
           this.slice.pause();
