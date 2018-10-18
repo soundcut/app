@@ -5,6 +5,7 @@ const { encode } = require('punycode');
 
 const LocalPlay = require('./LocalPlay');
 const Slice = require('./Slice');
+const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
@@ -127,6 +128,7 @@ class Upload extends Component {
 
   onMediaLoaded(audio) {
     this.slice = new Slice(audio, this.state.file);
+    this.waveForm = new WaveForm(audio, this.state.file);
     this.render();
   }
 
@@ -166,6 +168,7 @@ class Upload extends Component {
           />
         </fieldset>
         ${[this.localPlay || '']}
+        ${[this.waveForm || '']}
         ${[this.slice || '']}
       </form>
     `;
