@@ -177,7 +177,7 @@ class Slice extends Component {
   createSlice() {
     const state = this.state;
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let fileReader = new FileReader();
       fileReader.onloadend = () => {
         const _sourceArrayBuffer = fileReader.result;
