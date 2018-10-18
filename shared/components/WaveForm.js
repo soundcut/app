@@ -31,13 +31,28 @@ class WaveForm extends Component {
     return canvasCtx;
   }
 
+  async onconnected() {
+    this.create2DContext();
+
+    this.buffer = await this.getBuffer();
+
+    const nominalWidth = Math.round(
+      this.audio.duration * MIN_PX_PER_SEC * this.pixelRatio
+    );
+
+    let start = 0;
+    let end = WIDTH;
+
+    const peaks = this.getPeaks(nominalWidth, start, end);
+    this.drawBars(peaks, 0, start, end);
+  }
+
   setLength(length) {
     this.splitPeaks = [];
     this.mergedPeaks = [];
     // Set the last element of the sparse array so the peak arrays are
     // appropriately sized for other calculations.
-    const channels = this.buffer ? this.buffer.numberOfChannels : 1;
-    // const channels = 1;
+    const channels = this.buffer.numberOfChannels;
     let c;
     for (c = 0; c < channels; c++) {
       this.splitPeaks[c] = [];
@@ -123,29 +138,13 @@ class WaveForm extends Component {
     return buffer;
   }
 
-  async onconnected() {
-    this.create2DContext();
-
-    this.buffer = await this.getBuffer();
-
-    const nominalWidth = Math.round(
-      this.audio.duration * MIN_PX_PER_SEC * this.pixelRatio
-    );
-
-    let start = 0;
-    let end = WIDTH;
-
-    const peaks = this.getPeaks(nominalWidth, start, end);
-    this.drawBars(peaks, 0, start, end);
-  }
-
   drawBars(peaks, channelIndex, start, end) {
     return this.prepareDraw(
       peaks,
       channelIndex,
       start,
       end,
-      ({ absmax, hasMinVals, height, offsetY, halfH, peaks }) => {
+      ({ hasMinVals, height, offsetY, halfH, peaks }) => {
         // Skip every other value if there are negatives.
         const peakIndexScale = hasMinVals ? 2 : 1;
         const length = peaks.length / peakIndexScale;
@@ -160,7 +159,7 @@ class WaveForm extends Component {
 
         for (i = first; i < last; i += step) {
           const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
-          const h = Math.round((peak / absmax) * halfH);
+          const h = Math.round((peak / 1) * halfH);
           this.fillRect(
             i + this.halfPixel,
             halfH - h + offsetY,
@@ -192,8 +191,7 @@ class WaveForm extends Component {
 
       if (intersection.x1 < intersection.x2) {
         this.canvasCtx.fillStyle = BAR_COLOR;
-        this.fillRectToContext(
-          this.canvasCtx,
+        this.canvasCtx.fillRect(
           intersection.x1 - leftOffset,
           intersection.y1,
           intersection.x2 - intersection.x1,
@@ -204,15 +202,7 @@ class WaveForm extends Component {
   }
 
   prepareDraw(peaks, channelIndex, start, end, fn) {
-    const frame = func => {
-      return (...args) => requestAnimationFrame(() => func(...args));
-    };
-    return frame(() => {
-      // calculate maximum modulation value, either from the barHeight
-      // parameter or if normalize=true from the largest value in the peak
-      // set
-      let absmax = 1 / 1; /*this.params.barHeight*/
-
+    return requestAnimationFrame(() => {
       // Bar wave draws the bottom only as a reflection of the top,
       // so we don't need negative values
       const hasMinVals = [].some.call(peaks, val => val < 0);
@@ -221,18 +211,13 @@ class WaveForm extends Component {
       const halfH = height / 2;
 
       return fn({
-        absmax: absmax,
         hasMinVals: hasMinVals,
         height: height,
         offsetY: offsetY,
         halfH: halfH,
         peaks: peaks,
       });
-    })();
-  }
-
-  fillRectToContext(ctx, x, y, width, height) {
-    ctx.fillRect(x, y, width, height);
+    });
   }
 
   render() {
