@@ -3,8 +3,9 @@ const { Component } = require('hypermorphic');
 const WIDTH = 835;
 const HEIGHT = 200;
 const MIN_PX_PER_SEC = 5;
-const BAR_WIDTH = 1;
+const BAR_WIDTH = 3;
 const BAR_COLOR = '#166a77';
+const BAR_GAP = false;
 
 class WaveForm extends Component {
   constructor(audio, file) {
@@ -149,7 +150,7 @@ class WaveForm extends Component {
         const peakIndexScale = hasMinVals ? 2 : 1;
         const length = peaks.length / peakIndexScale;
         const bar = BAR_WIDTH * this.pixelRatio;
-        const gap = Math.max(this.pixelRatio, ~~(bar / 2));
+        const gap = BAR_GAP ? Math.max(this.pixelRatio, ~~(bar / 2)) : 0;
         const step = bar + gap;
 
         const scale = length / WIDTH;
@@ -222,7 +223,13 @@ class WaveForm extends Component {
 
   render() {
     return this.html`
-      <canvas id="WaveForm" onconnected=${this} ondisconnected=${this}>
+      <canvas
+        onconnected=${this}
+        ondisconnected=${this}
+        width="${WIDTH}"
+        height="${HEIGHT}"
+        id="WaveForm"
+      >
       </canvas>
     `;
   }
