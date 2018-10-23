@@ -180,32 +180,7 @@ class WaveForm extends Component {
   }
 
   fillRect(x, y, width, height) {
-    const startCanvas = Math.floor(x / WIDTH);
-    const endCanvas = Math.min(
-      Math.ceil((x + width) / WIDTH) + 1,
-      [this.canvas].length
-    );
-    let i;
-    for (i = startCanvas; i < endCanvas; i++) {
-      this.maxCanvasWidth = WIDTH;
-      const leftOffset = i * this.maxCanvasWidth;
-
-      const intersection = {
-        x1: Math.max(x, i * this.maxCanvasWidth),
-        y1: y,
-        x2: Math.min(x + width, i * this.maxCanvasWidth + this.canvas.width),
-        y2: y + height,
-      };
-
-      if (intersection.x1 < intersection.x2) {
-        this.canvasCtx.fillRect(
-          intersection.x1 - leftOffset,
-          intersection.y1,
-          intersection.x2 - intersection.x1,
-          intersection.y2 - intersection.y1
-        );
-      }
-    }
+    this.canvasCtx.fillRect(x, y, width, height);
   }
 
   prepareDraw(peaks, channelIndex, start, end, fn) {
@@ -238,7 +213,7 @@ class WaveForm extends Component {
     requestAnimationFrame(() => {
       const x = evt.clientX - this.boundingClientRect.left;
       this.canvasCtx.fillStyle = 'red';
-      this.canvasCtx.fillRect.apply(this.canvasCtx, [x, 0, 1, HEIGHT]);
+      this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
     });
   }
 
