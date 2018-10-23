@@ -1,4 +1,5 @@
 const { Component } = require('hypermorphic');
+const throttle = require('lodash/throttle');
 
 const WIDTH = 835;
 const HEIGHT = 200;
@@ -18,6 +19,10 @@ class WaveForm extends Component {
     this.halfPixel = 0.5 / this.pixelRatio;
 
     this.createAudioCtx();
+    this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 16, {
+      leading: true,
+      trailing: true,
+    });
   }
 
   createAudioCtx() {
@@ -34,6 +39,7 @@ class WaveForm extends Component {
 
   async onconnected() {
     this.create2DContext();
+    this.boundingClientRect = this.canvas.getBoundingClientRect();
 
     this.buffer = await this.getBuffer();
 
@@ -45,7 +51,7 @@ class WaveForm extends Component {
     let end = WIDTH;
 
     const peaks = this.getPeaks(nominalWidth, start, end);
-    this.drawBars(peaks, 0, start, end);
+    this.drawBars(peaks, 0, 0, WIDTH);
   }
 
   setLength(length) {
@@ -127,9 +133,9 @@ class WaveForm extends Component {
   }
 
   decodeArrayBuffer(arrayBuffer) {
-    return new Promise((resolve, reject) => {
-      this.audioCtx.decodeAudioData(arrayBuffer, resolve, reject);
-    });
+    return new Promise(
+      this.audioCtx.decodeAudioData.bind(this.audioCtx, arrayBuffer)
+    );
   }
 
   async getBuffer() {
@@ -158,6 +164,7 @@ class WaveForm extends Component {
         const last = end;
         let i;
 
+        this.canvasCtx.fillStyle = BAR_COLOR;
         for (i = first; i < last; i += step) {
           const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
           const h = Math.round((peak / 1) * halfH);
@@ -191,7 +198,6 @@ class WaveForm extends Component {
       };
 
       if (intersection.x1 < intersection.x2) {
-        this.canvasCtx.fillStyle = BAR_COLOR;
         this.canvasCtx.fillRect(
           intersection.x1 - leftOffset,
           intersection.y1,
@@ -221,11 +227,27 @@ class WaveForm extends Component {
     });
   }
 
+  handleMouseMove(evt) {
+    if (this.hasDrawnCurrent) {
+      this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+      this.drawBars(this.mergedPeaks, 0, 0, WIDTH);
+    }
+
+    this.hasDrawnCurrent = true;
+
+    requestAnimationFrame(() => {
+      const x = evt.clientX - this.boundingClientRect.left;
+      this.canvasCtx.fillStyle = 'red';
+      this.canvasCtx.fillRect.apply(this.canvasCtx, [x, 0, 1, HEIGHT]);
+    });
+  }
+
   render() {
     return this.html`
       <canvas
         onconnected=${this}
         ondisconnected=${this}
+        onmousemove=${this.handleMouseMove}
         width="${WIDTH}"
         height="${HEIGHT}"
         id="WaveForm"
