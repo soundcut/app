@@ -52,6 +52,7 @@ class WaveForm extends Component {
 
     const peaks = this.getPeaks(nominalWidth, start, end);
     this.drawBars(peaks, 0, 0, WIDTH);
+    this.drawn = true;
   }
 
   setLength(length) {
@@ -203,14 +204,18 @@ class WaveForm extends Component {
   }
 
   handleMouseMove(evt) {
-    if (this.hasDrawnCurrent) {
-      this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-      this.drawBars(this.mergedPeaks, 0, 0, WIDTH);
+    if (!this.drawn) {
+      return;
     }
 
-    this.hasDrawnCurrent = true;
-
     requestAnimationFrame(() => {
+      if (!this.waveform) {
+        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, HEIGHT);
+      } else {
+        this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+        this.canvasCtx.putImageData(this.waveform, 0, 0);
+      }
+
       const x = evt.clientX - this.boundingClientRect.left;
       this.canvasCtx.fillStyle = 'red';
       this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
