@@ -1,7 +1,7 @@
 cd /home/hosting-user
 
 if [ -f youtube-dl ]; then
-  youtube-dl -U
+  ./youtube-dl -U
 else
   wget https://yt-dl.org/downloads/latest/youtube-dl
   chmod a+rx /home/hosting-user/youtube-dl
