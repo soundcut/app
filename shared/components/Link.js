@@ -45,13 +45,19 @@ class Link extends Component {
     this.handleChange();
   }
 
+  reset() {
+    this.localPlay = undefined;
+    this.slice = undefined;
+    this.waveForm = undefined;
+    this.setState(initialState);
+    this.source.focus();
+  }
+
   handleReset() {
     const historyState = { value: '' };
     history.pushState(historyState, this.pageTitle, '/link');
     document.title = this.pageTitle;
-    this.localPlay = undefined;
-    this.slice = undefined;
-    this.setState(initialState);
+    this.reset();
   }
 
   handleChange() {
@@ -75,7 +81,7 @@ class Link extends Component {
     document.title = this.pageTitle;
 
     if (this.state.file) {
-      this.setState({ file: undefined });
+      this.reset();
     }
 
     const fetchPromise = fetch(linkPath, {
