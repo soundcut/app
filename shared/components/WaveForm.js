@@ -226,7 +226,6 @@ class WaveForm extends Component {
     return this.html`
       <canvas
         onconnected=${this}
-        ondisconnected=${this}
         onmousemove=${this.handleMouseMove}
         width="${WIDTH}"
         height="${HEIGHT}"
