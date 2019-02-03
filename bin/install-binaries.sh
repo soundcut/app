@@ -1,4 +1,4 @@
-cd /home/hosting-user/youtube-dl
+cd /home/hosting-user
 wget https://yt-dl.org/downloads/latest/youtube-dl
 chmod a+rx /home/hosting-user/youtube-dl
 

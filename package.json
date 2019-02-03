@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "NODE_ENV=production node server/index.js",
+    "start": "[ -z \"$PAAS_USER\" ] || ./bin/install-binaries.sh; NODE_ENV=production node server/index.js",
     "dev": "npm run build:dev; npm run watch & nodemon --watch 'dist' --watch 'server' --watch 'shared/views' server/index.js;",
     "watch": "chokidar 'assets/**/*.scss' 'client/*.js' 'shared/**/*' -i 'shared/views/*' -c 'npm run build:dev'",
     "prettier": "prettier --write --trailing-comma es5 --single-quote --print-width 80 'shared/**/*.js' 'client/**/*.js' 'server/**/*.js' 'lib/**/*.js' && npm run lint -- --fix",
