@@ -1,5 +1,6 @@
 const { Component } = require('hypermorphic');
 const throttle = require('lodash/throttle');
+const parser = require('mp3-parser');
 
 const WIDTH = 835;
 const HEIGHT = 200;
@@ -141,6 +142,16 @@ class WaveForm extends Component {
 
   async getBuffer() {
     const arrayBuffer = await this.getArrayBuffer();
+    const view = new DataView(arrayBuffer);
+    const tags = parser.readTags(view);
+    const firstFrame = tags.pop();
+    let next = firstFrame._section.nextFrameIndex;
+    const frames = [firstFrame];
+    while (next) {
+      const frame = parser.readFrame(view, next);
+      frame && frames.push(frame);
+      next = frame && frame._section.nextFrameIndex;
+    }
     const buffer = await this.decodeArrayBuffer(arrayBuffer);
 
     return buffer;
