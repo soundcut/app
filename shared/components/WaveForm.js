@@ -1,6 +1,8 @@
 const { Component } = require('hypermorphic');
 const throttle = require('lodash/throttle');
 const parser = require('mp3-parser');
+const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
+const concatAudioBuffer = require('../helpers/AudioBuffer.concat');
 
 const WIDTH = 835;
 const HEIGHT = 200;
@@ -8,6 +10,7 @@ const MIN_PX_PER_SEC = 5;
 const BAR_WIDTH = 3;
 const BAR_COLOR = '#166a77';
 const BAR_GAP = false;
+const CHUNK_MAX_SIZE = 100 * 1000;
 
 class WaveForm extends Component {
   constructor(audio, file) {
@@ -45,7 +48,7 @@ class WaveForm extends Component {
     this.buffer = await this.getBuffer();
 
     const nominalWidth = Math.round(
-      this.audio.duration * MIN_PX_PER_SEC * this.pixelRatio
+      this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
     );
 
     let start = 0;
@@ -143,8 +146,10 @@ class WaveForm extends Component {
   async getBuffer() {
     const arrayBuffer = await this.getArrayBuffer();
     const view = new DataView(arrayBuffer);
+
     const tags = parser.readTags(view);
     const firstFrame = tags.pop();
+    const tagsArrayBuffer = arrayBuffer.slice(0, firstFrame._section.offset);
     let next = firstFrame._section.nextFrameIndex;
     const frames = [firstFrame];
     while (next) {
@@ -152,9 +157,48 @@ class WaveForm extends Component {
       frame && frames.push(frame);
       next = frame && frame._section.nextFrameIndex;
     }
-    const buffer = await this.decodeArrayBuffer(arrayBuffer);
 
-    return buffer;
+    const chunks = frames.reduce((acc, frame) => {
+      let chunk = acc[acc.length - 1];
+
+      if (
+        !chunk ||
+        chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE
+      ) {
+        chunk = { byteLength: 0, frames: [] };
+      }
+
+      chunk.byteLength = chunk.byteLength + frame._section.byteLength;
+      chunk.frames.push(frame);
+
+      if (!acc.includes(chunk)) {
+        return acc.concat(chunk);
+      }
+
+      return acc;
+    }, []);
+
+    const audioBuffer = await chunks.reduce(async (acc, chunk) => {
+      const buffer = await acc;
+      const tmpArrayBuffer = arrayBuffer.slice(
+        chunk.frames[0]._section.offset,
+        chunk.frames[chunk.frames.length - 1]._section.nextFrameIndex
+      );
+
+      const finalArrayBuffer = concatArrayBuffer(
+        tagsArrayBuffer,
+        tmpArrayBuffer
+      );
+      const decoded = await this.decodeArrayBuffer(finalArrayBuffer);
+
+      if (buffer) {
+        return concatAudioBuffer(this.audioCtx, buffer, decoded);
+      }
+
+      return decoded;
+    }, Promise.resolve());
+
+    return audioBuffer;
   }
 
   drawBars(peaks, channelIndex, start, end) {
