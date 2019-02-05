@@ -211,7 +211,10 @@ class Slice extends Component {
             );
 
             duration += frame.duration;
-            if (duration >= state.start && duration <= state.end) {
+            if (duration >= state.start) {
+              if (duration > state.end) {
+                break;
+              }
               sliceFrames.push(frame);
             }
           }
