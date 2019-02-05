@@ -1,7 +1,10 @@
+const parser = require('mp3-parser');
 const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
 const getDisplayName = require('../helpers/getDisplayName');
+const getDuration = require('../helpers/getDuration');
+const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
 
 const maxSliceLength = 90;
 const sharePath = '/api/share';
@@ -187,12 +190,43 @@ class Slice extends Component {
         writer.addTag();
         const sourceArrayBuffer = writer.arrayBuffer;
 
-        const bytesPerSecond = Math.floor(
-          sourceArrayBuffer.byteLength / state.audio.duration
+        const view = new DataView(sourceArrayBuffer);
+
+        const tags = parser.readTags(view);
+        const firstFrame = tags.pop();
+        const tagsArrayBuffer = sourceArrayBuffer.slice(
+          0,
+          firstFrame._section.offset
         );
-        const start = Math.floor(state.start * bytesPerSecond);
-        const end = Math.floor(state.end * bytesPerSecond);
-        const sliceArrayBuffer = sourceArrayBuffer.slice(start, end);
+        let next = firstFrame._section.offset;
+
+        const sliceFrames = [];
+        let duration = 0;
+        while (next) {
+          const frame = parser.readFrame(view, next);
+          if (frame) {
+            frame.duration = getDuration(
+              frame._section.byteLength,
+              frame.header.bitrate
+            );
+
+            duration += frame.duration;
+            if (duration >= state.start && duration <= state.end) {
+              sliceFrames.push(frame);
+            }
+          }
+          next = frame && frame._section.nextFrameIndex;
+        }
+
+        const tmpArrayBuffer = sourceArrayBuffer.slice(
+          sliceFrames[0]._section.offset,
+          sliceFrames[sliceFrames.length - 1]._section.nextFrameIndex
+        );
+
+        const sliceArrayBuffer = concatArrayBuffer(
+          tagsArrayBuffer,
+          tmpArrayBuffer
+        );
 
         if (this.slice) {
           this.slice.pause();
