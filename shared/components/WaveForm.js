@@ -27,6 +27,7 @@ class WaveForm extends Component {
       leading: true,
       trailing: true,
     });
+    this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
   }
 
   createAudioCtx() {
@@ -42,6 +43,7 @@ class WaveForm extends Component {
   }
 
   async onconnected() {
+    this.audio.addEventListener('timeupdate', this.handleSourceTimeUpdate);
     this.create2DContext();
     this.boundingClientRect = this.canvas.getBoundingClientRect();
 
@@ -273,6 +275,26 @@ class WaveForm extends Component {
 
       const x = evt.clientX - this.boundingClientRect.left;
       this.canvasCtx.fillStyle = 'red';
+      this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
+    });
+  }
+
+  handleSourceTimeUpdate() {
+    if (!this.drawn) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      if (!this.waveform) {
+        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, HEIGHT);
+      } else {
+        this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+        this.canvasCtx.putImageData(this.waveform, 0, 0);
+      }
+
+      const x = (WIDTH / this.buffer.duration) * this.audio.currentTime;
+
+      this.canvasCtx.fillStyle = 'white';
       this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
     });
   }
