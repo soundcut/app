@@ -193,17 +193,19 @@ class Slice extends Component {
         const view = new DataView(sourceArrayBuffer);
 
         const tags = parser.readTags(view);
-        const firstFrame = tags.pop();
-        const tagsArrayBuffer = sourceArrayBuffer.slice(
-          0,
-          firstFrame._section.offset
+        const id3v2Tag = tags[0];
+        const id3v2TagArrayBuffer = sourceArrayBuffer.slice(
+          id3v2Tag._section,
+          id3v2Tag._section.offset
         );
-        let next = firstFrame._section.offset;
+
+        const firstFrame = tags[tags.length - 1];
+        let next = firstFrame._section.nextFrameIndex;
 
         const sliceFrames = [];
         let duration = 0;
         while (next) {
-          const frame = parser.readFrame(view, next);
+          const frame = parser.readFrame(view, next, true);
           if (frame) {
             frame.duration = getDuration(
               frame._section.byteLength,
@@ -227,7 +229,7 @@ class Slice extends Component {
         );
 
         const sliceArrayBuffer = concatArrayBuffer(
-          tagsArrayBuffer,
+          id3v2TagArrayBuffer,
           tmpArrayBuffer
         );
 
