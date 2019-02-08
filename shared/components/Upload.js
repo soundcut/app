@@ -11,7 +11,7 @@ const getDisplayName = require('../helpers/getDisplayName');
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
 const requiredFileTypeName = 'mp3';
 const humanizedRequiredFileType = requiredFileTypes.join(', ');
-const fileSizeLimit = 1048576 * 10;
+const fileSizeLimit = 1048576 * 1000;
 
 const uploadPath = `/api/upload/${requiredFileTypeName}`;
 
@@ -94,12 +94,10 @@ class Upload extends Component {
     const target = evt.target;
     const file = target.files[0];
 
-    if (!isFileValid) {
+    if (!isFileValid(file)) {
       this.setState({ file: undefined });
       return;
-    }
-
-    if (isFileValid(file)) {
+    } else {
       const filename = file.name;
       const encodedName = encode(filename);
       const historyState = { filename: encode(filename) };
@@ -120,9 +118,6 @@ class Upload extends Component {
       this.setState({
         file,
       });
-    } else if (isFileValid(this.state.file)) {
-      history.pushState({}, this.pageTitle, '/upload');
-      document.title = this.pageTitle;
     }
   }
 
