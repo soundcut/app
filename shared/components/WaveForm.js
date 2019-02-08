@@ -6,7 +6,6 @@ const concatAudioBuffer = require('../helpers/AudioBuffer.concat');
 
 const WIDTH = 835;
 const HEIGHT = 200;
-const MIN_PX_PER_SEC = 5;
 const BAR_WIDTH = 3;
 const BAR_COLOR = '#166a77';
 const BAR_GAP = false;
@@ -49,18 +48,24 @@ class WaveForm extends Component {
 
     this.buffer = await this.getBuffer();
 
-    const nominalWidth = Math.round(
-      this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
-    );
+    // const nominalWidth = Math.round(
+    //   this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
+    // );
 
-    let start = 0;
-    let end = WIDTH;
+    const width = WIDTH;
+    const start = 0;
+    const end = WIDTH;
 
-    const peaks = this.getPeaks(nominalWidth, start, end);
+    const peaks = this.getPeaks(width, start, end);
     this.drawBars(peaks, 0, 0, WIDTH);
     this.drawn = true;
   }
 
+  /**
+   * Set the rendered length (different from the length of the audio).
+   *
+   * @param {number} length
+   */
   setLength(length) {
     this.splitPeaks = [];
     this.mergedPeaks = [];
@@ -77,6 +82,15 @@ class WaveForm extends Component {
     this.mergedPeaks[2 * (length - 1) + 1] = 0;
   }
 
+  /**
+   * Compute the max and min value of the waveform when broken into <length> subranges.
+   *
+   * @param {number} length How many subranges to break the waveform into.
+   * @param {number} first First sample in the required range.
+   * @param {number} last Last sample in the required range.
+   * @return {number[]|number[][]} Array of 2*<length> peaks or array of arrays of
+   * peaks consisting of (max, min) values for each subrange.
+   */
   getPeaks(length, first, last) {
     first = first || 0;
     last = last || length - 1;
@@ -86,7 +100,6 @@ class WaveForm extends Component {
     const sampleSize = this.buffer.length / length;
     const sampleStep = ~~(sampleSize / 10) || 1;
     const channels = this.buffer.numberOfChannels;
-
     let c;
 
     for (c = 0; c < channels; c++) {
@@ -147,6 +160,7 @@ class WaveForm extends Component {
 
   async getBuffer() {
     const arrayBuffer = await this.getArrayBuffer();
+
     const view = new DataView(arrayBuffer);
 
     const tags = parser.readTags(view);
