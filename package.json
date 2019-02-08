@@ -16,7 +16,7 @@
     "sass": "node-sass assets/styles/main.scss --include-path node_modules --output-style compressed > dist/stylesheets/main.css",
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "echo \"Error: no release script specified\" && exit 1",
-    "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build:prod",
+    "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build:prod; npm prune --production",
     "deploy": "ssh $SOUNDSLICE_DEPLOY deploy default.git"
   },
   "author": "",
@@ -38,8 +38,7 @@
     "pg": "^7.4.3",
     "punycode": "1.4.1",
     "serve-favicon": "^2.5.0",
-    "serve-static": "^1.13.2",
-    "terser": "^3.14.1"
+    "serve-static": "^1.13.2"
   },
   "devDependencies": {
     "chokidar-cli": "^1.2.1",
@@ -48,6 +47,7 @@
     "nodemon": "^1.17.5",
     "normalize.css": "^8.0.0",
     "prettier": "^1.14.2",
+    "terser": "^3.14.1",
     "webpack": "^4.12.2",
     "webpack-cli": "^3.0.8"
   }
