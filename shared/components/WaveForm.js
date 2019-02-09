@@ -39,6 +39,7 @@ class WaveForm extends Component {
     const canvas = (this.canvas = document.getElementById('WaveForm'));
     const canvasCtx = (this.canvasCtx = canvas.getContext('2d'));
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+    this.canvasCtx.font = '10px sans-serif';
     return canvasCtx;
   }
 
@@ -291,7 +292,20 @@ class WaveForm extends Component {
       const x = evt.clientX - this.boundingClientRect.left;
       this.canvasCtx.fillStyle = 'red';
       this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
+
+      const time = this.formatTime((this.buffer.duration / WIDTH) * x);
+      const textX = WIDTH - x < 100 ? x - 55 : x + 10;
+      const textY = 20;
+      this.canvasCtx.fillText(time, textX, textY);
     });
+  }
+
+  formatTime(time) {
+    return [
+      Math.floor((time % 3600) / 60), // minutes
+      ('00' + Math.floor(time % 60)).slice(-2), // seconds
+      ('000' + Math.floor((time % 1) * 1000)).slice(-3), // miliseconds
+    ].join(':');
   }
 
   handleSourceTimeUpdate() {
@@ -308,9 +322,13 @@ class WaveForm extends Component {
       }
 
       const x = (WIDTH / this.buffer.duration) * this.audio.currentTime;
-
       this.canvasCtx.fillStyle = 'white';
       this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
+
+      const time = this.formatTime(this.audio.currentTime);
+      const textX = WIDTH - x < 100 ? x - 55 : x + 10;
+      const textY = 20;
+      this.canvasCtx.fillText(time, textX, textY);
     });
   }
 
