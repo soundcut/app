@@ -18,7 +18,8 @@ class WaveForm extends Component {
     this.file = file;
 
     this.pixelRatio =
-      window.devicePixelRatio || screen.deviceXDPI / screen.logicalXDPI;
+      // FIXME: Force pixelRatio=1 otherwise devices > 1 only draw half
+      1 || window.devicePixelRatio || screen.deviceXDPI / screen.logicalXDPI;
     this.halfPixel = 0.5 / this.pixelRatio;
 
     this.createAudioCtx();
