@@ -145,7 +145,7 @@ class Link extends Component {
       >
         <fieldset>
           <legend>
-            Link to an external media (YouTube, ...)
+            <span>Link to an external media (YouTube, ...)</span>
             <em>Audio will be extracted for you to slice</em>
           </legend>
           ${[state.error ? ErrorMessage() : '']}

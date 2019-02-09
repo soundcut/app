@@ -146,7 +146,7 @@ class Upload extends Component {
         }
         <fieldset class="FileField">
           <legend>
-            Upload a file
+            <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
             <a href="#" onClick=${this.downloadTestFile}>
               Download test audio/mp3 file...
