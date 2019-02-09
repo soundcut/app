@@ -1,15 +1,13 @@
 const { Component } = require('hypermorphic');
 const throttle = require('lodash/throttle');
-const parser = require('mp3-parser');
-const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
-const concatAudioBuffer = require('../helpers/AudioBuffer.concat');
+const getFileAudioBuffer = require('../helpers/getFileAudioBuffer');
+const formatTime = require('../helpers/formatTime');
 
 const WIDTH = 835;
 const HEIGHT = 200;
 const BAR_WIDTH = 3;
 const BAR_COLOR = '#166a77';
 const BAR_GAP = false;
-const CHUNK_MAX_SIZE = 100 * 1000;
 
 class WaveForm extends Component {
   constructor(audio, file) {
@@ -48,7 +46,7 @@ class WaveForm extends Component {
     this.create2DContext();
     this.boundingClientRect = this.canvas.getBoundingClientRect();
 
-    this.buffer = await this.getBuffer();
+    this.buffer = await getFileAudioBuffer(this.file, this.audioCtx);
 
     // const nominalWidth = Math.round(
     //   this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
@@ -144,81 +142,6 @@ class WaveForm extends Component {
     return this.mergedPeaks;
   }
 
-  getArrayBuffer() {
-    return new Promise(resolve => {
-      let fileReader = new FileReader();
-      fileReader.onloadend = () => {
-        resolve(fileReader.result);
-      };
-      fileReader.readAsArrayBuffer(this.file);
-    });
-  }
-
-  decodeArrayBuffer(arrayBuffer) {
-    return new Promise(
-      this.audioCtx.decodeAudioData.bind(this.audioCtx, arrayBuffer)
-    );
-  }
-
-  async getBuffer() {
-    const arrayBuffer = await this.getArrayBuffer();
-
-    const view = new DataView(arrayBuffer);
-
-    const tags = parser.readTags(view);
-    const firstFrame = tags.pop();
-    const tagsArrayBuffer = arrayBuffer.slice(0, firstFrame._section.offset);
-    let next = firstFrame._section.nextFrameIndex;
-    const frames = [firstFrame];
-    while (next) {
-      const frame = parser.readFrame(view, next);
-      frame && frames.push(frame);
-      next = frame && frame._section.nextFrameIndex;
-    }
-
-    const chunks = frames.reduce((acc, frame) => {
-      let chunk = acc[acc.length - 1];
-
-      if (
-        !chunk ||
-        chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE
-      ) {
-        chunk = { byteLength: 0, frames: [] };
-      }
-
-      chunk.byteLength = chunk.byteLength + frame._section.byteLength;
-      chunk.frames.push(frame);
-
-      if (!acc.includes(chunk)) {
-        return acc.concat(chunk);
-      }
-
-      return acc;
-    }, []);
-
-    const audioBuffer = await chunks.reduce(async (acc, chunk) => {
-      const buffer = await acc;
-      const tmpArrayBuffer = arrayBuffer.slice(
-        chunk.frames[0]._section.offset,
-        chunk.frames[chunk.frames.length - 1]._section.nextFrameIndex
-      );
-
-      const finalArrayBuffer = concatArrayBuffer(
-        tagsArrayBuffer,
-        tmpArrayBuffer
-      );
-      const decoded = await this.decodeArrayBuffer(finalArrayBuffer);
-
-      if (buffer) {
-        return concatAudioBuffer(this.audioCtx, buffer, decoded);
-      }
-
-      return decoded;
-    }, Promise.resolve());
-
-    return audioBuffer;
-  }
-
   drawBars(peaks, channelIndex, start, end) {
     return this.prepareDraw(
       peaks,
@@ -293,19 +216,11 @@ class WaveForm extends Component {
       this.canvasCtx.fillStyle = 'red';
       this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
 
-      const time = this.formatTime((this.buffer.duration / WIDTH) * x);
+      const time = formatTime((this.buffer.duration / WIDTH) * x);
       const textX = WIDTH - x < 100 ? x - 55 : x + 10;
       const textY = 20;
       this.canvasCtx.fillText(time, textX, textY);
     });
-  }
-
-  formatTime(time) {
-    return [
-      Math.floor((time % 3600) / 60), // minutes
-      ('00' + Math.floor(time % 60)).slice(-2), // seconds
-      ('000' + Math.floor((time % 1) * 1000)).slice(-3), // miliseconds
-    ].join(':');
   }
 
   handleSourceTimeUpdate() {
@@ -325,7 +240,7 @@ class WaveForm extends Component {
       this.canvasCtx.fillStyle = 'white';
       this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
 
-      const time = this.formatTime(this.audio.currentTime);
+      const time = formatTime(this.audio.currentTime);
       const textX = WIDTH - x < 100 ? x - 55 : x + 10;
       const textY = 20;
       this.canvasCtx.fillText(time, textX, textY);
