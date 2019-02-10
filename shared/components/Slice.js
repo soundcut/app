@@ -266,7 +266,7 @@ class Slice extends Component {
   render() {
     /* eslint-disable indent */
     const state = this.state;
-    const disabled = this.state.loading;
+    const disabled = !this.slice || this.state.loading;
 
     return this.html`
       <div onconnected=${this} ondisconnected=${this}>
