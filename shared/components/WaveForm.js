@@ -247,7 +247,7 @@ class WaveForm extends Component {
       );
       this.canvasCtx.fill();
 
-      const time = (this.getDuration() / WIDTH) * x;
+      const time = Math.max((this.getDuration() / WIDTH) * x, 0);
       const boundary = !this.state.start ? 'start' : 'end';
       const formattedTime = formatTime(time);
       const textSpacing = BAR_HANDLE_RADIUS + SPACING / 2;
