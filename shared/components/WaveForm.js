@@ -75,6 +75,23 @@ class WaveForm extends Component {
     this.drawn = true;
   }
 
+  getDuration() {
+    return (this.buffer || this.audio).duration;
+  }
+
+  doSnapshot() {
+    return this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
+  }
+
+  restoreSnapshot() {
+    this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
+    this.canvasCtx.putImageData(
+      this.snapshots[this.snapshots.length - 1],
+      0,
+      0
+    );
+  }
+
   /**
    * Set the rendered length (different from the length of the audio).
    *
@@ -210,20 +227,18 @@ class WaveForm extends Component {
     });
   }
 
-  getDuration() {
-    return (this.buffer || this.audio).duration;
+  resetBoundaries() {
+    this.setState(this.resetSlice());
+    this.snapshots = [this.snapshots[0]];
+    this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
+    this.canvasCtx.putImageData(this.snapshots[0], 0, 0);
   }
 
   handleMouseMove(evt) {
     if (!this.drawn || this.state.end) return;
 
     requestAnimationFrame(() => {
-      this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-      this.canvasCtx.putImageData(
-        this.snapshots[this.snapshots.length - 1],
-        0,
-        0
-      );
+      this.restoreSnapshot();
 
       const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
       this.canvasCtx.fillStyle = SLICE_COLOR;
@@ -260,13 +275,6 @@ class WaveForm extends Component {
     });
   }
 
-  resetBoundaries() {
-    this.setState(this.resetSlice());
-    this.snapshots = [this.snapshots[0]];
-    this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-    this.canvasCtx.putImageData(this.snapshots[0], 0, 0);
-  }
-
   handleClick(evt) {
     if (typeof this.setSliceBoundary !== 'function' || !this.drawn) {
       return;
@@ -296,20 +304,11 @@ class WaveForm extends Component {
     });
   }
 
-  doSnapshot() {
-    return this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
-  }
-
   handleSourceTimeUpdate() {
     if (!this.drawn) return;
 
     requestAnimationFrame(() => {
-      this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-      this.canvasCtx.putImageData(
-        this.snapshots[this.snapshots.length - 1],
-        0,
-        0
-      );
+      this.restoreSnapshot();
 
       const x = (WIDTH / this.getDuration()) * this.audio.currentTime;
       this.canvasCtx.fillStyle = 'white';
