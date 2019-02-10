@@ -67,26 +67,12 @@ class Upload extends Component {
     super();
     this.pageTitle = title;
     this.handleChange = this.handleChange.bind(this);
-    this.downloadTestFile = this.downloadTestFile.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
   }
 
   onconnected() {
     this.setState(initialState);
     history.replaceState({}, document.title, '/upload');
-  }
-
-  downloadTestFile(evt) {
-    evt.preventDefault();
-    const link = document.createElement('a');
-    link.style = 'display: none;';
-    link.href = '/public/soundslice-test-file.mp3';
-    link.download = 'soundslice-test-file.mp3';
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(function removeDownloadLink() {
-      link.parentElement.remove(link);
-    }, 0);
   }
 
   handleChange(evt) {
@@ -146,9 +132,6 @@ class Upload extends Component {
           <legend>
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
-            <a href="#" onClick=${this.downloadTestFile}>
-              Download test audio/mp3 file...
-            </a>
           </legend>
           <label for="source">
             Source material <em>${humanizedRequiredFileType}</em>
