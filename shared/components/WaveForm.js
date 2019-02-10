@@ -10,8 +10,9 @@ const HEIGHT = CANVAS_HEIGHT - SPACING * 2;
 const BAR_WIDTH = 4;
 const BAR_COLOR = '#166a77';
 const BAR_HANDLE_RADIUS = 8;
-const SLICE_COLOR = '#37f0c2';
+const BAR_CENTER = (BAR_WIDTH - 1) / 2;
 const BAR_GAP = false;
+const SLICE_COLOR = '#37f0c2';
 
 class WaveForm extends Component {
   constructor(audio, file) {
@@ -211,12 +212,12 @@ class WaveForm extends Component {
         this.canvasCtx.putImageData(this.waveform, 0, 0);
       }
 
-      const x = evt.clientX - this.boundingClientRect.left;
+      const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
       this.canvasCtx.fillStyle = SLICE_COLOR;
       this.canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, CANVAS_HEIGHT);
       this.canvasCtx.beginPath();
       this.canvasCtx.arc(
-        x + BAR_WIDTH / 2 - 1,
+        x + BAR_CENTER,
         CANVAS_HEIGHT - BAR_HANDLE_RADIUS,
         BAR_HANDLE_RADIUS,
         0,
@@ -225,7 +226,7 @@ class WaveForm extends Component {
       this.canvasCtx.fill();
       this.canvasCtx.beginPath();
       this.canvasCtx.arc(
-        x + BAR_WIDTH / 2 - 1,
+        x + BAR_CENTER,
         BAR_HANDLE_RADIUS,
         BAR_HANDLE_RADIUS,
         0,
