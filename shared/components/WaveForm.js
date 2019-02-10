@@ -19,10 +19,12 @@ const TIME_ANNOTATION_WIDTH = 40;
 const SLICE_COLOR = '#37f0c2';
 
 class WaveForm extends Component {
-  constructor(audio, file) {
+  constructor(audio, file, setSliceBoundary, resetSlice) {
     super();
     this.audio = audio;
     this.file = file;
+    this.setSliceBoundary = setSliceBoundary;
+    this.resetSlice = resetSlice;
 
     this.pixelRatio =
       // FIXME: Force pixelRatio=1 otherwise devices > 1 only draw half
@@ -34,7 +36,9 @@ class WaveForm extends Component {
       leading: true,
       trailing: true,
     });
+    this.handleClick = this.handleClick.bind(this);
     this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
+    this.snapshots = [];
   }
 
   createAudioCtx() {
@@ -180,6 +184,8 @@ class WaveForm extends Component {
             h * 2
           );
         }
+        this.drawn = true;
+        this.snapshots.push(this.doSnapshot());
       }
     );
   }
@@ -203,18 +209,20 @@ class WaveForm extends Component {
     });
   }
 
+  getDuration() {
+    return (this.buffer || this.audio).duration;
+  }
+
   handleMouseMove(evt) {
-    if (!this.drawn) {
-      return;
-    }
+    if (!this.drawn || this.state.end) return;
 
     requestAnimationFrame(() => {
-      if (!this.waveform) {
-        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
-      } else {
-        this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-        this.canvasCtx.putImageData(this.waveform, 0, 0);
-      }
+      this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
+      this.canvasCtx.putImageData(
+        this.snapshots[this.snapshots.length - 1],
+        0,
+        0
+      );
 
       const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
       this.canvasCtx.fillStyle = SLICE_COLOR;
@@ -238,31 +246,62 @@ class WaveForm extends Component {
       );
       this.canvasCtx.fill();
 
-      const time = formatTime((this.buffer.duration / WIDTH) * x);
+      const time = (this.getDuration() / WIDTH) * x;
+      const boundary = !this.state.start ? 'start' : 'end';
+      const formattedTime = formatTime(time);
       const textSpacing = BAR_HANDLE_RADIUS + SPACING / 2;
       const textX =
         WIDTH - x < TIME_ANNOTATION_WIDTH + textSpacing
           ? x - TIME_ANNOTATION_WIDTH - textSpacing
           : x + textSpacing;
-      const textY = FONT_SIZE;
-      this.canvasCtx.fillText(time, textX, textY);
+      const textY = boundary !== 'end' ? FONT_SIZE : CANVAS_HEIGHT - FONT_SIZE;
+      this.canvasCtx.fillText(formattedTime, textX, textY);
     });
   }
 
-  handleSourceTimeUpdate() {
-    if (!this.drawn) {
+  handleClick(evt) {
+    if (typeof this.setSliceBoundary !== 'function' || !this.drawn) {
       return;
     }
 
-    requestAnimationFrame(() => {
-      if (!this.waveform) {
-        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
-      } else {
-        this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-        this.canvasCtx.putImageData(this.waveform, 0, 0);
-      }
+    if (this.state.end) {
+      this.setState(this.resetSlice());
+      this.snapshots = [this.snapshots[0]];
+      this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
+      this.canvasCtx.putImageData(this.snapshots[0], 0, 0);
+      return;
+    }
 
-      const x = (WIDTH / this.buffer.duration) * this.audio.currentTime;
+    const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
+    const time = (this.getDuration() / WIDTH) * x;
+
+    const boundary = !this.state.start ? 'start' : 'end';
+    const { start, end } = this.setSliceBoundary(boundary, time);
+
+    this.snapshots.push(this.doSnapshot());
+
+    this.setState({
+      start,
+      end,
+    });
+  }
+
+  doSnapshot() {
+    return this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
+  }
+
+  handleSourceTimeUpdate() {
+    if (!this.drawn) return;
+
+    requestAnimationFrame(() => {
+      this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
+      this.canvasCtx.putImageData(
+        this.snapshots[this.snapshots.length - 1],
+        0,
+        0
+      );
+
+      const x = (WIDTH / this.getDuration()) * this.audio.currentTime;
       this.canvasCtx.fillStyle = 'white';
       this.canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, CANVAS_HEIGHT);
 
@@ -278,8 +317,10 @@ class WaveForm extends Component {
       <canvas
         onconnected=${this}
         onmousemove=${this.handleMouseMove}
+        onclick=${this.handleClick}
         width="${WIDTH}"
         height="${CANVAS_HEIGHT}"
+        class="${this.state.end ? 'will-reset' : 'can-select'}"
         id="WaveForm"
       >
       </canvas>

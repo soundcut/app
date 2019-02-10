@@ -2,12 +2,13 @@ const parser = require('mp3-parser');
 const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
+const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDuration = require('../helpers/getDuration');
 const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
 
-const maxSliceLength = 90;
-const sharePath = '/api/share';
+const MAX_SLICE_LENGTH = 90;
+const SHARE_PATH = '/api/share';
 
 function arrayBufferToObjectURL(buffer, callback) {
   const blob = new Blob([buffer], { type: 'audio/mpeg' });
@@ -36,8 +37,8 @@ function ShareInput(id) {
 const initialState = {
   audio: undefined,
   loop: false,
-  start: 0,
-  end: maxSliceLength,
+  start: undefined,
+  end: undefined,
   loading: false,
   sharing: false,
   id: undefined,
@@ -49,17 +50,25 @@ class Slice extends Component {
     super();
     this.file = file;
     this.state = Object.assign({}, initialState, { audio });
+
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayClick = this.handlePlayClick.bind(this);
     this.handlePauseClick = this.handlePauseClick.bind(this);
     this.handleLoopClick = this.handleLoopClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
+    this.setBoundary = this.setBoundary.bind(this);
+    this.resetSlice = this.resetSlice.bind(this);
+
+    this.waveform = new WaveForm(
+      audio,
+      file,
+      this.setBoundary,
+      this.resetSlice
+    );
   }
 
-  onconnected() {
-    this.createSlice();
-  }
+  onconnected() {}
 
   ondisconnected() {
     this.state.audio = undefined;
@@ -73,38 +82,39 @@ class Slice extends Component {
     }
   }
 
-  handleSliceChange(evt) {
-    const target = evt.target;
-    const value = target.value;
-
-    const which = target.name;
-
+  setBoundary(name, value) {
     const parsedValue = Math.floor(Number.parseFloat(value, 10));
-    const current = this.state[which];
-    const opposite = which === 'start' ? 'end' : 'start';
-    const diff = this.state[opposite] - parsedValue;
-    const diffOK =
-      which === 'start' ? diff <= maxSliceLength && diff > 0 : diff < 0;
-    const validNumber = !isNaN(parsedValue);
-    const notEqual = current !== parsedValue;
-    const accept = validNumber && notEqual;
+    const current = this.state[name];
+    const equal = current === parsedValue;
 
-    if (accept) {
-      this.setState({
-        [which]: parsedValue,
-      });
-      if (!diffOK) {
-        this.setState({
-          [opposite]: which === 'start' ? parsedValue + 1 : parsedValue - 1,
-        });
-      }
+    const update = {
+      [name]: parsedValue,
+    };
 
-      this.createSlice();
-    } else {
-      this.setState({
-        [which]: this.state[which],
-      });
+    if (equal) {
+      return;
     }
+
+    this.setState(update);
+
+    if (this.state.end) {
+      this.createSlice();
+    }
+
+    return { start: this.state.start, end: this.state.end };
+  }
+
+  resetSlice() {
+    this.slice = undefined;
+    this.setState({
+      start: undefined,
+      end: undefined,
+    });
+    return { start: this.state.start, end: this.state.end };
+  }
+
+  handleSliceChange(evt) {
+    this.setBoundary(evt.target.name, evt.target.value);
   }
 
   handlePlayClick(evt) {
@@ -153,7 +163,7 @@ class Slice extends Component {
     const formData = new FormData();
     formData.append('file', this.blob, filename);
 
-    const promise = fetch(sharePath, {
+    const promise = fetch(SHARE_PATH, {
       method: 'POST',
       body: formData,
     });
@@ -256,53 +266,20 @@ class Slice extends Component {
   render() {
     /* eslint-disable indent */
     const state = this.state;
-    const disabled = !this.slice || this.state.loading;
+    const disabled = this.state.loading;
 
     return this.html`
       <div onconnected=${this} ondisconnected=${this}>
         <h3>
           Drag handles to slice
         </h3>
+        ${[this.waveform]}
         <p>
-          <label for="slice-start-slider">Slice start (s)</label>
-          <input type="range"
-                 name="start"
-                 id="slice-start-slider"
-                 min="0"
-                 max="${state.audio.duration}"
-                 value="${state.start}"
-                 step="1"
-                 aria-valuemin="0"
-                 aria-valuemax="${state.audio.duration}"
-                 aria-valuenow="${state.start}"
-                 onChange=${this.handleSliceChange}
-                 disabled=${disabled}
-          >
-          <output for="slice-start-slider" id="slice-start-output">
-            ${state.start}/${state.audio.duration.toFixed(2)}
-          </output>
-        </p>
-        <p>
-          <label for="slice-end-slider">Slice end (s)</label>
-          <input type="range"
-                 name="end"
-                 id="slice-end-slider"
-                 min="0"
-                 max="${state.audio.duration}"
-                 value="${state.end}"
-                 step="1"
-                 aria-valuemin="0"
-                 aria-valuemax="${state.audio.duration}"
-                 aria-valuenow="${state.end}"
-                 onChange=${this.handleSliceChange}
-                 disabled=${disabled}
-          >
-          <output for="slice-end-slider" id="slice-end-output">
-            ${state.end}/${state.audio.duration.toFixed(2)}
-          </output>
-        </p>
-        <p>
-          Slice duration: ${state.end - state.start} seconds
+          ${
+            this.slice
+              ? `Slice duration: ${state.end - state.start} seconds`
+              : 'No slice boundaries selected.'
+          }
         </p>
         <div class="flex flex-justify-content-between">
           <p class="button-container">

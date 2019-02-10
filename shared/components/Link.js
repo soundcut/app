@@ -4,7 +4,6 @@ const { Component, wire } = require('hypermorphic');
 
 const LocalPlay = require('./LocalPlay');
 const Slice = require('./Slice');
-const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
 
 const linkPath = '/api/link';
@@ -130,7 +129,6 @@ class Link extends Component {
 
   onMediaLoaded(audio) {
     this.slice = new Slice(audio, this.state.file);
-    this.waveForm = new WaveForm(audio, this.state.file);
     this.render();
   }
 
@@ -175,7 +173,6 @@ class Link extends Component {
           </button>
         </p>
         ${[this.localPlay || '']}
-        ${[this.waveForm || '']}
         ${[this.slice || '']}
       </form>
     `;
