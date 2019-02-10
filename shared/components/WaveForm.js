@@ -12,6 +12,10 @@ const BAR_COLOR = '#166a77';
 const BAR_HANDLE_RADIUS = 8;
 const BAR_CENTER = (BAR_WIDTH - 1) / 2;
 const BAR_GAP = false;
+const FONT_FAMILY = 'monospace';
+const FONT_SIZE = 10;
+const FONT = `${FONT_SIZE}px ${FONT_FAMILY}`;
+const TIME_ANNOTATION_WIDTH = 40;
 const SLICE_COLOR = '#37f0c2';
 
 class WaveForm extends Component {
@@ -42,7 +46,7 @@ class WaveForm extends Component {
     const canvas = (this.canvas = document.getElementById('WaveForm'));
     const canvasCtx = (this.canvasCtx = canvas.getContext('2d'));
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-    this.canvasCtx.font = '10px sans-serif';
+    this.canvasCtx.font = FONT;
     return canvasCtx;
   }
 
@@ -235,8 +239,12 @@ class WaveForm extends Component {
       this.canvasCtx.fill();
 
       const time = formatTime((this.buffer.duration / WIDTH) * x);
-      const textX = WIDTH - x < 100 ? x - 55 : x + 10;
-      const textY = 20;
+      const textSpacing = BAR_HANDLE_RADIUS + SPACING / 2;
+      const textX =
+        WIDTH - x < TIME_ANNOTATION_WIDTH + textSpacing
+          ? x - TIME_ANNOTATION_WIDTH - textSpacing
+          : x + textSpacing;
+      const textY = FONT_SIZE;
       this.canvasCtx.fillText(time, textX, textY);
     });
   }
