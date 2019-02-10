@@ -38,6 +38,7 @@ class WaveForm extends Component {
     });
     this.handleClick = this.handleClick.bind(this);
     this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
+    this.resetBoundaries = this.resetBoundaries.bind(this);
     this.snapshots = [];
   }
 
@@ -259,21 +260,30 @@ class WaveForm extends Component {
     });
   }
 
+  resetBoundaries() {
+    this.setState(this.resetSlice());
+    this.snapshots = [this.snapshots[0]];
+    this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
+    this.canvasCtx.putImageData(this.snapshots[0], 0, 0);
+  }
+
   handleClick(evt) {
     if (typeof this.setSliceBoundary !== 'function' || !this.drawn) {
       return;
     }
 
     if (this.state.end) {
-      this.setState(this.resetSlice());
-      this.snapshots = [this.snapshots[0]];
-      this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-      this.canvasCtx.putImageData(this.snapshots[0], 0, 0);
+      this.resetBoundaries();
       return;
     }
 
     const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
     const time = (this.getDuration() / WIDTH) * x;
+
+    if (this.state.start > time) {
+      this.resetBoundaries();
+      return;
+    }
 
     const boundary = !this.state.start ? 'start' : 'end';
     const { start, end } = this.setSliceBoundary(boundary, time);
