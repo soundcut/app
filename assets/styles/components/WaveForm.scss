@@ -1,9 +1,16 @@
 @import '../abstracts/variables.scss';
 
 #WaveForm {
-  padding: $spacing 0;
+  position: relative;
   margin: 0 0 $spacing 0;
   background-color: $color-blue-darker;
+
+  > canvas {
+    position: absolute;
+    top: $spacing;
+    left: 0;
+    background-color: transparent;
+  }
 
   &.can-select {
     cursor: none;

@@ -5,8 +5,8 @@ const formatTime = require('../helpers/formatTime');
 
 const WIDTH = 835;
 const SPACING = 20;
-const CANVAS_HEIGHT = 200;
-const HEIGHT = CANVAS_HEIGHT - SPACING * 2;
+const HEIGHT = 200;
+const CONTAINER_HEIGHT = HEIGHT + SPACING * 2;
 const BAR_WIDTH = 4;
 const BAR_COLOR = '#166a77';
 const BAR_HANDLE_RADIUS = 8;
@@ -39,7 +39,6 @@ class WaveForm extends Component {
     this.handleClick = this.handleClick.bind(this);
     this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
     this.resetBoundaries = this.resetBoundaries.bind(this);
-    this.snapshots = [];
   }
 
   createAudioCtx() {
@@ -47,18 +46,25 @@ class WaveForm extends Component {
     this.analyser = this.audioCtx.createAnalyser();
   }
 
-  create2DContext() {
-    const canvas = (this.canvas = document.getElementById('WaveForm'));
-    const canvasCtx = (this.canvasCtx = canvas.getContext('2d'));
-    canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-    this.canvasCtx.font = FONT;
-    return canvasCtx;
+  setupCanvases() {
+    this.container = document.getElementById('WaveForm');
+    this.boundingClientRect = this.container.getBoundingClientRect();
+
+    this.canvases = {};
+    this.canvasContexts = {};
+    this.snapshots = {};
+    ['waveform', 'progress', 'start', 'end'].forEach(canvas => {
+      this.canvases[canvas] = document.getElementById(`${canvas}-canvas`);
+      this.canvasContexts[canvas] = this.canvases[canvas].getContext('2d');
+      this.canvasContexts[canvas].clearRect(0, 0, WIDTH, HEIGHT);
+      this.canvasContexts[canvas].font = FONT;
+      this.snapshots[canvas] = [];
+    });
   }
 
   async onconnected() {
     this.audio.addEventListener('timeupdate', this.handleSourceTimeUpdate);
-    this.create2DContext();
-    this.boundingClientRect = this.canvas.getBoundingClientRect();
+    this.setupCanvases();
 
     this.buffer = await getFileAudioBuffer(this.file, this.audioCtx);
 
@@ -79,17 +85,23 @@ class WaveForm extends Component {
     return (this.buffer || this.audio).duration;
   }
 
-  doSnapshot() {
-    return this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
+  doSnapshot(canvas) {
+    this.snapshots[canvas].push(
+      this.canvasContexts[canvas].getImageData(0, 0, WIDTH, HEIGHT)
+    );
   }
 
-  restoreSnapshot() {
-    this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-    this.canvasCtx.putImageData(
-      this.snapshots[this.snapshots.length - 1],
-      0,
-      0
-    );
+  restoreSnapshot(canvas) {
+    this.canvasContexts[canvas].clearRect(0, 0, WIDTH, HEIGHT);
+    this.canvasContexts[canvas].putImageData(this.snapshots[canvas][0], 0, 0);
+  }
+
+  ensureSnapshot(canvas) {
+    if (this.snapshots[canvas].length) {
+      this.restoreSnapshot(canvas);
+    } else {
+      this.doSnapshot(canvas);
+    }
   }
 
   /**
@@ -191,11 +203,11 @@ class WaveForm extends Component {
         const last = end;
         let i;
 
-        this.canvasCtx.fillStyle = BAR_COLOR;
+        this.canvasContexts['waveform'].fillStyle = BAR_COLOR;
         for (i = first; i < last; i += step) {
           const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
           const h = Math.round((peak / 1) * halfH);
-          this.canvasCtx.fillRect(
+          this.canvasContexts['waveform'].fillRect(
             i + this.halfPixel,
             halfH - h + offsetY,
             bar + this.halfPixel,
@@ -203,7 +215,7 @@ class WaveForm extends Component {
           );
         }
         this.drawn = true;
-        this.snapshots.push(this.doSnapshot());
+        this.doSnapshot('waveform');
       }
     );
   }
@@ -213,7 +225,7 @@ class WaveForm extends Component {
       // Bar wave draws the bottom only as a reflection of the top,
       // so we don't need negative values
       const hasMinVals = peaks.some(val => val < 0);
-      const height = HEIGHT * this.pixelRatio;
+      const height = HEIGHT - SPACING * 2 * this.pixelRatio;
       const offsetY = SPACING;
       const halfH = height / 2;
 
@@ -229,38 +241,41 @@ class WaveForm extends Component {
 
   resetBoundaries() {
     this.setState(this.resetSlice());
-    this.snapshots = [this.snapshots[0]];
-    this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
-    this.canvasCtx.putImageData(this.snapshots[0], 0, 0);
+
+    this.restoreSnapshot('start');
+    this.restoreSnapshot('end');
   }
 
   handleMouseMove(evt) {
     if (!this.drawn || this.state.end) return;
 
+    const canvas = this.state.start !== undefined ? 'end' : 'start';
+    const canvasCtx = this.canvasContexts[canvas];
+
     requestAnimationFrame(() => {
-      this.restoreSnapshot();
+      this.ensureSnapshot(canvas);
 
       const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
-      this.canvasCtx.fillStyle = SLICE_COLOR;
-      this.canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, CANVAS_HEIGHT);
-      this.canvasCtx.beginPath();
-      this.canvasCtx.arc(
+      canvasCtx.fillStyle = SLICE_COLOR;
+      canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
+      canvasCtx.beginPath();
+      canvasCtx.arc(
         x + BAR_CENTER,
-        CANVAS_HEIGHT - BAR_HANDLE_RADIUS,
+        HEIGHT - BAR_HANDLE_RADIUS,
         BAR_HANDLE_RADIUS,
         0,
         2 * Math.PI
       );
-      this.canvasCtx.fill();
-      this.canvasCtx.beginPath();
-      this.canvasCtx.arc(
+      canvasCtx.fill();
+      canvasCtx.beginPath();
+      canvasCtx.arc(
         x + BAR_CENTER,
         BAR_HANDLE_RADIUS,
         BAR_HANDLE_RADIUS,
         0,
         2 * Math.PI
       );
-      this.canvasCtx.fill();
+      canvasCtx.fill();
 
       const time = Math.max((this.getDuration() / WIDTH) * x, 0);
       const boundary = !this.state.start ? 'start' : 'end';
@@ -270,8 +285,8 @@ class WaveForm extends Component {
         WIDTH - x < TIME_ANNOTATION_WIDTH + textSpacing
           ? x - TIME_ANNOTATION_WIDTH - textSpacing
           : x + textSpacing;
-      const textY = boundary !== 'end' ? FONT_SIZE : CANVAS_HEIGHT - FONT_SIZE;
-      this.canvasCtx.fillText(formattedTime, textX, textY);
+      const textY = boundary !== 'end' ? FONT_SIZE : HEIGHT - FONT_SIZE;
+      canvasCtx.fillText(formattedTime, textX, textY);
     });
   }
 
@@ -296,7 +311,7 @@ class WaveForm extends Component {
     const boundary = !this.state.start ? 'start' : 'end';
     const { start, end } = this.setSliceBoundary(boundary, time);
 
-    this.snapshots.push(this.doSnapshot());
+    this.doSnapshot(boundary);
 
     this.setState({
       start,
@@ -308,31 +323,54 @@ class WaveForm extends Component {
     if (!this.drawn) return;
 
     requestAnimationFrame(() => {
-      this.restoreSnapshot();
+      this.ensureSnapshot('progress');
 
       const x = (WIDTH / this.getDuration()) * this.audio.currentTime;
-      this.canvasCtx.fillStyle = 'white';
-      this.canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, CANVAS_HEIGHT);
+      this.canvasContexts['progress'].fillStyle = 'white';
+      this.canvasContexts['progress'].fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
 
       const time = formatTime(this.audio.currentTime);
       const textX = WIDTH - x < 100 ? x - 55 : x + 10;
       const textY = 20;
-      this.canvasCtx.fillText(time, textX, textY);
+      this.canvasContexts['progress'].fillText(time, textX, textY);
     });
   }
 
   render() {
     return this.html`
+    <div
+      onconnected=${this}
+      onmousemove=${this.handleMouseMove}
+      onclick=${this.handleClick}
+      class="${this.state.end ? 'will-reset' : 'can-select'}"
+      style="${`width:${WIDTH}px; height:${CONTAINER_HEIGHT}px;`}"
+      id="WaveForm"
+    >
       <canvas
-        onconnected=${this}
-        onmousemove=${this.handleMouseMove}
-        onclick=${this.handleClick}
+        id="waveform-canvas"
         width="${WIDTH}"
-        height="${CANVAS_HEIGHT}"
-        class="${this.state.end ? 'will-reset' : 'can-select'}"
-        id="WaveForm"
+        height="${HEIGHT}"
       >
       </canvas>
+      <canvas
+        id="progress-canvas"
+        width="${WIDTH}"
+        height="${HEIGHT}"
+      >
+      </canvas>
+      <canvas
+        id="start-canvas"
+        width="${WIDTH}"
+        height="${HEIGHT}"
+      >
+      </canvas>
+      <canvas
+        id="end-canvas"
+        width="${WIDTH}"
+        height="${HEIGHT}"
+      >
+      </canvas>
+    </div>
     `;
   }
 }
