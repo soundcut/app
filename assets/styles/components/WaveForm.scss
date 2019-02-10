@@ -1,7 +1,15 @@
 @import '../abstracts/variables.scss';
 
 #WaveForm {
-  cursor: none;
   padding: $spacing 0;
+  margin: $spacing 0;
   background-color: $color-blue-darker;
+
+  &.can-select {
+    cursor: none;
+  }
+
+  &.will-reset {
+    cursor: not-allowed;
+  }
 }
