@@ -1,6 +1,7 @@
 @import '../abstracts/variables.scss';
 
 #WaveForm {
+  cursor: none;
   padding: $spacing 0;
   background-color: $color-blue-darker;
 }
