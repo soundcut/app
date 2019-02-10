@@ -4,9 +4,13 @@ const getFileAudioBuffer = require('../helpers/getFileAudioBuffer');
 const formatTime = require('../helpers/formatTime');
 
 const WIDTH = 835;
-const HEIGHT = 200;
-const BAR_WIDTH = 3;
+const SPACING = 20;
+const CANVAS_HEIGHT = 200;
+const HEIGHT = CANVAS_HEIGHT - SPACING * 2;
+const BAR_WIDTH = 4;
 const BAR_COLOR = '#166a77';
+const BAR_HANDLE_RADIUS = 8;
+const SLICE_COLOR = '#37f0c2';
 const BAR_GAP = false;
 
 class WaveForm extends Component {
@@ -57,7 +61,7 @@ class WaveForm extends Component {
     const end = WIDTH;
 
     const peaks = this.getPeaks(width, start, end);
-    this.drawBars(peaks, 0, 0, WIDTH);
+    this.drawBars(peaks, 0, WIDTH);
     this.drawn = true;
   }
 
@@ -142,13 +146,12 @@ class WaveForm extends Component {
     return this.mergedPeaks;
   }
 
-  drawBars(peaks, channelIndex, start, end) {
+  drawBars(peaks, start, end) {
     return this.prepareDraw(
       peaks,
-      channelIndex,
       start,
       end,
-      ({ hasMinVals, height, offsetY, halfH, peaks }) => {
+      ({ hasMinVals, offsetY, halfH, peaks }) => {
         // Skip every other value if there are negatives.
         const peakIndexScale = hasMinVals ? 2 : 1;
         const length = peaks.length / peakIndexScale;
@@ -165,7 +168,7 @@ class WaveForm extends Component {
         for (i = first; i < last; i += step) {
           const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
           const h = Math.round((peak / 1) * halfH);
-          this.fillRect(
+          this.canvasCtx.fillRect(
             i + this.halfPixel,
             halfH - h + offsetY,
             bar + this.halfPixel,
@@ -176,17 +179,13 @@ class WaveForm extends Component {
     );
   }
 
-  fillRect(x, y, width, height) {
-    this.canvasCtx.fillRect(x, y, width, height);
-  }
-
-  prepareDraw(peaks, channelIndex, start, end, fn) {
+  prepareDraw(peaks, start, end, fn) {
     return requestAnimationFrame(() => {
       // Bar wave draws the bottom only as a reflection of the top,
       // so we don't need negative values
-      const hasMinVals = [].some.call(peaks, val => val < 0);
+      const hasMinVals = peaks.some(val => val < 0);
       const height = HEIGHT * this.pixelRatio;
-      const offsetY = height * channelIndex || 0;
+      const offsetY = SPACING;
       const halfH = height / 2;
 
       return fn({
@@ -206,15 +205,33 @@ class WaveForm extends Component {
 
     requestAnimationFrame(() => {
       if (!this.waveform) {
-        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, HEIGHT);
+        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
       } else {
-        this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+        this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
         this.canvasCtx.putImageData(this.waveform, 0, 0);
       }
 
       const x = evt.clientX - this.boundingClientRect.left;
-      this.canvasCtx.fillStyle = 'red';
-      this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
+      this.canvasCtx.fillStyle = SLICE_COLOR;
+      this.canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, CANVAS_HEIGHT);
+      this.canvasCtx.beginPath();
+      this.canvasCtx.arc(
+        x + BAR_WIDTH / 2 - 1,
+        CANVAS_HEIGHT - BAR_HANDLE_RADIUS,
+        BAR_HANDLE_RADIUS,
+        0,
+        2 * Math.PI
+      );
+      this.canvasCtx.fill();
+      this.canvasCtx.beginPath();
+      this.canvasCtx.arc(
+        x + BAR_WIDTH / 2 - 1,
+        BAR_HANDLE_RADIUS,
+        BAR_HANDLE_RADIUS,
+        0,
+        2 * Math.PI
+      );
+      this.canvasCtx.fill();
 
       const time = formatTime((this.buffer.duration / WIDTH) * x);
       const textX = WIDTH - x < 100 ? x - 55 : x + 10;
@@ -230,15 +247,15 @@ class WaveForm extends Component {
 
     requestAnimationFrame(() => {
       if (!this.waveform) {
-        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, HEIGHT);
+        this.waveform = this.canvasCtx.getImageData(0, 0, WIDTH, CANVAS_HEIGHT);
       } else {
-        this.canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+        this.canvasCtx.clearRect(0, 0, WIDTH, CANVAS_HEIGHT);
         this.canvasCtx.putImageData(this.waveform, 0, 0);
       }
 
       const x = (WIDTH / this.buffer.duration) * this.audio.currentTime;
       this.canvasCtx.fillStyle = 'white';
-      this.canvasCtx.fillRect(x, 0, 1, HEIGHT);
+      this.canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, CANVAS_HEIGHT);
 
       const time = formatTime(this.audio.currentTime);
       const textX = WIDTH - x < 100 ? x - 55 : x + 10;
@@ -253,7 +270,7 @@ class WaveForm extends Component {
         onconnected=${this}
         onmousemove=${this.handleMouseMove}
         width="${WIDTH}"
-        height="${HEIGHT}"
+        height="${CANVAS_HEIGHT}"
         id="WaveForm"
       >
       </canvas>
