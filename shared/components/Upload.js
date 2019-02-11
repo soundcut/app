@@ -4,7 +4,6 @@ const { Component, wire } = require('hypermorphic');
 const { encode } = require('punycode');
 
 const LocalPlay = require('./LocalPlay');
-const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
@@ -67,7 +66,6 @@ class Upload extends Component {
     super();
     this.pageTitle = title;
     this.handleChange = this.handleChange.bind(this);
-    this.onMediaLoaded = this.onMediaLoaded.bind(this);
   }
 
   onconnected() {
@@ -98,17 +96,11 @@ class Upload extends Component {
 
       this.localPlay = new LocalPlay({
         file,
-        onMediaLoaded: this.onMediaLoaded,
       });
       this.setState({
         file,
       });
     }
-  }
-
-  onMediaLoaded(audio) {
-    this.slice = new Slice(audio, this.state.file);
-    this.render();
   }
 
   render() {
@@ -144,7 +136,6 @@ class Upload extends Component {
           />
         </fieldset>
         ${[this.localPlay || '']}
-        ${[this.slice || '']}
       </form>
     `;
   }
