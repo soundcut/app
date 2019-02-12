@@ -12,8 +12,12 @@
     background-color: transparent;
   }
 
+  > #waveform-canvas {
+    left: $spacing;
+  }
+
   &.can-select {
-    cursor: none;
+    cursor: auto;
   }
 
   &.will-reset {

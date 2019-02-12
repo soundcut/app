@@ -5,6 +5,7 @@ const { Component, wire } = require('hypermorphic');
 const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDuration = require('../helpers/getDuration');
+const formatTime = require('../helpers/formatTime');
 const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
 
 const MAX_SLICE_LENGTH = 90;
@@ -267,6 +268,7 @@ class Slice extends Component {
     /* eslint-disable indent */
     const state = this.state;
     const disabled = !this.slice || this.state.loading;
+    const duration = state.end - state.start;
 
     return this.html`
       <div onconnected=${this} ondisconnected=${this}>
@@ -277,7 +279,7 @@ class Slice extends Component {
         <p>
           ${
             this.slice
-              ? `Slice duration: ${state.end - state.start} seconds`
+              ? `Slice duration: ${formatTime(duration)} (${duration}seconds)`
               : 'No slice boundaries selected.'
           }
         </p>
