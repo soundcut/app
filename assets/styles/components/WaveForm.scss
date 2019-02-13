@@ -16,8 +16,8 @@
     left: $spacing;
   }
 
-  &.can-select {
-    cursor: auto;
+  &.cursor-grabbing {
+    cursor: grabbing;
   }
 
   &.will-reset {

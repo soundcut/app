@@ -42,6 +42,9 @@ class WaveForm extends Component {
     // this.handleClick = this.handleClick.bind(this);
     this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
     this.resetBoundaries = this.resetBoundaries.bind(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseUp = this.handleMouseUp.bind(this);
     // this.handleMouseEnter = this.handleMouseEnter.bind(this);
     // this.handleMouseLeave = this.handleMouseLeave.bind(this);
   }
@@ -223,6 +226,8 @@ class WaveForm extends Component {
         }
         this.drawn = true;
         this.doSnapshot('waveform');
+        // this.doSnapshot('start');
+        // this.doSnapshot('end');
         this.setSliceBoundary('start', 0);
         this.setState(this.setSliceBoundary('end', this.getDuration()));
         this.drawBoundary(this.canvasContexts['start'], SPACING);
@@ -260,7 +265,138 @@ class WaveForm extends Component {
     this.restoreSnapshot('end');
   }
 
+  handleMouseDown(evt) {
+    const x = evt.clientX - this.boundingClientRect.left;
+    const duration = this.getDuration();
+
+    const startPos = (WIDTH / duration) * this.state.start + SPACING;
+    const startBoundaryRange = [
+      startPos + BAR_HANDLE_RADIUS,
+      startPos - BAR_HANDLE_RADIUS,
+    ];
+    const inStartBoundaryRange =
+      x <= startBoundaryRange[0] && x >= startBoundaryRange[1];
+    const endPos = (WIDTH / duration) * this.state.end + SPACING;
+    const endBoundaryRange = [
+      endPos + BAR_HANDLE_RADIUS,
+      endPos - BAR_HANDLE_RADIUS,
+    ];
+    const inEndBoundaryRange =
+      x <= endBoundaryRange[0] && x >= endBoundaryRange[1];
+
+    const boundary = inStartBoundaryRange
+      ? 'start'
+      : inEndBoundaryRange
+        ? 'end'
+        : null;
+
+    if (boundary) {
+      this.setState({
+        hovering: false,
+        dragging: {
+          boundary,
+          position: x,
+        },
+      });
+      this.container.addEventListener('mouseup', this.handleMouseUp);
+    }
+  }
+
   handleMouseMove(evt) {
+    if (this.state.dragging) {
+      requestAnimationFrame(() => {
+        if (!this.state.dragging) {
+          return;
+        }
+
+        const duration = this.getDuration();
+        const boundary = this.state.dragging.boundary;
+        const xContainer = evt.clientX - this.boundingClientRect.left;
+        const delta = xContainer - this.state.dragging.position;
+
+        const boundaryPos = (WIDTH / duration) * this.state[boundary] + SPACING;
+        const newBoundaryPos =
+          boundary === 'start'
+            ? Math.max(SPACING, boundaryPos + delta)
+            : Math.min(WIDTH + SPACING, boundaryPos + delta);
+
+        const canvasCtx = this.canvasContexts[boundary];
+        canvasCtx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT);
+        this.drawBoundary(canvasCtx, newBoundaryPos);
+      });
+      return;
+    }
+
+    const x = evt.clientX - this.boundingClientRect.left;
+    const duration = this.getDuration();
+
+    const startPos = (WIDTH / duration) * this.state.start + SPACING;
+    const startBoundaryRange = [
+      startPos + BAR_HANDLE_RADIUS,
+      startPos - BAR_HANDLE_RADIUS,
+    ];
+    const inStartBoundaryRange =
+      x <= startBoundaryRange[0] && x >= startBoundaryRange[1];
+    const endPos = (WIDTH / duration) * this.state.end + SPACING;
+    const endBoundaryRange = [
+      endPos + BAR_HANDLE_RADIUS,
+      endPos - BAR_HANDLE_RADIUS,
+    ];
+    const inEndBoundaryRange =
+      x <= endBoundaryRange[0] && x >= endBoundaryRange[1];
+
+    const boundary = inStartBoundaryRange
+      ? 'start'
+      : inEndBoundaryRange
+        ? 'end'
+        : null;
+
+    if (!this.state.hovering && boundary) {
+      this.setState({
+        hovering: true,
+      });
+      return;
+    }
+
+    if (this.state.hovering && !boundary) {
+      this.setState({
+        hovering: false,
+      });
+    }
+  }
+
+  handleMouseUp(evt) {
+    this.container.removeEventListener('mouseup', this.handleMouseUp);
+
+    const boundary = this.state.dragging.boundary;
+
+    const xContainer = evt.clientX - this.boundingClientRect.left;
+    const x =
+      boundary === 'start'
+        ? Math.max(0, xContainer - SPACING)
+        : Math.min(WIDTH, xContainer - SPACING);
+
+    const time = Math.max((this.getDuration() / WIDTH) * x, 0);
+    const slice = this.setSliceBoundary(boundary, time);
+    this.setState({ dragging: null, start: slice.start, end: slice.end });
+
+    // FIXME:
+    // Dirty fix in case `start` boundary is put after `end` boundary.
+    // Prefer re-drawing the correct boundaries on the matching canvas.
+    if (slice.swap) {
+      const startCanvas = this.canvases.start;
+      const endCanvas = this.canvases.end;
+      this.canvases.start = endCanvas;
+      this.canvases.end = startCanvas;
+
+      const startCtx = this.canvasContexts.start;
+      const endCtx = this.canvasContexts.end;
+      this.canvasContexts.start = endCtx;
+      this.canvasContexts.end = startCtx;
+    }
+  }
+
+  handleMouseMoveDuration(evt) {
     const canvas = 'duration';
     const canvasCtx = this.canvasContexts[canvas];
 
@@ -402,14 +538,16 @@ class WaveForm extends Component {
     });
   }
 
+  /* eslint-disable indent */
   render() {
     return this.html`
     <div
       onconnected=${this}
+      onmousedown=${this.handleMouseDown}
       onmousemove=${this.handleMouseMove}
-      onmouseenter=${this.handleMouseEnter}
-      onclick=${this.handleClick}
-      class="${this.state.end ? 'will-reset' : 'can-select'}"
+      class="${
+        this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''
+      }"
       style="${`width:${CONTAINER_WIDTH}px; height:${CONTAINER_HEIGHT}px;`}"
       id="WaveForm"
     >
@@ -433,12 +571,6 @@ class WaveForm extends Component {
       </canvas>
       <canvas
         id="start-canvas"
-        width="${CONTAINER_WIDTH}"
-        height="${HEIGHT}"
-      >
-      </canvas>
-      <canvas
-        id="end-canvas"
         width="${CONTAINER_WIDTH}"
         height="${HEIGHT}"
       >

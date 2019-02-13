@@ -98,11 +98,24 @@ class Slice extends Component {
 
     this.setState(update);
 
+    let boundaries = { start: this.state.start, end: this.state.end };
+    const swap =
+      this.state.start !== undefined &&
+      this.state.end !== undefined &&
+      this.state.end - this.state.start < 0;
+    if (swap) {
+      boundaries = {
+        start: this.state.end,
+        end: this.state.start,
+      };
+      this.setState(boundaries);
+    }
+
     if (this.state.end) {
       this.createSlice();
     }
 
-    return { start: this.state.start, end: this.state.end };
+    return Object.assign({ swap }, boundaries);
   }
 
   resetSlice() {
