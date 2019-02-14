@@ -3,7 +3,6 @@
 const { Component, wire } = require('hypermorphic');
 
 const LocalPlay = require('./LocalPlay');
-const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
 
 const linkPath = '/api/link';
@@ -26,7 +25,6 @@ class Link extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.onMediaLoaded = this.onMediaLoaded.bind(this);
   }
 
   onconnected() {
@@ -46,8 +44,6 @@ class Link extends Component {
 
   reset() {
     this.localPlay = undefined;
-    this.slice = undefined;
-    this.waveForm = undefined;
     this.setState(initialState);
     this.source.focus();
   }
@@ -111,7 +107,6 @@ class Link extends Component {
       this.localPlay = new LocalPlay({
         file,
         autoplay: true,
-        onMediaLoaded: this.onMediaLoaded,
       });
 
       this.setState({
@@ -125,11 +120,6 @@ class Link extends Component {
         loading: false,
       });
     }
-  }
-
-  onMediaLoaded(audio) {
-    this.slice = new Slice(audio, this.state.file);
-    this.render();
   }
 
   render() {
@@ -173,7 +163,6 @@ class Link extends Component {
           </button>
         </p>
         ${[this.localPlay || '']}
-        ${[this.slice || '']}
       </form>
     `;
   }
