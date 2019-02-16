@@ -22,23 +22,6 @@
           </a>
         </h1>
       </header>
-      <nav>
-        <ul>
-          ${props.links
-            .concat({ name: 'About', path: 'about' })
-            .map((link) => `
-              <li>
-                <a
-                  class="${props.path === link.path ? 'selected' : ''}"
-                  href="${link.path}"
-                >
-                  ${link.name}
-                </a>
-              </li>
-            `)
-          }
-        </ul>
-      </nav>
       <main>${props.main}</main>
     </div>
   </body>
