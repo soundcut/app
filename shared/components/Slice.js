@@ -37,7 +37,6 @@ function ShareInput(id) {
 
 const initialState = {
   audio: undefined,
-  loop: false,
   start: undefined,
   end: undefined,
   loading: false,
@@ -56,7 +55,6 @@ class Slice extends Component {
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayClick = this.handlePlayClick.bind(this);
     this.handlePauseClick = this.handlePauseClick.bind(this);
-    this.handleLoopClick = this.handleLoopClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
@@ -139,12 +137,6 @@ class Slice extends Component {
   handlePauseClick(evt) {
     evt.preventDefault();
     this.slice.pause();
-  }
-
-  async handleLoopClick(evt) {
-    evt.preventDefault();
-    this.setState({ loop: !this.state.loop });
-    await this.createSlice();
   }
 
   handleDownloadClick(evt) {
@@ -264,7 +256,7 @@ class Slice extends Component {
 
         arrayBufferToObjectURL(sliceArrayBuffer, (objectURL, blob) => {
           const slice = new Audio();
-          slice.loop = state.loop;
+          slice.loop = true;
           this.slice = slice;
           slice.src = objectURL;
           this.blob = blob;
@@ -298,12 +290,6 @@ class Slice extends Component {
         </p>
         <div class="flex flex-justify-content-between">
           <p class="button-container">
-            <button type="button"
-              onclick=${this.handleLoopClick}
-              disabled=${disabled}
-            >
-              ${!this.state.loop ? 'Set loop mode' : 'Unset loop mode'}
-            </button>
             <button type="button"
                     disabled=${disabled}
                     onclick=${this.handlePlayClick}
