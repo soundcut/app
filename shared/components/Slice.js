@@ -256,9 +256,10 @@ class Slice extends Component {
 
         arrayBufferToObjectURL(sliceArrayBuffer, (objectURL, blob) => {
           const slice = new Audio();
-          slice.loop = true;
           this.slice = slice;
           slice.src = objectURL;
+          slice.loop = true;
+          slice.play();
           this.blob = blob;
           this.render();
           resolve();
