@@ -8,5 +8,5 @@ module.exports = function getDisplayName(str) {
     // pass
   }
 
-  return ret;
+  return ret || 'Untitled';
 };

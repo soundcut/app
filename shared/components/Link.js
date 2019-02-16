@@ -106,7 +106,6 @@ class Link extends Component {
 
       this.localPlay = new LocalPlay({
         file,
-        autoplay: true,
       });
 
       this.setState({
