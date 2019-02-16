@@ -280,7 +280,6 @@ class Slice extends Component {
         <h3>
           Drag handles to slice
         </h3>
-        ${[this.waveform]}
         <p>
           ${
             this.slice
@@ -294,13 +293,13 @@ class Slice extends Component {
                     disabled=${disabled}
                     onclick=${this.handlePlayClick}
             >
-              Play slice
+              Play
             </button>
             <button type="button"
                     disabled=${disabled}
                     onclick=${this.handlePauseClick}
             >
-              Pause slice
+              Pause
             </button>
           </p>
           <p class="button-container">
@@ -309,21 +308,22 @@ class Slice extends Component {
                     disabled=${disabled}
                     title="Your browser's download dialog should open instantly."
             >
-              Download slice!
+              Download
             </button>
             <button type="button"
                     onClick=${this.handleShareClick}
                     disabled=${disabled}
-                    title="A unique URL will be generated for you to share your slice."
+                    title="${
+                      !this.state.sharing ? 'A unique URL will be generated for you to share your slice.' : 'Generating unique URL...'
+                    }"
             >
-              ${
-                !this.state.sharing ? 'Share slice' : 'Generating unique URL...'
-              }
+              Share
             </button>
           </p>
         </div>
         ${[state.error ? ErrorMessage() : '']}
         ${[state.id ? ShareInput(state.id) : '']}
+        ${[this.waveform]}
       </div>
     `;
   }
