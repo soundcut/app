@@ -30,18 +30,12 @@ function humanizeFileSize(bytes) {
 
 function Buttons(
   audio,
-  handleLoopClick,
   handlePlay,
   handlePause,
   handleDownload
 ) {
   return wire()`
     <p class="button-container">
-      <button type="button"
-        onclick=${handleLoopClick}
-      >
-        ${!audio.loop ? 'Set loop mode' : 'Unset loop mode'}
-      </button>
       <button type="button"
               onClick=${handlePlay}
       >
@@ -69,7 +63,6 @@ class LocalPlay extends Component {
     this.autoplay = !!autoplay;
     this.handlePlay = this.handlePlay.bind(this);
     this.handlePause = this.handlePause.bind(this);
-    this.handleLoop = this.handleLoop.bind(this);
     this.handleDownload = this.handleDownload.bind(this);
   }
 
@@ -95,12 +88,6 @@ class LocalPlay extends Component {
     this.file = undefined;
     URL.revokeObjectURL(this.objectURL);
     clearInterval(this.interval);
-  }
-
-  handleLoop(evt) {
-    evt.preventDefault();
-    this.audio.loop = !this.audio.loop;
-    this.render();
   }
 
   handlePlay() {
@@ -148,7 +135,6 @@ class LocalPlay extends Component {
                 this.duration,
                 Buttons(
                   this.audio,
-                  this.handleLoop,
                   this.handlePlay,
                   this.handlePause,
                   this.handleDownload
