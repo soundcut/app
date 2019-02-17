@@ -53,8 +53,7 @@ class Slice extends Component {
 
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
-    this.handlePlayClick = this.handlePlayClick.bind(this);
-    this.handlePauseClick = this.handlePauseClick.bind(this);
+    this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
@@ -129,14 +128,14 @@ class Slice extends Component {
     this.setBoundary(evt.target.name, evt.target.value);
   }
 
-  handlePlayClick(evt) {
+  handlePlayPauseClick(evt) {
     evt.preventDefault();
-    this.slice.play();
-  }
-
-  handlePauseClick(evt) {
-    evt.preventDefault();
-    this.slice.pause();
+    if (this.slice.paused) {
+      this.slice.play();
+    } else {
+      this.slice.pause();
+    }
+    this.render();
   }
 
   handleDownloadClick(evt) {
@@ -292,15 +291,9 @@ class Slice extends Component {
           <p class="button-container">
             <button type="button"
                     disabled=${disabled}
-                    onclick=${this.handlePlayClick}
+                    onclick=${this.handlePlayPauseClick}
             >
-              Play
-            </button>
-            <button type="button"
-                    disabled=${disabled}
-                    onclick=${this.handlePauseClick}
-            >
-              Pause
+              ${disabled || this.slice.paused ? 'Play' : 'Pause'}
             </button>
           </p>
           <p class="button-container">
