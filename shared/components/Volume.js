@@ -3,9 +3,7 @@ const { Component } = require('hypermorphic');
 class Volume extends Component {
   constructor(audio) {
     super();
-    this.state = {
-      audio,
-    };
+    this.audio = audio;
     this.handleVolumeChange = this.handleVolumeChange.bind(this);
   }
 
@@ -14,8 +12,8 @@ class Volume extends Component {
     const value = target.value;
 
     const parsedValue = Math.floor(Number.parseInt(value, 10)) / 100;
-    if (!isNaN(parsedValue) && this.state.audio.volume !== parsedValue) {
-      this.state.audio.volume = parsedValue;
+    if (!isNaN(parsedValue) && this.audio.volume !== parsedValue) {
+      this.audio.volume = parsedValue;
       this.render();
     } else {
       evt.preventDefault();
@@ -23,24 +21,22 @@ class Volume extends Component {
   }
 
   render() {
-    const state = this.state;
-
     return this.html`
-        <p>
+        <p class="Volume">
           <label for="volume-slider">Volume</label>
           <input type="range"
                   id="volume-slider"
                   min="0"
                   max="100"
-                  value="${Math.floor(state.audio.volume * 100)}"
+                  value="${Math.floor(this.audio.volume * 100)}"
                   step="1"
                   aria-valuemin="1"
                   aria-valuemax="100"
-                  aria-valuenow="${Math.floor(state.audio.volume * 100)}"
+                  aria-valuenow="${Math.floor(this.audio.volume * 100)}"
                   onInput=${this.handleVolumeChange}
           >
           <output for="volume-slider" id="volume">
-            ${`${Math.floor(state.audio.volume * 100)}/100`}
+            ${`${Math.floor(this.audio.volume * 100)}/100`}
           </output>
         </p>
     `;

@@ -2,6 +2,7 @@ const parser = require('mp3-parser');
 const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
+const Volume = require('./Volume');
 const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDuration = require('../helpers/getDuration');
@@ -36,7 +37,6 @@ function ShareInput(id) {
 }
 
 const initialState = {
-  audio: undefined,
   start: undefined,
   end: undefined,
   loading: false,
@@ -49,7 +49,8 @@ class Slice extends Component {
   constructor(audio, file) {
     super();
     this.file = file;
-    this.state = Object.assign({}, initialState, { audio });
+    this.audio = audio;
+    this.state = Object.assign({}, initialState);
 
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
@@ -57,19 +58,24 @@ class Slice extends Component {
     this.handleShareClick = this.handleShareClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
-
-    this.waveform = new WaveForm(
-      audio,
-      file,
-      this.setBoundary,
-      this.resetSlice
-    );
   }
 
-  onconnected() {}
+  onconnected() {
+    this.setBoundary('start', 0);
+    this.setBoundary('end', this.audio.duration);
+
+    this.waveform = new WaveForm({
+      audio: this.audio,
+      file: this.file,
+      setSliceBoundary: this.setBoundary,
+      resetSlice: this.resetSlice,
+      start: this.state.start,
+      end: this.state.end,
+    });
+  }
 
   ondisconnected() {
-    this.state.audio = undefined;
+    this.audio = undefined;
     this.file = undefined;
     this.blob = undefined;
     this.state = initialState;
@@ -192,10 +198,10 @@ class Slice extends Component {
     this.setState({ loading: false, sharing: false, error: false });
   }
 
-  createSlice() {
+  async createSlice() {
     const state = this.state;
 
-    return new Promise(resolve => {
+    await new Promise(resolve => {
       let fileReader = new FileReader();
       fileReader.onloadend = () => {
         const _sourceArrayBuffer = fileReader.result;
@@ -248,8 +254,10 @@ class Slice extends Component {
           tmpArrayBuffer
         );
 
+        let volume = 1;
         if (this.slice) {
           this.slice.pause();
+          volume = this.slice.volume;
           this.slice = undefined;
         }
 
@@ -258,6 +266,8 @@ class Slice extends Component {
           this.slice = slice;
           slice.src = objectURL;
           slice.loop = true;
+          slice.volume = volume;
+          this.volume = new Volume(slice);
           slice.play();
           this.blob = blob;
           this.render();
@@ -290,7 +300,16 @@ class Slice extends Component {
         ${[state.error ? ErrorMessage() : '']}
         ${[state.id ? ShareInput(state.id) : '']}
         <div class="player-container">
-          ${[this.waveform]}
+          ${[
+            this.slice
+              ? wire()`
+              <div class="flex">
+                ${[this.waveform]}
+                ${[this.volume]}
+              </div>
+            `
+              : '',
+          ]}
           <div class="flex">
             <button type="button"
                     disabled=${disabled}

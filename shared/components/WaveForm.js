@@ -55,12 +55,17 @@ function Canvases(containerWidth, width) {
 }
 
 class WaveForm extends Component {
-  constructor(audio, file, setSliceBoundary, resetSlice) {
+  constructor({ audio, file, setSliceBoundary, resetSlice, start, end }) {
     super();
     this.audio = audio;
     this.file = file;
     this.setSliceBoundary = setSliceBoundary;
     this.resetSlice = resetSlice;
+
+    this.state = {
+      start,
+      end,
+    };
 
     this.pixelRatio =
       // FIXME: Force pixelRatio=1 otherwise devices > 1 only draw half
@@ -275,8 +280,6 @@ class WaveForm extends Component {
         this.doSnapshot('waveform');
         // this.doSnapshot('start');
         // this.doSnapshot('end');
-        this.setSliceBoundary('start', 0);
-        this.setState(this.setSliceBoundary('end', this.getDuration()));
         this.drawBoundary(this.canvasContexts['start'], SPACING);
         this.drawBoundary(
           this.canvasContexts['end'],
