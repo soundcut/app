@@ -1,8 +1,10 @@
 @import '../abstracts/variables.scss';
 
 #WaveForm {
-  position: relative;
-  margin: 0 0 $spacing 0;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
   background-color: $color-blue-darker;
 
   > canvas {

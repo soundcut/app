@@ -315,7 +315,9 @@ class Slice extends Component {
                     onClick=${this.handleShareClick}
                     disabled=${disabled}
                     title="${
-                      !this.state.sharing ? 'A unique URL will be generated for you to share your slice.' : 'Generating unique URL...'
+                      !this.state.sharing
+                        ? 'A unique URL will be generated for you to share your slice.'
+                        : 'Generating unique URL...'
                     }"
             >
               Share

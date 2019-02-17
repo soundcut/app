@@ -5,9 +5,7 @@ const formatTime = require('../helpers/formatTime');
 
 const SPACING = 20;
 const CONTAINER_HEIGHT = 240;
-const CONTAINER_WIDTH = 835;
 const HEIGHT = CONTAINER_HEIGHT - SPACING * 2;
-const WIDTH = CONTAINER_WIDTH - SPACING * 2;
 const BAR_WIDTH = 4;
 const BAR_COLOR = '#166a77';
 const BAR_HANDLE_RADIUS = 8;
@@ -20,6 +18,41 @@ const TIME_ANNOTATION_WIDTH = 40;
 const SLICE_COLOR = '#37f0c2';
 const DURATION_COLOR = '#f4ffdc';
 const PROGRESS_COLOR = '#24adc2';
+
+function Canvases(containerWidth, width) {
+  return `
+    <canvas
+      id="waveform-canvas"
+      width="${width}"
+      height="${HEIGHT}"
+    >
+    </canvas>
+    <canvas
+      id="progress-canvas"
+      width="${containerWidth}"
+      height="${HEIGHT}"
+    >
+    </canvas>
+    <canvas
+      id="duration-canvas"
+      width="${containerWidth}"
+      height="${HEIGHT}"
+    >
+    </canvas>
+    <canvas
+      id="start-canvas"
+      width="${containerWidth}"
+      height="${HEIGHT}"
+    >
+    </canvas>
+    <canvas
+      id="end-canvas"
+      width="${containerWidth}"
+      height="${HEIGHT}"
+    >
+    </canvas>
+  `;
+}
 
 class WaveForm extends Component {
   constructor(audio, file, setSliceBoundary, resetSlice) {
@@ -54,17 +87,25 @@ class WaveForm extends Component {
     this.analyser = this.audioCtx.createAnalyser();
   }
 
-  setupCanvases() {
+  setupDimensions() {
     this.container = document.getElementById('WaveForm');
     this.boundingClientRect = this.container.getBoundingClientRect();
+    this.containerWidth = this.boundingClientRect.width;
+    this.width = this.containerWidth - SPACING * 2;
+  }
 
+  setupCanvases() {
     this.canvases = {};
     this.canvasContexts = {};
     this.snapshots = {};
+    this.container.insertAdjacentHTML(
+      'afterbegin',
+      Canvases(this.containerWidth, this.width)
+    );
     ['waveform', 'progress', 'duration', 'start', 'end'].forEach(canvas => {
       this.canvases[canvas] = document.getElementById(`${canvas}-canvas`);
       this.canvasContexts[canvas] = this.canvases[canvas].getContext('2d');
-      this.canvasContexts[canvas].clearRect(0, 0, WIDTH, HEIGHT);
+      this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
       this.canvasContexts[canvas].font = FONT;
       this.snapshots[canvas] = [];
     });
@@ -72,7 +113,12 @@ class WaveForm extends Component {
 
   async onconnected() {
     this.audio.addEventListener('timeupdate', this.handleSourceTimeUpdate);
+
+    this.setupDimensions();
     this.setupCanvases();
+    this.setState({
+      mounted: true,
+    });
 
     this.buffer = await getFileAudioBuffer(this.file, this.audioCtx);
 
@@ -80,12 +126,12 @@ class WaveForm extends Component {
     //   this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
     // );
 
-    const width = WIDTH;
+    const width = this.width;
     const start = 0;
-    const end = WIDTH;
+    const end = this.width;
 
     const peaks = this.getPeaks(width, start, end);
-    this.drawBars(peaks, 0, WIDTH);
+    this.drawBars(peaks, 0, this.width);
   }
 
   getDuration() {
@@ -94,12 +140,12 @@ class WaveForm extends Component {
 
   doSnapshot(canvas) {
     this.snapshots[canvas].push(
-      this.canvasContexts[canvas].getImageData(0, 0, WIDTH, HEIGHT)
+      this.canvasContexts[canvas].getImageData(0, 0, this.width, HEIGHT)
     );
   }
 
   restoreSnapshot(canvas) {
-    this.canvasContexts[canvas].clearRect(0, 0, WIDTH, HEIGHT);
+    this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
     const snapshot = this.snapshots[canvas][0];
     if (snapshot) {
       this.canvasContexts[canvas].putImageData(snapshot, 0, 0);
@@ -208,7 +254,7 @@ class WaveForm extends Component {
         const gap = BAR_GAP ? Math.max(this.pixelRatio, ~~(bar / 2)) : 0;
         const step = bar + gap;
 
-        const scale = length / WIDTH;
+        const scale = length / this.width;
         const first = start;
         const last = end;
         let i;
@@ -233,7 +279,7 @@ class WaveForm extends Component {
         this.drawBoundary(this.canvasContexts['start'], SPACING);
         this.drawBoundary(
           this.canvasContexts['end'],
-          CONTAINER_WIDTH - SPACING
+          this.containerWidth - SPACING
         );
       }
     );
@@ -269,14 +315,14 @@ class WaveForm extends Component {
     const x = evt.clientX - this.boundingClientRect.left;
     const duration = this.getDuration();
 
-    const startPos = (WIDTH / duration) * this.state.start + SPACING;
+    const startPos = (this.width / duration) * this.state.start + SPACING;
     const startBoundaryRange = [
       startPos + BAR_HANDLE_RADIUS,
       startPos - BAR_HANDLE_RADIUS,
     ];
     const inStartBoundaryRange =
       x <= startBoundaryRange[0] && x >= startBoundaryRange[1];
-    const endPos = (WIDTH / duration) * this.state.end + SPACING;
+    const endPos = (this.width / duration) * this.state.end + SPACING;
     const endBoundaryRange = [
       endPos + BAR_HANDLE_RADIUS,
       endPos - BAR_HANDLE_RADIUS,
@@ -314,14 +360,15 @@ class WaveForm extends Component {
         const xContainer = evt.clientX - this.boundingClientRect.left;
         const delta = xContainer - this.state.dragging.position;
 
-        const boundaryPos = (WIDTH / duration) * this.state[boundary] + SPACING;
+        const boundaryPos =
+          (this.width / duration) * this.state[boundary] + SPACING;
         const newBoundaryPos =
           boundary === 'start'
             ? Math.max(SPACING, boundaryPos + delta)
-            : Math.min(WIDTH + SPACING, boundaryPos + delta);
+            : Math.min(this.width + SPACING, boundaryPos + delta);
 
         const canvasCtx = this.canvasContexts[boundary];
-        canvasCtx.clearRect(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT);
+        canvasCtx.clearRect(0, 0, this.containerWidth, CONTAINER_HEIGHT);
         this.drawBoundary(canvasCtx, newBoundaryPos);
       });
       return;
@@ -330,14 +377,14 @@ class WaveForm extends Component {
     const x = evt.clientX - this.boundingClientRect.left;
     const duration = this.getDuration();
 
-    const startPos = (WIDTH / duration) * this.state.start + SPACING;
+    const startPos = (this.width / duration) * this.state.start + SPACING;
     const startBoundaryRange = [
       startPos + BAR_HANDLE_RADIUS,
       startPos - BAR_HANDLE_RADIUS,
     ];
     const inStartBoundaryRange =
       x <= startBoundaryRange[0] && x >= startBoundaryRange[1];
-    const endPos = (WIDTH / duration) * this.state.end + SPACING;
+    const endPos = (this.width / duration) * this.state.end + SPACING;
     const endBoundaryRange = [
       endPos + BAR_HANDLE_RADIUS,
       endPos - BAR_HANDLE_RADIUS,
@@ -374,9 +421,9 @@ class WaveForm extends Component {
     const x =
       boundary === 'start'
         ? Math.max(0, xContainer - SPACING)
-        : Math.min(WIDTH, xContainer - SPACING);
+        : Math.min(this.width, xContainer - SPACING);
 
-    const time = Math.max((this.getDuration() / WIDTH) * x, 0);
+    const time = Math.max((this.getDuration() / this.width) * x, 0);
     const slice = this.setSliceBoundary(boundary, time);
     this.setState({ dragging: null, start: slice.start, end: slice.end });
 
@@ -407,11 +454,11 @@ class WaveForm extends Component {
       canvasCtx.fillStyle = DURATION_COLOR;
       canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
 
-      const time = Math.max((this.getDuration() / WIDTH) * x, 0);
+      const time = Math.max((this.getDuration() / this.width) * x, 0);
       const formattedTime = formatTime(time);
       const textSpacing = SPACING / 2;
       const textX =
-        WIDTH - x < TIME_ANNOTATION_WIDTH + textSpacing
+        this.width - x < TIME_ANNOTATION_WIDTH + textSpacing
           ? x - TIME_ANNOTATION_WIDTH - textSpacing
           : x + textSpacing;
       const textY = FONT_SIZE;
@@ -452,11 +499,11 @@ class WaveForm extends Component {
     );
     canvasCtx.fill();
 
-    const time = Math.max((this.getDuration() / WIDTH) * (x - SPACING), 0);
+    const time = Math.max((this.getDuration() / this.width) * (x - SPACING), 0);
     const formattedTime = formatTime(time);
     const textSpacing = BAR_HANDLE_RADIUS + SPACING / 2;
     const textX =
-      WIDTH - x < TIME_ANNOTATION_WIDTH + textSpacing
+      this.width - x < TIME_ANNOTATION_WIDTH + textSpacing
         ? x - TIME_ANNOTATION_WIDTH - textSpacing
         : x + textSpacing;
     const textY = FONT_SIZE;
@@ -479,7 +526,7 @@ class WaveForm extends Component {
   handleClick(evt) {
     const x = evt.clientX - this.boundingClientRect.left - SPACING;
     const parsed = Math.max(
-      Number.parseFloat(((this.getDuration() / WIDTH) * x).toFixed(2), 0)
+      Number.parseFloat(((this.getDuration() / this.width) * x).toFixed(2), 0)
     );
     const current = Math.max(
       Number.parseFloat(this.audio.currentTime.toFixed(2)),
@@ -503,7 +550,7 @@ class WaveForm extends Component {
     }
 
     const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
-    const time = (this.getDuration() / WIDTH) * x;
+    const time = (this.getDuration() / this.width) * x;
 
     if (this.state.start > time) {
       this.resetBoundaries();
@@ -527,12 +574,13 @@ class WaveForm extends Component {
     requestAnimationFrame(() => {
       this.ensureSnapshot('progress');
 
-      const x = SPACING + (WIDTH / this.getDuration()) * this.audio.currentTime;
+      const x =
+        SPACING + (this.width / this.getDuration()) * this.audio.currentTime;
       this.canvasContexts['progress'].fillStyle = PROGRESS_COLOR;
       this.canvasContexts['progress'].fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
 
       const time = formatTime(this.audio.currentTime);
-      const textX = WIDTH - x < 100 ? x - 55 : x + 10;
+      const textX = this.width - x < 100 ? x - 55 : x + 10;
       const textY = FONT_SIZE;
       this.canvasContexts['progress'].fillText(time, textX, textY);
     });
@@ -542,45 +590,15 @@ class WaveForm extends Component {
   render() {
     return this.html`
     <div
+      id="WaveForm"
       onconnected=${this}
       onmousedown=${this.handleMouseDown}
       onmousemove=${this.handleMouseMove}
+      style="${`height:${CONTAINER_HEIGHT}px;`}"
       class="${
         this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''
       }"
-      style="${`width:${CONTAINER_WIDTH}px; height:${CONTAINER_HEIGHT}px;`}"
-      id="WaveForm"
     >
-      <canvas
-        id="waveform-canvas"
-        width="${WIDTH}"
-        height="${HEIGHT}"
-      >
-      </canvas>
-      <canvas
-        id="progress-canvas"
-        width="${CONTAINER_WIDTH}"
-        height="${HEIGHT}"
-      >
-      </canvas>
-      <canvas
-        id="duration-canvas"
-        width="${CONTAINER_WIDTH}"
-        height="${HEIGHT}"
-      >
-      </canvas>
-      <canvas
-        id="start-canvas"
-        width="${CONTAINER_WIDTH}"
-        height="${HEIGHT}"
-      >
-      </canvas>
-      <canvas
-        id="end-canvas"
-        width="${CONTAINER_WIDTH}"
-        height="${HEIGHT}"
-      >
-      </canvas>
     </div>
     `;
   }
