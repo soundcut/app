@@ -5,17 +5,28 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  background-color: $color-blue-darker;
-
-  > canvas {
-    position: absolute;
-    top: $spacing;
-    left: 0;
-    background-color: transparent;
+  @media screen and (max-width: 834px) {
+    max-width: 835px;
   }
+  overflow-x: auto;
+  background-color: $color-blue-darker;
+  border-top: 1px solid $color-blue-lighter;
 
-  > #waveform-canvas {
-    left: $spacing;
+  > div {
+    min-width: 835px;
+    width: 100%;
+    height: 100%;
+
+    > canvas {
+      position: absolute;
+      top: $spacing;
+      left: 0;
+      background-color: transparent;
+    }
+
+    > #waveform-canvas {
+      left: $spacing;
+    }
   }
 
   &.cursor-grabbing {
@@ -25,4 +36,8 @@
   &.will-reset {
     cursor: not-allowed;
   }
+}
+
+main.has-waveform {
+  padding-bottom: 240px;
 }

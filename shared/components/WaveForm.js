@@ -87,8 +87,9 @@ class WaveForm extends Component {
     this.analyser = this.audioCtx.createAnalyser();
   }
 
-  setupDimensions() {
-    this.container = document.getElementById('WaveForm');
+  setupContainer() {
+    document.querySelector('main').classList.add('has-waveform');
+    this.container = document.getElementById('WaveForm').firstElementChild;
     this.boundingClientRect = this.container.getBoundingClientRect();
     this.containerWidth = this.boundingClientRect.width;
     this.width = this.containerWidth - SPACING * 2;
@@ -114,7 +115,7 @@ class WaveForm extends Component {
   async onconnected() {
     this.audio.addEventListener('timeupdate', this.handleSourceTimeUpdate);
 
-    this.setupDimensions();
+    this.setupContainer();
     this.setupCanvases();
     this.setState({
       mounted: true,
@@ -599,6 +600,8 @@ class WaveForm extends Component {
         this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''
       }"
     >
+      <div>
+      </div>
     </div>
     `;
   }
