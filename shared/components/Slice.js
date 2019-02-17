@@ -276,7 +276,7 @@ class Slice extends Component {
     const duration = state.end - state.start;
 
     return this.html`
-      <div onconnected=${this} ondisconnected=${this}>
+      <div id="Slice" onconnected=${this} ondisconnected=${this}>
         <h3>
           Drag handles to slice
         </h3>
@@ -287,16 +287,17 @@ class Slice extends Component {
               : 'No slice boundaries selected.'
           }
         </p>
-        <div class="flex flex-justify-content-between">
-          <p class="button-container">
+        ${[state.error ? ErrorMessage() : '']}
+        ${[state.id ? ShareInput(state.id) : '']}
+        <div class="player-container">
+          ${[this.waveform]}
+          <div class="flex">
             <button type="button"
                     disabled=${disabled}
                     onclick=${this.handlePlayPauseClick}
             >
               ${disabled || this.slice.paused ? 'Play' : 'Pause'}
             </button>
-          </p>
-          <p class="button-container">
             <button type="button"
                     onClick=${this.handleDownloadClick}
                     disabled=${disabled}
@@ -315,11 +316,8 @@ class Slice extends Component {
             >
               Share
             </button>
-          </p>
+          </div>
         </div>
-        ${[state.error ? ErrorMessage() : '']}
-        ${[state.id ? ShareInput(state.id) : '']}
-        ${[this.waveform]}
       </div>
     `;
   }

@@ -1,7 +1,21 @@
 @import '../abstracts/variables.scss';
 
-.Slice {
-  h6 {
-    color: $color-blue-light;
+#Slice {
+  .player-container {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: $color-blue-darker;
+    border-top: 1px solid $color-blue-lighter;
+
+    button {
+      border-radius: 0;
+      flex-grow: 1;
+
+      &:not(:last-child) {
+        border-right: 1px solid $color-blue-darker;
+      }
+    }
   }
 }

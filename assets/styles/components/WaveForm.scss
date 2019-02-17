@@ -1,16 +1,12 @@
 @import '../abstracts/variables.scss';
 
 #WaveForm {
-  position: fixed;
-  left: 0;
-  bottom: 0;
   width: 100%;
   @media screen and (max-width: 834px) {
     max-width: 835px;
   }
   overflow-x: auto;
-  background-color: $color-blue-darker;
-  border-top: 1px solid $color-blue-lighter;
+  position: relative;
 
   > div {
     min-width: 835px;
