@@ -300,16 +300,10 @@ class Slice extends Component {
         ${[state.error ? ErrorMessage() : '']}
         ${[state.id ? ShareInput(state.id) : '']}
         <div class="player-container">
-          ${[
-            this.slice
-              ? wire()`
-              <div class="flex">
-                ${[this.waveform]}
-                ${[this.volume]}
-              </div>
-            `
-              : '',
-          ]}
+          <div class="flex">
+            ${[this.slice ? this.waveform : '']}
+            ${[this.slice ? this.volume : '']}
+          </div>
           <div class="flex">
             <button type="button"
                     disabled=${disabled}
