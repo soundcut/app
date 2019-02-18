@@ -2,6 +2,7 @@ const { Component } = require('hypermorphic');
 const throttle = require('lodash/throttle');
 const getFileAudioBuffer = require('../helpers/getFileAudioBuffer');
 const formatTime = require('../helpers/formatTime');
+const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
 
 const SPACING = 20;
 const CONTAINER_HEIGHT = 240;
@@ -118,13 +119,40 @@ class WaveForm extends Component {
   }
 
   async onconnected() {
-    this.audio.addEventListener('timeupdate', this.handleSourceTimeUpdate);
+    this.supportsPassiveEventListener = checkPassiveEventListener();
+    (this.evtHandlerOptions = this.supportsPassiveEventListener
+      ? { passive: true }
+      : false),
+    this.audio.addEventListener(
+      'timeupdate',
+      this.handleSourceTimeUpdate,
+      this.evtHandlerOptions
+    );
 
     this.setupContainer();
     this.setupCanvases();
-    this.setState({
-      mounted: true,
-    });
+
+    this.container.addEventListener(
+      'mousedown',
+      this.handleMouseDown,
+      this.evtHandlerOptions
+    );
+    this.container.addEventListener(
+      'touchstart',
+      this.handleMouseDown,
+      this.evtHandlerOptions
+    );
+
+    this.container.addEventListener(
+      'mousemove',
+      this.handleMouseMove,
+      this.evtHandlerOptions
+    );
+    this.container.addEventListener(
+      'touchmove',
+      this.handleMouseMove,
+      this.evtHandlerOptions
+    );
 
     this.buffer = await getFileAudioBuffer(this.file, this.audioCtx);
 
@@ -316,7 +344,9 @@ class WaveForm extends Component {
   }
 
   handleMouseDown(evt) {
-    const x = evt.clientX - this.boundingClientRect.left;
+    const x =
+      (evt.touches ? evt.touches[0] : evt).clientX -
+      this.boundingClientRect.left;
     const duration = this.getDuration();
 
     const startPos = (this.width / duration) * this.state.start + SPACING;
@@ -348,7 +378,16 @@ class WaveForm extends Component {
           position: x,
         },
       });
-      this.container.addEventListener('mouseup', this.handleMouseUp);
+      this.container.addEventListener(
+        'mouseup',
+        this.handleMouseUp,
+        this.evtHandlerOptions
+      );
+      this.container.addEventListener(
+        'touchend',
+        this.handleMouseUp,
+        this.evtHandlerOptions
+      );
     }
   }
 
@@ -361,7 +400,9 @@ class WaveForm extends Component {
 
         const duration = this.getDuration();
         const boundary = this.state.dragging.boundary;
-        const xContainer = evt.clientX - this.boundingClientRect.left;
+        const xContainer =
+          (evt.touches ? evt.touches[0] : evt).clientX -
+          this.boundingClientRect.left;
         const delta = xContainer - this.state.dragging.position;
 
         const boundaryPos =
@@ -375,6 +416,11 @@ class WaveForm extends Component {
         canvasCtx.clearRect(0, 0, this.containerWidth, CONTAINER_HEIGHT);
         this.drawBoundary(canvasCtx, newBoundaryPos);
       });
+      return;
+    }
+
+    // Disacard hovering for touch events.
+    if (evt.touches) {
       return;
     }
 
@@ -417,11 +463,21 @@ class WaveForm extends Component {
   }
 
   handleMouseUp(evt) {
-    this.container.removeEventListener('mouseup', this.handleMouseUp);
-
     const boundary = this.state.dragging.boundary;
 
-    const xContainer = evt.clientX - this.boundingClientRect.left;
+    const xContainer =
+      (evt.changedTouches ? evt.changedTouches[0] : evt).clientX -
+      this.boundingClientRect.left;
+    this.container.removeEventListener(
+      'touchend',
+      this.handleMouseUp,
+      this.evtHandlerOptions
+    );
+    this.container.removeEventListener(
+      'mouseup',
+      this.handleMouseUp,
+      this.evtHandlerOptions
+    );
     const x =
       boundary === 'start'
         ? Math.max(0, xContainer - SPACING)
@@ -471,11 +527,19 @@ class WaveForm extends Component {
   }
 
   handleMouseEnter() {
-    this.container.addEventListener('mouseleave', this.handleMouseLeave);
+    this.container.addEventListener(
+      'mouseleave',
+      this.handleMouseLeave,
+      this.evtHandlerOptions
+    );
   }
 
   handleMouseLeave() {
-    this.container.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.container.removeEventListener(
+      'mouseleave',
+      this.handleMouseLeave,
+      this.evtHandlerOptions
+    );
     requestAnimationFrame(() => {
       this.restoreSnapshot('duration');
     });
@@ -596,8 +660,6 @@ class WaveForm extends Component {
     <div
       id="WaveForm"
       onconnected=${this}
-      onmousedown=${this.handleMouseDown}
-      onmousemove=${this.handleMouseMove}
       style="${`height:${CONTAINER_HEIGHT}px;`}"
       class="${
         this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''
