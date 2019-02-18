@@ -6,6 +6,7 @@
     left: 0;
     bottom: 0;
     width: 100%;
+    z-index: 1;
     background-color: $color-blue-darker;
     border-top: 1px solid $color-blue-lighter;
 
@@ -18,7 +19,12 @@
       }
     }
 
+    #WaveForm {
+      z-index: 3;
+    }
+
     .Volume {
+      z-index: 2;
       position: relative;
       margin-bottom: 0;
       width: 60px;
