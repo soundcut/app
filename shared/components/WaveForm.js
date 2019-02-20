@@ -74,18 +74,9 @@ class WaveForm extends Component {
     this.halfPixel = 0.5 / this.pixelRatio;
 
     this.createAudioCtx();
-    // this.handleMouseMove = throttle(this.handleMouseMove.bind(this), 16, {
-    //   leading: true,
-    //   trailing: true,
-    // });
-    // this.handleClick = this.handleClick.bind(this);
-    this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
-    this.resetBoundaries = this.resetBoundaries.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
-    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    // this.handleMouseLeave = this.handleMouseLeave.bind(this);
   }
 
   createAudioCtx() {
@@ -176,22 +167,6 @@ class WaveForm extends Component {
     this.snapshots[canvas].push(
       this.canvasContexts[canvas].getImageData(0, 0, this.width, HEIGHT)
     );
-  }
-
-  restoreSnapshot(canvas) {
-    this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
-    const snapshot = this.snapshots[canvas][0];
-    if (snapshot) {
-      this.canvasContexts[canvas].putImageData(snapshot, 0, 0);
-    }
-  }
-
-  ensureSnapshot(canvas) {
-    if (this.snapshots[canvas].length) {
-      this.restoreSnapshot(canvas);
-    } else {
-      this.doSnapshot(canvas);
-    }
   }
 
   /**
@@ -306,8 +281,6 @@ class WaveForm extends Component {
         }
         this.drawn = true;
         this.doSnapshot('waveform');
-        // this.doSnapshot('start');
-        // this.doSnapshot('end');
         this.drawBoundary(this.canvasContexts['start'], SPACING);
         this.drawBoundary(
           this.canvasContexts['end'],
@@ -334,13 +307,6 @@ class WaveForm extends Component {
         peaks: peaks,
       });
     });
-  }
-
-  resetBoundaries() {
-    this.setState(this.resetSlice());
-
-    this.restoreSnapshot('start');
-    this.restoreSnapshot('end');
   }
 
   handleMouseDown(evt) {
@@ -510,48 +476,6 @@ class WaveForm extends Component {
     }
   }
 
-  handleMouseMoveDuration(evt) {
-    const canvas = 'duration';
-    const canvasCtx = this.canvasContexts[canvas];
-
-    requestAnimationFrame(() => {
-      this.ensureSnapshot(canvas);
-
-      const x = evt.clientX - this.boundingClientRect.left - SPACING;
-      canvasCtx.fillStyle = DURATION_COLOR;
-      canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
-
-      const time = Math.max((this.getDuration() / this.width) * x, 0);
-      const formattedTime = formatTime(time);
-      const textSpacing = SPACING / 2;
-      const textX =
-        this.width - x < TIME_ANNOTATION_WIDTH + textSpacing
-          ? x - TIME_ANNOTATION_WIDTH - textSpacing
-          : x + textSpacing;
-      const textY = FONT_SIZE;
-      canvasCtx.fillText(formattedTime, textX, textY);
-    });
-  }
-
-  handleMouseEnter() {
-    this.container.addEventListener(
-      'mouseleave',
-      this.handleMouseLeave,
-      this.evtHandlerOptions
-    );
-  }
-
-  handleMouseLeave() {
-    this.container.removeEventListener(
-      'mouseleave',
-      this.handleMouseLeave,
-      this.evtHandlerOptions
-    );
-    requestAnimationFrame(() => {
-      this.restoreSnapshot('duration');
-    });
-  }
-
   drawBoundary(canvasCtx, x) {
     canvasCtx.fillStyle = SLICE_COLOR;
     canvasCtx.fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
@@ -583,82 +507,6 @@ class WaveForm extends Component {
         : x + textSpacing;
     const textY = FONT_SIZE;
     canvasCtx.fillText(formattedTime, textX, textY);
-  }
-
-  handleBoundarySelection(evt) {
-    if (!this.drawn || this.state.end) return;
-
-    const canvas = this.state.start !== undefined ? 'end' : 'start';
-    const canvasCtx = this.canvasContexts[canvas];
-
-    requestAnimationFrame(() => {
-      this.ensureSnapshot(canvas);
-      const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
-      this.drawBoundary(canvasCtx, x);
-    });
-  }
-
-  handleClick(evt) {
-    const x = evt.clientX - this.boundingClientRect.left - SPACING;
-    const parsed = Math.max(
-      Number.parseFloat(((this.getDuration() / this.width) * x).toFixed(2), 0)
-    );
-    const current = Math.max(
-      Number.parseFloat(this.audio.currentTime.toFixed(2)),
-      0
-    );
-    if (parsed !== current) {
-      this.audio.currentTime = parsed;
-      this.audio.play();
-      this.restoreSnapshot('duration');
-    }
-  }
-
-  handleBoundaryClick(evt) {
-    if (typeof this.setSliceBoundary !== 'function' || !this.drawn) {
-      return;
-    }
-
-    if (this.state.end) {
-      this.resetBoundaries();
-      return;
-    }
-
-    const x = evt.clientX - this.boundingClientRect.left - BAR_CENTER;
-    const time = (this.getDuration() / this.width) * x;
-
-    if (this.state.start > time) {
-      this.resetBoundaries();
-      return;
-    }
-
-    const boundary = !this.state.start ? 'start' : 'end';
-    const { start, end } = this.setSliceBoundary(boundary, time);
-
-    this.doSnapshot(boundary);
-
-    this.setState({
-      start,
-      end,
-    });
-  }
-
-  handleSourceTimeUpdate() {
-    if (!this.drawn) return;
-
-    requestAnimationFrame(() => {
-      this.ensureSnapshot('progress');
-
-      const x =
-        SPACING + (this.width / this.getDuration()) * this.audio.currentTime;
-      this.canvasContexts['progress'].fillStyle = PROGRESS_COLOR;
-      this.canvasContexts['progress'].fillRect(x, 0, BAR_WIDTH / 2, HEIGHT);
-
-      const time = formatTime(this.audio.currentTime);
-      const textX = this.width - x < 100 ? x - 55 : x + 10;
-      const textY = FONT_SIZE;
-      this.canvasContexts['progress'].fillText(time, textX, textY);
-    });
   }
 
   /* eslint-disable indent */
