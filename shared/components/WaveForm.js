@@ -537,6 +537,7 @@ class WaveForm extends Component {
         //pix[i+3] is the transparency.
       }
 
+      canvasCtx.clearRect(0, 0, this.width, HEIGHT);
       canvasCtx.putImageData(snapshot, 0, 0);
     });
   }
