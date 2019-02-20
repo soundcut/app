@@ -60,18 +60,20 @@ class Slice extends Component {
     this.resetSlice = this.resetSlice.bind(this);
   }
 
-  onconnected() {
-    this.setBoundary('start', 0);
-    this.setBoundary('end', this.audio.duration);
+  async onconnected() {
+    await this.setBoundary('start', 0);
+    await this.setBoundary('end', this.audio.duration);
 
     this.waveform = new WaveForm({
       audio: this.audio,
       file: this.file,
+      slice: this.slice,
       setSliceBoundary: this.setBoundary,
       resetSlice: this.resetSlice,
       start: this.state.start,
       end: this.state.end,
     });
+    this.render();
   }
 
   ondisconnected() {
@@ -86,7 +88,7 @@ class Slice extends Component {
     }
   }
 
-  setBoundary(name, value) {
+  async setBoundary(name, value) {
     const parsedValue = Math.floor(Number.parseFloat(value, 10));
     const current = this.state[name];
     const equal = current === parsedValue;
@@ -115,10 +117,10 @@ class Slice extends Component {
     }
 
     if (this.state.end) {
-      this.createSlice();
+      await this.createSlice();
     }
 
-    return Object.assign({ swap }, boundaries);
+    return Object.assign({ audio: this.slice, swap }, boundaries);
   }
 
   resetSlice() {
@@ -301,7 +303,7 @@ class Slice extends Component {
         ${[state.id ? ShareInput(state.id) : '']}
         <div class="player-container">
           <div class="flex">
-            ${[this.slice ? this.waveform : '']}
+            ${[this.waveform ? this.waveform : '']}
             ${[this.slice ? this.volume : '']}
           </div>
           <div class="flex">

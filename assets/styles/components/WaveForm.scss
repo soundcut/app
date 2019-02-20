@@ -20,7 +20,8 @@
       background-color: transparent;
     }
 
-    > #waveform-canvas {
+    > #waveform-canvas,
+    > #progress-canvas {
       left: $spacing;
     }
   }

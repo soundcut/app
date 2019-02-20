@@ -8,7 +8,6 @@ const SPACING = 20;
 const CONTAINER_HEIGHT = 240;
 const HEIGHT = CONTAINER_HEIGHT - SPACING * 2;
 const BAR_WIDTH = 4;
-const BAR_COLOR = '#166a77';
 const BAR_HANDLE_RADIUS = 8;
 const BAR_CENTER = (BAR_WIDTH - 1) / 2;
 const BAR_GAP = false;
@@ -16,9 +15,21 @@ const FONT_FAMILY = 'monospace';
 const FONT_SIZE = 10;
 const FONT = `${FONT_SIZE}px ${FONT_FAMILY}`;
 const TIME_ANNOTATION_WIDTH = 40;
+const BAR_COLOR = '#166a77';
 const SLICE_COLOR = '#37f0c2';
 const DURATION_COLOR = '#f4ffdc';
 const PROGRESS_COLOR = '#24adc2';
+
+function hexToRGB(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? [
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16),
+    ]
+    : null;
+}
 
 function Canvases(containerWidth, width) {
   return `
@@ -30,7 +41,7 @@ function Canvases(containerWidth, width) {
     </canvas>
     <canvas
       id="progress-canvas"
-      width="${containerWidth}"
+      width="${width}"
       height="${HEIGHT}"
     >
     </canvas>
@@ -56,10 +67,19 @@ function Canvases(containerWidth, width) {
 }
 
 class WaveForm extends Component {
-  constructor({ audio, file, setSliceBoundary, resetSlice, start, end }) {
+  constructor({
+    slice,
+    audio,
+    file,
+    setSliceBoundary,
+    resetSlice,
+    start,
+    end,
+  }) {
     super();
     this.audio = audio;
     this.file = file;
+    this.slice = slice;
     this.setSliceBoundary = setSliceBoundary;
     this.resetSlice = resetSlice;
 
@@ -74,6 +94,7 @@ class WaveForm extends Component {
     this.halfPixel = 0.5 / this.pixelRatio;
 
     this.createAudioCtx();
+    this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
@@ -111,14 +132,9 @@ class WaveForm extends Component {
 
   async onconnected() {
     this.supportsPassiveEventListener = checkPassiveEventListener();
-    (this.evtHandlerOptions = this.supportsPassiveEventListener
+    this.evtHandlerOptions = this.supportsPassiveEventListener
       ? { passive: true }
-      : false),
-    this.audio.addEventListener(
-      'timeupdate',
-      this.handleSourceTimeUpdate,
-      this.evtHandlerOptions
-    );
+      : false;
 
     this.setupContainer();
     this.setupCanvases();
@@ -144,6 +160,7 @@ class WaveForm extends Component {
       this.handleMouseMove,
       this.evtHandlerOptions
     );
+    this.updateAudioListeners(this.slice);
 
     this.buffer = await getFileAudioBuffer(this.file, this.audioCtx);
 
@@ -166,6 +183,23 @@ class WaveForm extends Component {
   doSnapshot(canvas) {
     this.snapshots[canvas].push(
       this.canvasContexts[canvas].getImageData(0, 0, this.width, HEIGHT)
+    );
+  }
+
+  updateAudioListeners(slice) {
+    if (this.slice) {
+      this.slice.removeEventListener(
+        'timeupate',
+        this.handleSourceTimeUpdate,
+        this.evtHandlerOptions
+      );
+    }
+
+    this.slice = slice;
+    this.slice.addEventListener(
+      'timeupdate',
+      this.handleSourceTimeUpdate,
+      this.evtHandlerOptions
     );
   }
 
@@ -459,6 +493,7 @@ class WaveForm extends Component {
     const time = Math.max((this.getDuration() / this.width) * x, 0);
     const slice = this.setSliceBoundary(boundary, time);
     this.setState({ dragging: null, start: slice.start, end: slice.end });
+    this.updateAudioListeners(slice.audio);
 
     // FIXME:
     // Dirty fix in case `start` boundary is put after `end` boundary.
@@ -474,6 +509,36 @@ class WaveForm extends Component {
       this.canvasContexts.start = endCtx;
       this.canvasContexts.end = startCtx;
     }
+  }
+
+  handleSourceTimeUpdate() {
+    if (!this.drawn) return;
+
+    requestAnimationFrame(() => {
+      const currentTime = this.state.start + this.slice.currentTime;
+      const x = SPACING + (this.width / this.getDuration()) * currentTime;
+
+      const snapshot = this.canvasContexts['waveform'].getImageData(
+        0,
+        0,
+        x,
+        HEIGHT
+      );
+      const imageData = snapshot.data;
+      const progressColor = hexToRGB(PROGRESS_COLOR);
+
+      const canvasCtx = this.canvasContexts['progress'];
+
+      // Loops through all of the pixels and modifies the components.
+      for (let i = 0, n = imageData.length; i < n; i += 4) {
+        imageData[i] = progressColor[0]; // Red component
+        imageData[i + 1] = progressColor[1]; // Green component
+        imageData[i + 2] = progressColor[2]; // Blue component
+        //pix[i+3] is the transparency.
+      }
+
+      canvasCtx.putImageData(snapshot, 0, 0);
+    });
   }
 
   drawBoundary(canvasCtx, x) {
