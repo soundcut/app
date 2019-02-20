@@ -346,7 +346,9 @@ class WaveForm extends Component {
   handleMouseDown(evt) {
     const x =
       (evt.touches ? evt.touches[0] : evt).clientX -
-      this.boundingClientRect.left;
+      this.boundingClientRect.left +
+      this.container.parentNode.scrollLeft;
+
     const duration = this.getDuration();
 
     const startPos = (this.width / duration) * this.state.start + SPACING;
@@ -402,7 +404,8 @@ class WaveForm extends Component {
         const boundary = this.state.dragging.boundary;
         const xContainer =
           (evt.touches ? evt.touches[0] : evt).clientX -
-          this.boundingClientRect.left;
+          this.boundingClientRect.left +
+          this.container.parentNode.scrollLeft;
         const delta = xContainer - this.state.dragging.position;
 
         const boundaryPos =
@@ -424,7 +427,10 @@ class WaveForm extends Component {
       return;
     }
 
-    const x = evt.clientX - this.boundingClientRect.left;
+    const x =
+      evt.clientX -
+      this.boundingClientRect.left +
+      this.container.parentNode.scrollLeft;
     const duration = this.getDuration();
 
     const startPos = (this.width / duration) * this.state.start + SPACING;
@@ -467,7 +473,8 @@ class WaveForm extends Component {
 
     const xContainer =
       (evt.changedTouches ? evt.changedTouches[0] : evt).clientX -
-      this.boundingClientRect.left;
+      this.boundingClientRect.left +
+      this.container.parentNode.scrollLeft;
     this.container.removeEventListener(
       'touchend',
       this.handleMouseUp,
