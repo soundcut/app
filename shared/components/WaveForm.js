@@ -468,7 +468,7 @@ class WaveForm extends Component {
     }
   }
 
-  handleMouseUp(evt) {
+  async handleMouseUp(evt) {
     const boundary = this.state.dragging.boundary;
 
     const xContainer =
@@ -491,7 +491,7 @@ class WaveForm extends Component {
         : Math.min(this.width, xContainer - SPACING);
 
     const time = Math.max((this.getDuration() / this.width) * x, 0);
-    const slice = this.setSliceBoundary(boundary, time);
+    const slice = await this.setSliceBoundary(boundary, time);
     this.setState({ dragging: null, start: slice.start, end: slice.end });
     this.updateAudioListeners(slice.audio);
 
