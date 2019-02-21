@@ -1,6 +1,5 @@
 const { Component } = require('hypermorphic');
 const throttle = require('lodash/throttle');
-const getFileAudioBuffer = require('../helpers/getFileAudioBuffer');
 const formatTime = require('../helpers/formatTime');
 const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
 
@@ -70,7 +69,7 @@ class WaveForm extends Component {
   constructor({
     slice,
     audio,
-    file,
+    audioBuffer,
     setSliceBoundary,
     resetSlice,
     start,
@@ -78,7 +77,7 @@ class WaveForm extends Component {
   }) {
     super();
     this.audio = audio;
-    this.file = file;
+    this.buffer = audioBuffer;
     this.slice = slice;
     this.setSliceBoundary = setSliceBoundary;
     this.resetSlice = resetSlice;
@@ -93,16 +92,10 @@ class WaveForm extends Component {
       1 || window.devicePixelRatio || screen.deviceXDPI / screen.logicalXDPI;
     this.halfPixel = 0.5 / this.pixelRatio;
 
-    this.createAudioCtx();
     this.handleSourceTimeUpdate = this.handleSourceTimeUpdate.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
-  }
-
-  createAudioCtx() {
-    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    this.analyser = this.audioCtx.createAnalyser();
   }
 
   setupContainer() {
@@ -162,8 +155,6 @@ class WaveForm extends Component {
     );
     this.updateAudioListeners(this.slice);
 
-    this.buffer = await getFileAudioBuffer(this.file, this.audioCtx);
-
     // const nominalWidth = Math.round(
     //   this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
     // );
@@ -177,7 +168,7 @@ class WaveForm extends Component {
   }
 
   getDuration() {
-    return (this.buffer || this.audio).duration;
+    return this.buffer.duration;
   }
 
   doSnapshot(canvas) {
