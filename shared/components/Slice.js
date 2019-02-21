@@ -8,6 +8,7 @@ const getDisplayName = require('../helpers/getDisplayName');
 const getDuration = require('../helpers/getDuration');
 const formatTime = require('../helpers/formatTime');
 const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
+const decodeFileAudioData = require('../helpers/decodeFileAudioData');
 
 const MAX_SLICE_LENGTH = 90;
 const SHARE_PATH = '/api/share';
@@ -61,12 +62,13 @@ class Slice extends Component {
   }
 
   async onconnected() {
+    this.sourceAudioBuffer = await decodeFileAudioData(this.file);
     await this.setBoundary('start', 0);
-    await this.setBoundary('end', this.audio.duration);
+    await this.setBoundary('end', this.sourceAudioBuffer.duration);
 
     this.waveform = new WaveForm({
       audio: this.audio,
-      file: this.file,
+      audioBuffer: this.sourceAudioBuffer,
       slice: this.slice,
       setSliceBoundary: this.setBoundary,
       resetSlice: this.resetSlice,
