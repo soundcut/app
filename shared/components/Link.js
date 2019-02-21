@@ -146,12 +146,7 @@ class Link extends Component {
                  disabled=${state.loading}
           />
         </fieldset>
-        <p class="button-container flex flex-wrap flex-justify-content-center">
-          <button type="reset"
-                  disabled=${state.loading}
-          >
-            Reset
-          </button>
+        <p class="button-container flex flex-wrap flex-justify-content-end">
           <button type="submit"
                   disabled=${!state.hasValue || state.loading}
                   title="${

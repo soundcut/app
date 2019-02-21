@@ -516,7 +516,7 @@ class WaveForm extends Component {
 
     requestAnimationFrame(() => {
       const currentTime = this.state.start + this.slice.currentTime;
-      const x = this.width / this.getDuration() * currentTime;
+      const x = (this.width / this.getDuration()) * currentTime;
 
       const snapshot = this.canvasContexts['waveform'].getImageData(
         0,
