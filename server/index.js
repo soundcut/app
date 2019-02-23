@@ -140,16 +140,13 @@ app.post('/api/link', jsonParser, async function(req, res) {
 
   try {
     const ret = await spawnYouTubeDL(req.body.url, req);
-    const headers = Object.keys(ret)
-      .filter(key => key !== 'fileStream')
-      .reduce(
-        (acc, key) => Object.assign({ [`x-${key}`]: encode(ret[key]) }, acc),
-        {
-          'content-type': 'audio/mp3',
-        }
-      );
+    const headers = {
+      'content-disposition': `attachment; filename="${encode(ret.title)}"`,
+      'content-type': 'audio/mp3',
+    };
 
     res.writeHead(201, headers);
+    res.on('error', function(err) { ret.fileStream.end(); });
     ret.fileStream.pipe(res);
   } catch (err) {
     console.error(err);
@@ -278,7 +275,7 @@ app.get('/api/slice/:id', async function(req, res) {
   console.info('Retrieving slice file stream...', id);
   const fileStream = createReadStream(path);
   const headers = {
-    'x-title': encode(name),
+    'content-disposition': `attachment; filename="${encode(ret.title)}"`,
     'content-type': 'audio/mp3',
   };
   res.writeHead(200, headers);
