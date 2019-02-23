@@ -50,7 +50,9 @@ class Shared extends Component {
       }
 
       const blob = await response.blob();
-      const filename = response.headers.get('content-disposition').match(/filename="(.+)"/)[1];
+      const filename = response.headers
+        .get('content-disposition')
+        .match(/filename="(.+)"/)[1];
       const file = new File([blob], filename);
       this.setState({
         file,

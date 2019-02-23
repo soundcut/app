@@ -146,7 +146,9 @@ app.post('/api/link', jsonParser, async function(req, res) {
     };
 
     res.writeHead(201, headers);
-    res.on('error', function(err) { ret.fileStream.end(); });
+    res.on('error', function(err) {
+      ret.fileStream.end();
+    });
     ret.fileStream.pipe(res);
   } catch (err) {
     console.error(err);
@@ -275,7 +277,7 @@ app.get('/api/slice/:id', async function(req, res) {
   console.info('Retrieving slice file stream...', id);
   const fileStream = createReadStream(path);
   const headers = {
-    'content-disposition': `attachment; filename="${encode(ret.title)}"`,
+    'content-disposition': `attachment; filename="${encode(name)}"`,
     'content-type': 'audio/mp3',
   };
   res.writeHead(200, headers);
