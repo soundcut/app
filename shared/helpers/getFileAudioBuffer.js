@@ -54,22 +54,26 @@ async function getFileAudioBuffer(file, audioCtx) {
     return acc;
   }, []);
 
-  const audioBuffer = await chunks.reduce(async (acc, chunk) => {
-    const buffer = await acc;
+  const arrayBuffers = chunks.map(chunk => {
     const tmpArrayBuffer = arrayBuffer.slice(
       chunk.frames[0]._section.offset,
       chunk.frames[chunk.frames.length - 1]._section.nextFrameIndex
     );
 
-    const finalArrayBuffer = concatArrayBuffer(tagsArrayBuffer, tmpArrayBuffer);
-    const decoded = await decodeArrayBuffer(audioCtx, finalArrayBuffer);
+    return concatArrayBuffer(tagsArrayBuffer, tmpArrayBuffer);
+  });
 
-    if (buffer) {
-      return concatAudioBuffer(audioCtx, buffer, decoded);
+  const audioBuffers = await Promise.all(
+    arrayBuffers.map(decodeArrayBuffer.bind(null, audioCtx))
+  );
+
+  const audioBuffer = audioBuffers.reduce((acc, audioBuffer_) => {
+    if (acc) {
+      return concatAudioBuffer(audioCtx, acc, audioBuffer_);
     }
 
-    return decoded;
-  }, Promise.resolve());
+    return audioBuffer_;
+  }, null);
 
   return audioBuffer;
 }
