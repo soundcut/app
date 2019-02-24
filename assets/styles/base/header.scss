@@ -1,20 +1,32 @@
 @import '../abstracts/variables.scss';
 
+$logo-height: 110px;
+$header-heigth: $logo-height + $spacing-small * 2;
+
 header {
-  padding-top: $spacing-large;
-  margin-bottom: $spacing-large;
-}
+  width: 100%;
+  height: $header-heigth;
+  padding: $spacing-small;
+  background-color: $color-blue-darker;
+  box-shadow: 0 -5px $spacing 0 rgba(0,0,0,.2);
 
-header h1 {
-  text-align: center;
-}
+  & a,
+  & img {
+    height: 100%;
+  }
 
-header h1 #logo {
-  width: 110px;
-  height: 110px;
+  margin: 0;
+  & > a {
+    display: inline-block;
+    background-color: transparent;
 
-  @media screen and (min-width: $screen-large) {
-    width: 220px;
-    height: 220px;
+    &:hover {
+      background-color: $color-green;
+    }
+
+    &:focus {
+      outline: 1px dashed $color-green;
+      text-decoration: none;
+    }
   }
 }

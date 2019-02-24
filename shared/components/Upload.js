@@ -125,15 +125,15 @@ class Upload extends Component {
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
           </legend>
+          <input onChange=${this.handleChange}
+            type="file"
+            id="source"
+            name="source"
+            accept=${requiredFileTypes[0]}
+          />
           <label for="source">
             Source material <em>${humanizedRequiredFileType}</em>
           </label>
-          <input onChange=${this.handleChange}
-                  type="file"
-                  id="source"
-                  name="source"
-                  accept=${requiredFileTypes[0]}
-          />
         </fieldset>
         ${[this.localPlay || '']}
       </form>

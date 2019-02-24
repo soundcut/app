@@ -13,12 +13,8 @@ fieldset {
 
 legend {
   display: flex;
+  flex-direction: column;
   width: 100%;
-
-  // Dirty fix for browsers which discard `display: flex` on `<legend>`
-  > * {
-    display: block;
-  }
 
   margin-bottom: $spacing-small;
   text-align: center;
@@ -28,10 +24,20 @@ legend {
 
 input[type=text],
 input[type=url] {
-  border-radius: $border-radius;
-  border: 1px solid transparent;
   height: $form-widget-height-small;
   padding: $spacing-xsmall;
+  border-radius: $border-radius;
+  border: 1px solid transparent;
+  background-color: $color-cement;
+
+  &:focus {
+    background-color: white;
+    border-color: $color-blue-light;
+  }
+
+  &:disabled {
+    background-color: $color-sand;
+  }
 }
 
 

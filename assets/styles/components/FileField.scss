@@ -11,6 +11,7 @@ fieldset.FileField {
     border-radius: 3px;
     background-color: $color-blue-lighter;
     color: $color-green;
+    cursor: pointer;
 
     em {
       display: block;
@@ -23,5 +24,9 @@ fieldset.FileField {
     height: 0;
     font-size: 0;
     overflow: hidden;
+
+    &:focus + label {
+      border-style: solid;
+    }
   }
 }
