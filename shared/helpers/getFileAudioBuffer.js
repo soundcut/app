@@ -2,7 +2,17 @@ const parser = require('mp3-parser');
 const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
 const concatAudioBuffer = require('../helpers/AudioBuffer.concat');
 
-const CHUNK_MAX_SIZE = 100 * 1000;
+const CHUNK_MAX_SIZE = 1000 * 1000;
+const CONCCURENT_DECODE_WORKERS = 4;
+
+const asyncWorker = (source, items, fn, output) => async () => {
+  let next;
+  while ((next = items.pop())) {
+    const idx = source.indexOf(next);
+    const result = await fn(next);
+    output[idx] = result;
+  }
+};
 
 function getArrayBuffer(file) {
   return new Promise(resolve => {
@@ -26,54 +36,56 @@ async function getFileAudioBuffer(file, audioCtx) {
   const tags = parser.readTags(view);
   const firstFrame = tags.pop();
   const tagsArrayBuffer = arrayBuffer.slice(0, firstFrame._section.offset);
+  const chunkArrayBuffers = [];
+  let chunk;
   let next = firstFrame._section.nextFrameIndex;
-  const frames = [firstFrame];
   while (next) {
     const frame = parser.readFrame(view, next);
-    frame && frames.push(frame);
+    if (frame) {
+      if (
+        chunk &&
+        chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE
+      ) {
+        const tmp = concatArrayBuffer(
+          tagsArrayBuffer,
+          arrayBuffer.slice(
+            chunk.frames[0]._section.offset,
+            chunk.frames[chunk.frames.length - 1]._section.nextFrameIndex
+          )
+        );
+        chunkArrayBuffers.push(tmp);
+        chunk = { byteLength: 0, frames: [] };
+      }
+
+      if (!chunk) {
+        chunk = { byteLength: 0, frames: [] };
+      }
+
+      chunk.byteLength = chunk.byteLength + frame._section.byteLength;
+      chunk.frames.push(frame);
+    }
+
     next = frame && frame._section.nextFrameIndex;
   }
 
-  const chunks = frames.reduce((acc, frame) => {
-    let chunk = acc[acc.length - 1];
+  const workers = [];
+  const source = chunkArrayBuffers;
+  const items = chunkArrayBuffers.slice();
+  const audioBuffers = new Array(chunkArrayBuffers.length);
+  const decode = decodeArrayBuffer.bind(null, audioCtx);
 
-    if (
-      !chunk ||
-      chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE
-    ) {
-      chunk = { byteLength: 0, frames: [] };
-    }
+  for (let i = 0; i < CONCCURENT_DECODE_WORKERS; i++) {
+    workers.push(asyncWorker(source, items, decode, audioBuffers)());
+  }
+  const done = await Promise.all(workers);
 
-    chunk.byteLength = chunk.byteLength + frame._section.byteLength;
-    chunk.frames.push(frame);
-
-    if (!acc.includes(chunk)) {
-      return acc.concat(chunk);
-    }
-
-    return acc;
-  }, []);
-
-  const arrayBuffers = chunks.map(chunk => {
-    const tmpArrayBuffer = arrayBuffer.slice(
-      chunk.frames[0]._section.offset,
-      chunk.frames[chunk.frames.length - 1]._section.nextFrameIndex
-    );
-
-    return concatArrayBuffer(tagsArrayBuffer, tmpArrayBuffer);
-  });
-
-  const audioBuffers = await Promise.all(
-    arrayBuffers.map(decodeArrayBuffer.bind(null, audioCtx))
-  );
-
-  const audioBuffer = audioBuffers.reduce((acc, audioBuffer_) => {
-    if (acc) {
-      return concatAudioBuffer(audioCtx, acc, audioBuffer_);
-    }
-
-    return audioBuffer_;
-  }, null);
+  let audioBuffer;
+  let current;
+  while ((current = audioBuffers.pop())) {
+    audioBuffer = audioBuffer
+      ? concatAudioBuffer(audioCtx, audioBuffer, current)
+      : current;
+  }
 
   return audioBuffer;
 }
