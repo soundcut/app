@@ -38,7 +38,7 @@ async function getFileAudioBuffer(file, audioCtx) {
   const tagsArrayBuffer = arrayBuffer.slice(0, firstFrame._section.offset);
   const chunkArrayBuffers = [];
   let chunk;
-  let next = firstFrame._section.nextFrameIndex;
+  let next = firstFrame._section.offset;
   while (next) {
     const frame = parser.readFrame(view, next);
     if (frame) {
