@@ -5,6 +5,30 @@ const concatAudioBuffer = require('../helpers/AudioBuffer.concat');
 const CHUNK_MAX_SIZE = 1000 * 1000;
 const CONCCURENT_DECODE_WORKERS = 4;
 
+function makeSaveChunk(chunkArrayBuffers, tagsArrayBuffer, sourceArrayBuffer) {
+  return function saveChunk(chunk) {
+    chunkArrayBuffers.push(
+      concatArrayBuffer(
+        tagsArrayBuffer,
+        sourceArrayBuffer.slice(
+          chunk.frames[0]._section.offset,
+          chunk.frames[chunk.frames.length - 1]._section.offset +
+            chunk.frames[chunk.frames.length - 1]._section.byteLength
+        )
+      )
+    );
+  };
+}
+
+function getEmptyChunk() {
+  return { byteLength: 0, frames: [] };
+}
+
+function addChunkFrame(chunk, frame) {
+  chunk.byteLength = chunk.byteLength + frame._section.byteLength;
+  chunk.frames.push(frame);
+}
+
 const asyncWorker = (source, items, fn, output) => async () => {
   let next;
   while ((next = items.pop())) {
@@ -37,35 +61,35 @@ async function getFileAudioBuffer(file, audioCtx) {
   const firstFrame = tags.pop();
   const tagsArrayBuffer = arrayBuffer.slice(0, firstFrame._section.offset);
   const chunkArrayBuffers = [];
+  const saveChunk = makeSaveChunk(
+    chunkArrayBuffers,
+    tagsArrayBuffer,
+    arrayBuffer
+  );
   let chunk;
   let next = firstFrame._section.offset;
   while (next) {
     const frame = parser.readFrame(view, next);
+    next = frame && frame._section.nextFrameIndex;
+
     if (frame) {
-      if (
-        chunk &&
-        chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE
-      ) {
-        const tmp = concatArrayBuffer(
-          tagsArrayBuffer,
-          arrayBuffer.slice(
-            chunk.frames[0]._section.offset,
-            chunk.frames[chunk.frames.length - 1]._section.nextFrameIndex
-          )
-        );
-        chunkArrayBuffers.push(tmp);
-        chunk = { byteLength: 0, frames: [] };
+      const chunkEnd =
+        chunk && chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE;
+      if (chunkEnd) {
+        saveChunk(chunk);
+        chunk = getEmptyChunk();
       }
 
       if (!chunk) {
-        chunk = { byteLength: 0, frames: [] };
+        chunk = getEmptyChunk();
       }
 
-      chunk.byteLength = chunk.byteLength + frame._section.byteLength;
-      chunk.frames.push(frame);
+      addChunkFrame(chunk, frame);
     }
 
-    next = frame && frame._section.nextFrameIndex;
+    if (chunk && (!frame || !next)) {
+      saveChunk(chunk);
+    }
   }
 
   const workers = [];
