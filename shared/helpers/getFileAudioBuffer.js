@@ -81,7 +81,7 @@ async function getFileAudioBuffer(file, audioCtx) {
 
   let audioBuffer;
   let current;
-  while ((current = audioBuffers.pop())) {
+  while ((current = audioBuffers.shift())) {
     audioBuffer = audioBuffer
       ? concatAudioBuffer(audioCtx, audioBuffer, current)
       : current;
