@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 
-const { Component, wire } = require('hypermorphic');
+const { Component } = require('hypermorphic');
+const { encode } = require('punycode');
 
 const Slice = require('./Slice');
 const getDisplayName = require('../helpers/getDisplayName');
@@ -34,6 +35,14 @@ class LocalPlay extends Component {
   }
 
   onconnected() {
+    const filename = this.file.name;
+    const encodedName = encode(filename);
+    const historyState = { filename: encodedName };
+    const pathname = `/play?title=${encodedName}`;
+    const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+    document.title = newTitle;
+    history.pushState(historyState, document.title, pathname);
+
     this.objectURL = URL.createObjectURL(this.file);
     this.audio = new Audio(this.objectURL);
     this.interval = setInterval(() => {

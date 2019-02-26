@@ -28,6 +28,8 @@ class Shared extends Component {
   }
 
   onconnected() {
+    window.document.title = 'Listen to slice | Sound Slice';
+
     this.setState(initialState);
     this.fetchSlice();
   }

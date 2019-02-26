@@ -20,7 +20,16 @@
       </a>
     </header>
     <div id="wrapper">
-      <main>${props.main}</main>
+      <main>
+        <noscript>
+          <p class="Error">
+            Sound Slice is an app for manipulating audio files in the browser, it <strong>requires JavaScript</strong>.
+            <br />
+            Please <strong>enable JavaScript</strong> in your browser to continue.
+          </p>
+        </noscript>
+        ${props.main}
+      </main>
     </div>
   </body>
 </html>

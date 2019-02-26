@@ -1,17 +1,11 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
-const { encode } = require('punycode');
-
-const LocalPlay = require('./LocalPlay');
-const getDisplayName = require('../helpers/getDisplayName');
+const ErrorMessage = require('./ErrorMessage');
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
-const requiredFileTypeName = 'mp3';
 const humanizedRequiredFileType = requiredFileTypes.join(', ');
 const fileSizeLimit = 1048576 * 1000;
-
-const uploadPath = `/api/upload/${requiredFileTypeName}`;
 
 function humanizeFileSize(bytes) {
   if (bytes < 1024) {
@@ -27,22 +21,22 @@ function InvalidFileSize(size) {
   const actual = humanizeFileSize(size);
   const limit = humanizeFileSize(fileSizeLimit);
 
-  return wire({ actual, limit })`
-  <p>
+  const message = wire()`
     File selected is bigger (<strong>${actual}</strong>)
     than maximum size (<strong>${limit}</strong>).
-  </p>
   `;
+
+  return ErrorMessage(message);
 }
 
 function InvalidFileType(type) {
-  return wire({ type })`
-  <p>
+  const message = wire()`
     Selected file type (<strong>${type}</strong>) is not supported.
     <br />
-    Please upload a <strong>${humanizedRequiredFileType}</strong>
-  </p>
+    Please upload a <strong>${humanizedRequiredFileType}</strong> file.
   `;
+
+  return ErrorMessage(message);
 }
 
 function isFileSizeValid(bytes) {
@@ -62,55 +56,32 @@ const initialState = {
 };
 
 class Upload extends Component {
-  constructor(title) {
+  constructor(onFileValid) {
     super();
-    this.pageTitle = title;
+    this.onFileValid = onFileValid;
     this.handleChange = this.handleChange.bind(this);
-  }
-
-  onconnected() {
-    this.setState(initialState);
-    history.replaceState({}, document.title, '/upload');
   }
 
   handleChange(evt) {
     const target = evt.target;
     const file = target.files[0];
 
-    if (!isFileValid(file)) {
-      this.setState({ file: undefined });
-      return;
-    } else {
-      const filename = file.name;
-      const encodedName = encode(filename);
-      const historyState = { filename: encode(filename) };
-      const pathname = `/upload?title=${encodedName}`;
-      const newTitle = `${getDisplayName(filename)} | ${this.pageTitle}`;
+    this.setState({
+      file,
+    });
 
-      if (!this.state.file) {
-        history.pushState(historyState, newTitle, pathname);
-      } else {
-        history.replaceState(historyState, newTitle, pathname);
-      }
-      document.title = newTitle;
-
-      this.localPlay = new LocalPlay({
-        file,
-      });
-      this.setState({
-        file,
-      });
+    if (isFileValid(file)) {
+      this.onFileValid(file);
     }
   }
 
   render() {
     const state = this.state;
     const file = state.file;
+
     return this.html`
-      <form onconnected=${this}
-            enctype="multipart/form-data"
+      <form enctype="multipart/form-data"
             method="post"
-            action="${uploadPath}"
       >
         ${
           file
@@ -135,7 +106,6 @@ class Upload extends Component {
             Source material <em>${humanizedRequiredFileType}</em>
           </label>
         </fieldset>
-        ${[this.localPlay || '']}
       </form>
     `;
   }
