@@ -172,6 +172,10 @@ app.get('/', function(req, res) {
   res.end();
 });
 
+app.get('/play', function(req, res) {
+  res.redirect('/');
+});
+
 app.get('/upload', function(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/html',

@@ -2,8 +2,8 @@
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
 
-const LocalPlay = require('./LocalPlay');
-const getDisplayName = require('../helpers/getDisplayName');
+const ErrorMessage = require('../ErrorMessage');
+const Loader = require('../Loader');
 
 const linkPath = '/api/link';
 
@@ -14,49 +14,53 @@ const initialState = {
   file: undefined,
 };
 
-function ErrorMessage() {
-  return wire()`<p>Oops! Something went wrong.</p>`;
-}
-
-class Link extends Component {
-  constructor(title) {
+class LinkForm extends Component {
+  constructor({ onFileValid, loadingCallback } = {}) {
     super();
-    this.pageTitle = title;
+    this.onFileValid = onFileValid;
+    this.loadingCallback = loadingCallback;
+    this.state = Object.assign({}, initialState);
     this.handleChange = this.handleChange.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.formWire = wire();
   }
 
   onconnected() {
-    this.setState(initialState);
-    this.source = document.getElementById('source');
-    const initialValue = new URLSearchParams(location.search).get('from');
+    document.title = 'Sound Slice | Link external media';
+    this.link = document.getElementById('link');
+    this.loader = Loader();
+    this.errorMessage = ErrorMessage(
+      'Unable to extract audio from this source at this time.'
+    );
+
+    const initialValue = new URLSearchParams(window.location.search).get(
+      'from'
+    );
     if (initialValue) {
-      this.source.value = initialValue;
-      if (this.source.checkValidity()) {
+      this.link.value = initialValue;
+      if (this.link.checkValidity()) {
         this.handleSubmit();
+      } else {
+        this.link.focus();
       }
-    } else {
-      this.source.focus();
     }
     this.handleChange();
   }
 
   reset() {
-    this.localPlay = undefined;
     this.setState(initialState);
-    this.source.focus();
   }
 
   handleReset() {
     const historyState = { value: '' };
-    history.pushState(historyState, this.pageTitle, '/link');
-    document.title = this.pageTitle;
+    document.title = 'Sound Slice';
+    history.pushState(historyState, document.title, '/link');
     this.reset();
   }
 
   handleChange() {
-    const value = this.source.value;
+    const value = this.link.value;
     if (value && !this.state.hasValue) {
       this.setState({ hasValue: true });
     }
@@ -69,11 +73,7 @@ class Link extends Component {
   async handleSubmit(evt) {
     if (evt) evt.preventDefault();
 
-    const value = this.source.value;
-    const historyState = { value };
-    const pathname = `/link?from=${value}`;
-    history.pushState(historyState, this.pageTitle, pathname);
-    document.title = this.pageTitle;
+    const value = this.link.value;
 
     if (this.state.file) {
       this.reset();
@@ -89,7 +89,14 @@ class Link extends Component {
       }),
     });
 
-    this.setState({ loading: true });
+    this.setState({
+      loading: true,
+      error: false,
+    });
+    if (typeof this.loadingCallback === 'function') {
+      this.loadingCallback(true);
+    }
+
     try {
       const response = await fetchPromise;
       if (response.status !== 201) {
@@ -101,18 +108,15 @@ class Link extends Component {
         .get('content-disposition')
         .match(/filename="(.+)"/)[1];
       const file = new File([blob], filename);
-      const newHistoryState = { value, title: filename };
-      const newTitle = `${getDisplayName(filename)} | ${this.pageTitle}`;
-      history.replaceState(newHistoryState, newTitle, pathname);
-      document.title = newTitle;
 
-      this.localPlay = new LocalPlay({
-        file,
-      });
+      if (typeof this.onFileValid === 'function') {
+        this.onFileValid(file);
+      }
 
       this.setState({
         file,
         loading: false,
+        error: false,
       });
     } catch (err) {
       console.error(err);
@@ -120,15 +124,30 @@ class Link extends Component {
         error: true,
         loading: false,
       });
+    } finally {
+      if (typeof this.loadingCallback === 'function') {
+        this.loadingCallback(false);
+      }
     }
+  }
+
+  decorateContent(...children) {
+    return this.html`
+      <div onconnected=${this}>
+        ${children}
+      </div>
+    `;
   }
 
   render() {
     const state = this.state;
-    return this.html`
-      <form onconnected=${this}
-            onSubmit=${this.handleSubmit}
-            onReset=${this.handleReset}
+
+    if (state.loading) {
+      return this.decorateContent(this.loader);
+    }
+
+    return this.decorateContent(this.formWire`
+      <form onSubmit=${this.handleSubmit}
             method="get"
             action="/link"
       >
@@ -138,30 +157,25 @@ class Link extends Component {
             <em>Audio will be extracted for you to slice</em>
           </legend>
           ${[state.error ? ErrorMessage() : '']}
-          <label for="source">
+          <label for="link">
             URL
           </label>
           <input onInput=${this.handleChange}
                  type="url"
-                 id="source"
-                 name="source"
-                 disabled=${state.loading}
+                 id="link"
+                 name="link"
           />
         </fieldset>
         <p class="button-container flex flex-wrap flex-justify-content-end">
           <button type="submit"
-                  disabled=${!state.hasValue || state.loading}
-                  title="${
-                    state.loading ? 'This can take up to a minute...' : ''
-                  }"
+                  disabled=${!state.hasValue}
           >
-            ${state.loading ? 'Extracting audio...' : 'Extract audio'}
+            Extract audio
           </button>
         </p>
-        ${[this.localPlay || '']}
       </form>
-    `;
+    `);
   }
 }
 
-module.exports = Link;
+module.exports = LinkForm;
