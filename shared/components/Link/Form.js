@@ -4,6 +4,7 @@ const { Component, wire } = require('hypermorphic');
 
 const ErrorMessage = require('../ErrorMessage');
 const Loader = require('../Loader');
+const CloudDownload = require('../Icons/CloudDownload');
 
 const linkPath = '/api/link';
 
@@ -29,7 +30,7 @@ class LinkForm extends Component {
   onconnected() {
     document.title = 'Sound Slice | Link external media';
     this.link = document.getElementById('link');
-    this.loader = Loader();
+    this.loader = Loader('Extracting audio... Please wait.');
     this.errorMessage = ErrorMessage(
       'Unable to extract audio from this source at this time.'
     );
@@ -169,8 +170,10 @@ class LinkForm extends Component {
         <p class="button-container flex flex-wrap flex-justify-content-end">
           <button type="submit"
                   disabled=${!state.hasValue}
+                  class="button--withicon"
           >
-            Extract audio
+            ${CloudDownload()}
+            <span>Extract audio</span>
           </button>
         </p>
       </form>

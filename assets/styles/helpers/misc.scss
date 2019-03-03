@@ -1,3 +1,26 @@
+@import '../abstracts/variables.scss';
+
 .full-width {
   width: 100%;
+}
+
+.padding-top-xsmall {
+  padding-top: $spacing-small;
+}
+
+.padding-y-xsmall {
+  padding-top: $spacing-xsmall;
+  padding-bottom: $spacing-xsmall;
+}
+
+.padding-xsmall {
+  padding: $spacing-xsmall;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.flip {
+  transform: rotate(180deg);
 }

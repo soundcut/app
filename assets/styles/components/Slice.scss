@@ -43,4 +43,16 @@
       }
     }
   }
+
+  .player-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-xsmall;
+    padding-top: $spacing-small;
+
+    strong {
+      color: $color-sand;
+    }
+  }
 }

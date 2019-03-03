@@ -1,8 +1,8 @@
 @import '../abstracts/variables.scss';
 
 .LocalPlay {
-  h6 {
-    text-transform: none;
-    color: $color-blue-light;
+  h1 {
+    margin-bottom: 0;
+    margin-right: $spacing-small;
   }
 }

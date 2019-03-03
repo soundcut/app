@@ -4,6 +4,7 @@ const { Component } = require('hypermorphic');
 const { encode } = require('punycode');
 
 const Slice = require('./Slice');
+const Download = require('./Icons/Download');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDownloadName = require('../helpers/getDownloadName');
 
@@ -89,17 +90,21 @@ class LocalPlay extends Component {
 
     return this.html`
       <div class="LocalPlay" onconnected=${this} ondisconnected=${this}>
-        <h3>${displayName}</h3>
-        <p>
-          <button
-            class="full-width"
-            disabled=${!mediaIsLoaded}
-            onClick=${this.handleDownload}
-            title="Your browser's download dialog should open instantly."
-          >
-            Download
-          </button>
-        </p>
+        <div class="flex flex-wrap flex-justify-between flex-items-center">
+          <h1 class="flex-grow1">
+            ${displayName} <small>(${humanizedSize})</small>
+          </h1>
+          <div class="padding-y-xsmall flex flex-grow1 flex-justify-content-end">
+            <button
+              disabled=${!mediaIsLoaded}
+              onClick=${this.handleDownload}
+              title="Your browser's download dialog should open instantly."
+              class="button--xsmall button--withicon"
+            >
+              ${Download()} <span>Download</span>
+            </button>
+          </div>
+        </div>
         ${[this.slice || '']}
       </div>
     `;

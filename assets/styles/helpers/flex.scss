@@ -22,6 +22,14 @@
   justify-content: space-between;
 }
 
+.flex-items-center {
+  align-items: center;
+}
+
 .flex-wrap {
   flex-wrap: wrap;
+}
+
+.flex-grow1 {
+  flex-grow: 1;
 }

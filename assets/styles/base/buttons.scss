@@ -7,6 +7,20 @@ a.button {
 a.button,
 button {
   padding: $spacing-small;
+  &.button--xsmall {
+    padding: $spacing-xsmall;
+  }
+
+  &.button--withicon {
+    display: flex;
+    align-items: center;
+
+    svg + span {
+      margin-left: $spacing-xsmall;
+      width: 100%;
+    }
+  }
+
   border: 1px solid transparent;
   border-radius: $border-radius;
   background-color: $color-blue-lighter;

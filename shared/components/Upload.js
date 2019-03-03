@@ -2,6 +2,7 @@
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
 const ErrorMessage = require('./ErrorMessage');
+const UploadIcon = require('./Icons/Upload');
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
 const humanizedRequiredFileType = requiredFileTypes.join(', ');
@@ -58,6 +59,7 @@ const initialState = {
 class Upload extends Component {
   constructor(onFileValid) {
     super();
+    this.state = Object.assign({}, initialState);
     this.onFileValid = onFileValid;
     this.handleChange = this.handleChange.bind(this);
   }
@@ -83,19 +85,19 @@ class Upload extends Component {
       <form enctype="multipart/form-data"
             method="post"
       >
-        ${
-          file
-            ? [
-                !isFileSizeValid(file.size) && InvalidFileSize(file.size),
-                !isFileTypeValid(file.type) && InvalidFileType(file.type),
-              ].filter(Boolean)
-            : ''
-        }
         <fieldset class="FileField">
           <legend>
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
           </legend>
+          ${
+            file
+              ? [
+                  !isFileSizeValid(file.size) && InvalidFileSize(file.size),
+                  !isFileTypeValid(file.type) && InvalidFileType(file.type),
+                ].filter(Boolean)
+              : ''
+          }
           <input onChange=${this.handleChange}
             type="file"
             id="source"
@@ -103,7 +105,13 @@ class Upload extends Component {
             accept=${requiredFileTypes[0]}
           />
           <label for="source">
-            Source material <em>${humanizedRequiredFileType}</em>
+            ${UploadIcon()}
+            <span>
+              <span>
+                Source material
+              </span>
+              <em>${humanizedRequiredFileType}</em>
+            </span>
           </label>
         </fieldset>
       </form>

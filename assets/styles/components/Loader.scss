@@ -1,9 +1,14 @@
 @import '../abstracts/variables.scss';
 
 .Loader {
+  margin-top: $spacing-small;
   text-align: center;
-  svg {
+  > svg {
     animation: rotation 2s infinite linear;
+  }
+
+  > p {
+    margin-bottom: $spacing-xsmall;
   }
 }
 
