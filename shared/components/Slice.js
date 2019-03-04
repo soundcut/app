@@ -285,7 +285,6 @@ class Slice extends Component {
           slice.loop = true;
           slice.volume = volume;
           this.volume = new Volume(slice);
-          slice.play();
           this.blob = blob;
           this.render();
           resolve();
