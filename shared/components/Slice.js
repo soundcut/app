@@ -351,34 +351,34 @@ class Slice extends Component {
                 </small>
               </div>
               <div class="flex">
+                <div class="flex flex-direction-column">
+                  <button type="button"
+                          disabled=${disabled}
+                          onclick=${this.handlePlayPauseClick}
+                  >
+                    ${disabled || this.slice.paused ? Play() : Pause()}
+                  </button>
+                  <button type="button"
+                          onClick=${this.handleDownloadClick}
+                          disabled=${disabled}
+                          title="Your browser's download dialog should open instantly."
+                  >
+                    ${Download()}
+                  </button>
+                  <button type="button"
+                          onClick=${this.handleShareClick}
+                          disabled=${disabled}
+                          title="${
+                            !this.state.sharing
+                              ? 'A unique URL will be generated for you to share your slice.'
+                              : 'Generating unique URL...'
+                          }"
+                  >
+                    ${Share()}
+                  </button>
+                </div>
                 ${[this.waveform ? this.waveform : '']}
                 ${[this.slice ? this.volume : '']}
-              </div>
-              <div class="flex">
-                <button type="button"
-                        disabled=${disabled}
-                        onclick=${this.handlePlayPauseClick}
-                >
-                  ${disabled || this.slice.paused ? Play() : Pause()}
-                </button>
-                <button type="button"
-                        onClick=${this.handleDownloadClick}
-                        disabled=${disabled}
-                        title="Your browser's download dialog should open instantly."
-                >
-                  ${Download()}
-                </button>
-                <button type="button"
-                        onClick=${this.handleShareClick}
-                        disabled=${disabled}
-                        title="${
-                          !this.state.sharing
-                            ? 'A unique URL will be generated for you to share your slice.'
-                            : 'Generating unique URL...'
-                        }"
-                >
-                  ${Share()}
-                </button>
               </div>
             </div>
           </div>

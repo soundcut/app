@@ -11,12 +11,9 @@
     border-top: 1px solid $color-blue-lighter;
 
     button {
+      background-color: transparent;
       border-radius: 0;
       flex-grow: 1;
-
-      &:not(:last-child) {
-        border-right: 1px solid $color-blue-darker;
-      }
     }
 
     #WaveForm {
