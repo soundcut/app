@@ -1,75 +1,18 @@
 const { Component, wire } = require('hypermorphic');
 
-const Loader = require('./Loader');
-const Play = require('./Icons/Play');
-const Pause = require('./Icons/Pause');
-const Download = require('./Icons/Download');
-const Share = require('./Icons/Share');
-const ErrorMessage = require('./ErrorMessage');
-const Volume = require('./Volume');
-const WaveForm = require('./WaveForm');
-const getDisplayName = require('../helpers/getDisplayName');
-const formatTime = require('../helpers/formatTime');
-const decodeFileAudioData = require('../helpers/decodeFileAudioData');
-const getAudioSlice = require('../helpers/getAudioSlice');
+const Loader = require('../Loader');
+const ErrorMessage = require('../ErrorMessage');
+const Volume = require('../Volume');
+const WaveForm = require('../WaveForm');
+const PlayerActions = require('./PlayerActions');
+const ShareInput = require('./ShareInput');
+const getDisplayName = require('../../helpers/getDisplayName');
+const formatTime = require('../../helpers/formatTime');
+const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
+const getAudioSlice = require('../../helpers/getAudioSlice');
 
 const MAX_SLICE_LENGTH = 90;
 const SHARE_PATH = '/api/share';
-
-function ShareInput(id) {
-  const url = `${window.location.origin}/slice/${id}`;
-  return wire()`
-  <p>
-    <label for="share" class="flex flex-justify-content-between">
-      <span>Sharing link for this slice:</span>
-      <a href="${url}">
-        Go to this slice
-      </a>
-    </label>
-    <input id="share" class="full-width" type="text" value=${url} />
-  </p>
-  `;
-}
-
-/* eslint-disable indent */
-function PlayerActions({
-  disabled,
-  paused,
-  sharing,
-  handlePlayPauseClick,
-  handleDownloadClick,
-  handleShareClick,
-}) {
-  return wire()`
-    <div class="flex flex-direction-column">
-      <button type="button"
-              disabled=${disabled}
-              onclick=${handlePlayPauseClick}
-      >
-        ${disabled || paused ? Play() : Pause()}
-      </button>
-      <button type="button"
-              onClick=${handleDownloadClick}
-              disabled=${disabled}
-              title="Your browser's download dialog should open instantly."
-      >
-        ${Download()}
-      </button>
-      <button type="button"
-              onClick=${handleShareClick}
-              disabled=${disabled}
-              title="${
-                !sharing
-                  ? 'A unique URL will be generated for you to share your slice.'
-                  : 'Generating unique URL...'
-              }"
-      >
-        ${Share()}
-      </button>
-    </div>
-  `;
-}
-/* eslint-enable indent */
 
 const initialState = {
   mounted: false,

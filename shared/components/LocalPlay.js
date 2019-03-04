@@ -98,7 +98,7 @@ class LocalPlay extends Component {
             <button
               disabled=${!mediaIsLoaded}
               onClick=${this.handleDownload}
-              title="Your browser's download dialog should open instantly."
+              title="Download the source file."
               class="button--xsmall button--withicon"
             >
               ${Download()} <span>Download</span>
