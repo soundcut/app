@@ -3,6 +3,10 @@ const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
 const Loader = require('./Loader');
+const Play = require('./Icons/Play');
+const Pause = require('./Icons/Pause');
+const Download = require('./Icons/Download');
+const Share = require('./Icons/Share');
 const ErrorMessage = require('./ErrorMessage');
 const Volume = require('./Volume');
 const WaveForm = require('./WaveForm');
@@ -355,14 +359,14 @@ class Slice extends Component {
                         disabled=${disabled}
                         onclick=${this.handlePlayPauseClick}
                 >
-                  ${disabled || this.slice.paused ? 'Play' : 'Pause'}
+                  ${disabled || this.slice.paused ? Play() : Pause()}
                 </button>
                 <button type="button"
                         onClick=${this.handleDownloadClick}
                         disabled=${disabled}
                         title="Your browser's download dialog should open instantly."
                 >
-                  Download
+                  ${Download()}
                 </button>
                 <button type="button"
                         onClick=${this.handleShareClick}
@@ -373,7 +377,7 @@ class Slice extends Component {
                             : 'Generating unique URL...'
                         }"
                 >
-                  Share
+                  ${Share()}
                 </button>
               </div>
             </div>
