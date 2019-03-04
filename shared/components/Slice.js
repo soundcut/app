@@ -279,7 +279,7 @@ class Slice extends Component {
           tmpArrayBuffer
         );
 
-        let volume = 1;
+        let volume = 0.5;
         if (this.slice) {
           this.slice.pause();
           volume = this.slice.volume;
