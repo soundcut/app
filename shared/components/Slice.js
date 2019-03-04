@@ -39,6 +39,46 @@ function ShareInput(id) {
   `;
 }
 
+/* eslint-disable indent */
+function PlayerActions({
+  disabled,
+  paused,
+  sharing,
+  handlePlayPauseClick,
+  handleDownloadClick,
+  handleShareClick,
+}) {
+  return wire()`
+    <div class="flex flex-direction-column">
+      <button type="button"
+              disabled=${disabled}
+              onclick=${handlePlayPauseClick}
+      >
+        ${disabled || paused ? Play() : Pause()}
+      </button>
+      <button type="button"
+              onClick=${handleDownloadClick}
+              disabled=${disabled}
+              title="Your browser's download dialog should open instantly."
+      >
+        ${Download()}
+      </button>
+      <button type="button"
+              onClick=${handleShareClick}
+              disabled=${disabled}
+              title="${
+                !sharing
+                  ? 'A unique URL will be generated for you to share your slice.'
+                  : 'Generating unique URL...'
+              }"
+      >
+        ${Share()}
+      </button>
+    </div>
+  `;
+}
+/* eslint-enable indent */
+
 const initialState = {
   mounted: false,
   start: undefined,
@@ -206,6 +246,13 @@ class Slice extends Component {
     this.setState({ loading: true, sharing: true, error: false });
     try {
       const response = await promise;
+
+      if (response.status !== 200) {
+        const err = new Error('Server Error');
+        err.response = response;
+        throw err;
+      }
+
       const data = await response.json();
       this.setState({
         loading: false,
@@ -214,10 +261,15 @@ class Slice extends Component {
       });
     } catch (err) {
       console.error({ err });
+      const error = [
+        'Unable to share this slice :(',
+        !err.response && 'Is this device connected to the internet?',
+        err.message,
+      ];
       this.setState({
         loading: false,
         sharing: false,
-        error: err.message,
+        error,
       });
       return;
     }
@@ -312,7 +364,6 @@ class Slice extends Component {
   }
 
   render() {
-    /* eslint-disable indent */
     const state = this.state;
     const disabled = !this.slice || this.state.loading;
     const duration = state.end - state.start;
@@ -332,6 +383,7 @@ class Slice extends Component {
     }
 
     if (this.slice) {
+      /* eslint-disable indent */
       return this.decorateContent(
         this.sliceWire`
           <div>
@@ -351,32 +403,16 @@ class Slice extends Component {
                 </small>
               </div>
               <div class="flex">
-                <div class="flex flex-direction-column">
-                  <button type="button"
-                          disabled=${disabled}
-                          onclick=${this.handlePlayPauseClick}
-                  >
-                    ${disabled || this.slice.paused ? Play() : Pause()}
-                  </button>
-                  <button type="button"
-                          onClick=${this.handleDownloadClick}
-                          disabled=${disabled}
-                          title="Your browser's download dialog should open instantly."
-                  >
-                    ${Download()}
-                  </button>
-                  <button type="button"
-                          onClick=${this.handleShareClick}
-                          disabled=${disabled}
-                          title="${
-                            !this.state.sharing
-                              ? 'A unique URL will be generated for you to share your slice.'
-                              : 'Generating unique URL...'
-                          }"
-                  >
-                    ${Share()}
-                  </button>
-                </div>
+                ${[
+                  PlayerActions({
+                    disabled,
+                    paused: this.slice.paused,
+                    sharing: state.sharing,
+                    handlePlayPauseClick: this.handlePlayPauseClick,
+                    handleDownloadClick: this.handleDownloadClick,
+                    handleShareClick: this.handleShareClick,
+                  }),
+                ]}
                 ${[this.waveform ? this.waveform : '']}
                 ${[this.slice ? this.volume : '']}
               </div>
