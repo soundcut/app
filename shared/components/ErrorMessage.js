@@ -1,7 +1,11 @@
 const { wire } = require('hypermorphic');
 
-function ErrorMessage(content = 'Oops! Something went wrong.') {
-  return wire()`<p class="Error">${content}</p>`;
+function ErrorMessage(messages_ = 'Oops! Something went wrong.') {
+  const messages = Array.isArray(messages_) ? messages_ : [messages_];
+
+  return wire()`<p class="Error">
+    ${messages.map(message => wire()`${message} <br/>`)}
+  </p>`;
 }
 
 module.exports = ErrorMessage;

@@ -3,6 +3,7 @@ const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
 const Loader = require('./Loader');
+const ErrorMessage = require('./ErrorMessage');
 const Volume = require('./Volume');
 const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
@@ -17,10 +18,6 @@ const SHARE_PATH = '/api/share';
 function arrayBufferToObjectURL(buffer, callback) {
   const blob = new Blob([buffer], { type: 'audio/mpeg' });
   setTimeout(() => callback(URL.createObjectURL(blob), blob), 0);
-}
-
-function ErrorMessage() {
-  return wire()`<p>Oops! Something went wrong.</p>`;
 }
 
 function ShareInput(id) {
@@ -75,8 +72,15 @@ class Slice extends Component {
       await this.setBoundary('start', 0);
       await this.setBoundary('end', this.sourceAudioBuffer.duration);
     } catch (err) {
+      const error = [
+        'Unable to decode audio data :(',
+        'Please try again using a different browser.',
+        err.message,
+      ];
+
       this.setState({
         decoding: false,
+        error,
       });
       return;
     }
@@ -205,14 +209,14 @@ class Slice extends Component {
         id: data.id,
       });
     } catch (err) {
+      console.error({ err });
       this.setState({
         loading: false,
         sharing: false,
-        error: true,
+        error: err.message,
       });
       return;
     }
-    this.setState({ loading: false, sharing: false, error: false });
   }
 
   async createSlice() {
@@ -319,58 +323,64 @@ class Slice extends Component {
       );
     }
 
-    return this.decorateContent(
-      this.sliceWire`
-        <div>
-          ${[state.error ? ErrorMessage() : '']}
-          ${[state.id ? ShareInput(state.id) : '']}
-          <div class="player-container">
-            <div class="player-header">
-              <strong>
-                Drag handles to slice
-              </strong>
-              <small>
-                ${
-                  this.slice
-                    ? `${formatTime(duration)} (${duration}seconds)`
-                    : ''
-                }
-              </small>
-            </div>
-            <div class="flex">
-              ${[this.waveform ? this.waveform : '']}
-              ${[this.slice ? this.volume : '']}
-            </div>
-            <div class="flex">
-              <button type="button"
-                      disabled=${disabled}
-                      onclick=${this.handlePlayPauseClick}
-              >
-                ${disabled || this.slice.paused ? 'Play' : 'Pause'}
-              </button>
-              <button type="button"
-                      onClick=${this.handleDownloadClick}
-                      disabled=${disabled}
-                      title="Your browser's download dialog should open instantly."
-              >
-                Download
-              </button>
-              <button type="button"
-                      onClick=${this.handleShareClick}
-                      disabled=${disabled}
-                      title="${
-                        !this.state.sharing
-                          ? 'A unique URL will be generated for you to share your slice.'
-                          : 'Generating unique URL...'
-                      }"
-              >
-                Share
-              </button>
+    if (!this.slice && state.error) {
+      return this.decorateContent(ErrorMessage(state.error));
+    }
+
+    if (this.slice) {
+      return this.decorateContent(
+        this.sliceWire`
+          <div>
+            ${[state.error ? ErrorMessage(state.error) : '']}
+            ${[state.id ? ShareInput(state.id) : '']}
+            <div class="player-container">
+              <div class="player-header">
+                <strong>
+                  Drag handles to slice
+                </strong>
+                <small>
+                  ${
+                    this.slice
+                      ? `${formatTime(duration)} (${duration}seconds)`
+                      : ''
+                  }
+                </small>
+              </div>
+              <div class="flex">
+                ${[this.waveform ? this.waveform : '']}
+                ${[this.slice ? this.volume : '']}
+              </div>
+              <div class="flex">
+                <button type="button"
+                        disabled=${disabled}
+                        onclick=${this.handlePlayPauseClick}
+                >
+                  ${disabled || this.slice.paused ? 'Play' : 'Pause'}
+                </button>
+                <button type="button"
+                        onClick=${this.handleDownloadClick}
+                        disabled=${disabled}
+                        title="Your browser's download dialog should open instantly."
+                >
+                  Download
+                </button>
+                <button type="button"
+                        onClick=${this.handleShareClick}
+                        disabled=${disabled}
+                        title="${
+                          !this.state.sharing
+                            ? 'A unique URL will be generated for you to share your slice.'
+                            : 'Generating unique URL...'
+                        }"
+                >
+                  Share
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      `
-    );
+        `
+      );
+    }
   }
 }
 

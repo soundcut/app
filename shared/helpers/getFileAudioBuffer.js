@@ -101,7 +101,7 @@ async function getFileAudioBuffer(file, audioCtx) {
   for (let i = 0; i < CONCCURENT_DECODE_WORKERS; i++) {
     workers.push(asyncWorker(source, items, decode, audioBuffers)());
   }
-  const done = await Promise.all(workers);
+  await Promise.all(workers);
 
   let audioBuffer;
   let current;
