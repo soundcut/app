@@ -1,5 +1,3 @@
-const parser = require('mp3-parser');
-const ID3Writer = require('browser-id3-writer');
 const { Component, wire } = require('hypermorphic');
 
 const Loader = require('./Loader');
@@ -11,18 +9,12 @@ const ErrorMessage = require('./ErrorMessage');
 const Volume = require('./Volume');
 const WaveForm = require('./WaveForm');
 const getDisplayName = require('../helpers/getDisplayName');
-const getDuration = require('../helpers/getDuration');
 const formatTime = require('../helpers/formatTime');
-const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
 const decodeFileAudioData = require('../helpers/decodeFileAudioData');
+const getAudioSlice = require('../helpers/getAudioSlice');
 
 const MAX_SLICE_LENGTH = 90;
 const SHARE_PATH = '/api/share';
-
-function arrayBufferToObjectURL(buffer, callback) {
-  const blob = new Blob([buffer], { type: 'audio/mpeg' });
-  setTimeout(() => callback(URL.createObjectURL(blob), blob), 0);
-}
 
 function ShareInput(id) {
   const url = `${window.location.origin}/slice/${id}`;
@@ -113,8 +105,6 @@ class Slice extends Component {
     });
     try {
       this.sourceAudioBuffer = await decodeFileAudioData(this.file);
-      await this.setBoundary('start', 0);
-      await this.setBoundary('end', this.sourceAudioBuffer.duration);
     } catch (err) {
       const error = [
         'Unable to decode audio data :(',
@@ -131,6 +121,9 @@ class Slice extends Component {
     this.setState({
       decoding: false,
     });
+
+    await this.setBoundary('start', 0);
+    await this.setBoundary('end', this.sourceAudioBuffer.duration);
 
     this.waveform = new WaveForm({
       audio: this.audio,
@@ -278,81 +271,21 @@ class Slice extends Component {
   async createSlice() {
     const state = this.state;
 
-    await new Promise(resolve => {
-      let fileReader = new FileReader();
-      fileReader.onloadend = () => {
-        const _sourceArrayBuffer = fileReader.result;
-
-        // scrub source's metadata..
-        const writer = new ID3Writer(_sourceArrayBuffer);
-        writer.addTag();
-        const sourceArrayBuffer = writer.arrayBuffer;
-
-        const view = new DataView(sourceArrayBuffer);
-
-        const tags = parser.readTags(view);
-        const id3v2Tag = tags[0];
-        const id3v2TagArrayBuffer = sourceArrayBuffer.slice(
-          id3v2Tag._section,
-          id3v2Tag._section.offset
-        );
-
-        const firstFrame = tags[tags.length - 1];
-        let next = firstFrame._section.nextFrameIndex;
-
-        const sliceFrames = [];
-        let duration = 0;
-        while (next) {
-          const frame = parser.readFrame(view, next, true);
-          if (frame) {
-            frame.duration = getDuration(
-              frame._section.byteLength,
-              frame.header.bitrate
-            );
-
-            duration += frame.duration;
-            if (duration >= state.start) {
-              if (duration > state.end) {
-                break;
-              }
-              sliceFrames.push(frame);
-            }
-          }
-          next = frame && frame._section.nextFrameIndex;
-        }
-
-        const tmpArrayBuffer = sourceArrayBuffer.slice(
-          sliceFrames[0]._section.offset,
-          sliceFrames[sliceFrames.length - 1]._section.nextFrameIndex
-        );
-
-        const sliceArrayBuffer = concatArrayBuffer(
-          id3v2TagArrayBuffer,
-          tmpArrayBuffer
-        );
-
-        let volume = 0.5;
-        if (this.slice) {
-          this.slice.pause();
-          volume = this.slice.volume;
-          this.slice = undefined;
-        }
-
-        arrayBufferToObjectURL(sliceArrayBuffer, (objectURL, blob) => {
-          const slice = new Audio();
-          this.slice = slice;
-          slice.src = objectURL;
-          slice.loop = true;
-          slice.volume = volume;
-          this.volume = new Volume(slice);
-          this.blob = blob;
-          this.render();
-          resolve();
-        });
-      };
-
-      fileReader.readAsArrayBuffer(this.file);
-    });
+    const { audio, blob } = await getAudioSlice(
+      this.file,
+      state.start,
+      state.end
+    );
+    let volume = 0.5;
+    if (this.slice) {
+      this.slice.pause();
+      volume = this.slice.volume;
+      this.slice = undefined;
+    }
+    this.blob = blob;
+    this.slice = audio;
+    this.slice.volume = volume;
+    this.volume = new Volume(this.slice);
   }
 
   decorateContent(...children) {
