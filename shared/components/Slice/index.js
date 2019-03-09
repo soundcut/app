@@ -92,17 +92,18 @@ class Slice extends Component {
     const current = this.state[name];
     const equal = current === parsedValue;
 
+    let boundaries = { start: this.state.start, end: this.state.end };
     const update = {
       [name]: parsedValue,
     };
 
     if (equal) {
-      return;
+      return Object.assign({ audio: this.slice, swap: false }, boundaries);
     }
 
     this.setState(update);
+    boundaries = { start: this.state.start, end: this.state.end };
 
-    let boundaries = { start: this.state.start, end: this.state.end };
     const swap =
       this.state.start !== undefined &&
       this.state.end !== undefined &&
