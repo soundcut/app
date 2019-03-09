@@ -1,5 +1,4 @@
 const { Component } = require('hypermorphic');
-const throttle = require('lodash/throttle');
 const formatTime = require('../helpers/formatTime');
 const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
 
