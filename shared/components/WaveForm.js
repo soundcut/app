@@ -1,5 +1,6 @@
 const { Component } = require('hypermorphic');
 const formatTime = require('../helpers/formatTime');
+const hexToRGB = require('../helpers/hexToRGB');
 const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
 
 const SPACING = 20;
@@ -17,17 +18,6 @@ const BAR_COLOR = '#166a77';
 const SLICE_COLOR = '#37f0c2';
 const DURATION_COLOR = '#f4ffdc';
 const PROGRESS_COLOR = '#24adc2';
-
-function hexToRGB(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16),
-    ]
-    : null;
-}
 
 function Canvases(containerWidth, width) {
   return `
