@@ -33,6 +33,7 @@ class LocalPlay extends Component {
     super();
     this.file = file;
     this.handleDownload = this.handleDownload.bind(this);
+    this.setSliceComponent = this.setSliceComponent.bind(this);
   }
 
   onconnected() {
@@ -49,9 +50,8 @@ class LocalPlay extends Component {
     this.interval = setInterval(() => {
       if (isMediaLoaded(this.audio)) {
         clearInterval(this.interval);
-        this.slice = new Slice(this.audio, this.file);
+        this.setSliceComponent(this.audio, this.file);
         URL.revokeObjectURL(this.objectURL);
-        this.render();
       }
     }, 100);
   }
@@ -61,6 +61,11 @@ class LocalPlay extends Component {
     this.file = undefined;
     URL.revokeObjectURL(this.objectURL);
     clearInterval(this.interval);
+  }
+
+  setSliceComponent(audio, file) {
+    this.slice = new Slice({ audio, file });
+    this.render();
   }
 
   handleDownload(evt) {

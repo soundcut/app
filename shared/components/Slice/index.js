@@ -19,23 +19,26 @@ const initialState = {
   start: undefined,
   end: undefined,
   decoding: false,
+  submitted: false,
   loading: false,
   sharing: false,
   id: undefined,
   error: undefined,
+  file: undefined,
+  audio: undefined,
 };
 
 class Slice extends Component {
-  constructor(audio, file) {
+  constructor({ audio, file }) {
     super();
-    this.file = file;
-    this.audio = audio;
-    this.state = Object.assign({}, initialState);
+    this.state = Object.assign({}, initialState, { file, audio });
 
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
+    this.handleSubmitClick = this.handleSubmitClick.bind(this);
+    this.handleDismissClick = this.handleDismissClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
   }
@@ -47,7 +50,7 @@ class Slice extends Component {
       decoding: true,
     });
     try {
-      this.sourceAudioBuffer = await decodeFileAudioData(this.file);
+      this.sourceAudioBuffer = await decodeFileAudioData(this.state.file);
     } catch (err) {
       const error = [
         'Unable to decode audio data :(',
@@ -69,7 +72,7 @@ class Slice extends Component {
     await this.setBoundary('end', this.sourceAudioBuffer.duration);
 
     this.waveform = new WaveForm({
-      audio: this.audio,
+      audio: this.state.audio,
       audioBuffer: this.sourceAudioBuffer,
       slice: this.slice,
       setSliceBoundary: this.setBoundary,
@@ -153,7 +156,7 @@ class Slice extends Component {
     const link = document.createElement('a');
     link.style = 'display: none;';
     link.href = src;
-    const filename = getDisplayName(this.file.name) || 'Untitled';
+    const filename = getDisplayName(this.state.file.name) || 'Untitled';
     link.download = `${filename} - Sound Slice [${`${this.state.start}-${
       this.state.end
     }`}].mp3`;
@@ -169,7 +172,7 @@ class Slice extends Component {
   async handleShareClick(evt) {
     evt.preventDefault();
 
-    const original = getDisplayName(this.file.name) || 'Untitled';
+    const original = getDisplayName(this.state.file.name) || 'Untitled';
     const filename = `${original} - Sound Slice [${`${this.state.start}-${
       this.state.end
     }`}].mp3`;
@@ -216,7 +219,7 @@ class Slice extends Component {
     const state = this.state;
 
     const { audio, blob } = await getAudioSlice(
-      this.file,
+      this.state.file,
       state.start,
       state.end
     );
@@ -230,6 +233,24 @@ class Slice extends Component {
     this.slice = audio;
     this.slice.volume = volume;
     this.volume = new Volume(this.slice);
+  }
+
+  handleSubmitClick(evt) {
+    evt.preventDefault();
+    this.reset = Object.assign({}, this.state);
+    this.setState({
+      audio: this.slice,
+      file: this.blob,
+      submitted: true,
+    });
+
+    this.onconnected();
+  }
+
+  handleDismissClick(evt) {
+    evt.preventDefault();
+    this.setState(Object.assign({}, this.reset));
+    this.onconnected();
   }
 
   decorateContent(...children) {
@@ -285,9 +306,12 @@ class Slice extends Component {
                     disabled,
                     paused: this.slice.paused,
                     sharing: state.sharing,
+                    submitted: state.submitted,
                     handlePlayPauseClick: this.handlePlayPauseClick,
                     handleDownloadClick: this.handleDownloadClick,
                     handleShareClick: this.handleShareClick,
+                    handleSubmitClick: this.handleSubmitClick,
+                    handleDismissClick: this.handleDismissClick,
                   }),
                 ]}
                 ${[this.waveform ? this.waveform : '']}

@@ -55,21 +55,12 @@ function Canvases(containerWidth, width) {
 }
 
 class WaveForm extends Component {
-  constructor({
-    slice,
-    audio,
-    audioBuffer,
-    setSliceBoundary,
-    resetSlice,
-    start,
-    end,
-  }) {
+  constructor({ slice, audio, audioBuffer, setSliceBoundary, start, end }) {
     super();
     this.audio = audio;
     this.buffer = audioBuffer;
     this.slice = slice;
     this.setSliceBoundary = setSliceBoundary;
-    this.resetSlice = resetSlice;
 
     this.state = {
       start,

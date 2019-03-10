@@ -4,6 +4,7 @@ const Pause = require('../Icons/Pause');
 const Download = require('../Icons/Download');
 const Share = require('../Icons/Share');
 const Check = require('../Icons/Check');
+const Cross = require('../Icons/Cross');
 
 /* eslint-disable indent */
 function PlayerActions({
@@ -11,10 +12,11 @@ function PlayerActions({
   disabled,
   paused,
   sharing,
-  handleSubmit,
+  handleSubmitClick,
   handlePlayPauseClick,
   handleDownloadClick,
   handleShareClick,
+  handleDismissClick,
 }) {
   if (!submitted) {
     return wire()`
@@ -27,7 +29,7 @@ function PlayerActions({
       </button>
       <button type="button"
               disabled=${disabled}
-              onclick=${handleSubmit}
+              onclick=${handleSubmitClick}
               title="Create the slice for the selected boundaries"
       >
         ${Check()}
@@ -61,6 +63,13 @@ function PlayerActions({
               }"
       >
         ${Share()}
+      </button>
+      <button type="button"
+              onClick=${handleDismissClick}
+              disabled=${disabled}
+              title="Dismiss slice"
+      >
+        ${Cross()}
       </button>
     </div>
   `;
