@@ -1,98 +1,44 @@
 const { Component, wire } = require('hypermorphic');
 
-const Loader = require('./Loader');
-const Play = require('./Icons/Play');
-const Pause = require('./Icons/Pause');
-const Download = require('./Icons/Download');
-const Share = require('./Icons/Share');
-const ErrorMessage = require('./ErrorMessage');
-const Volume = require('./Volume');
-const WaveForm = require('./WaveForm');
-const getDisplayName = require('../helpers/getDisplayName');
-const formatTime = require('../helpers/formatTime');
-const decodeFileAudioData = require('../helpers/decodeFileAudioData');
-const getAudioSlice = require('../helpers/getAudioSlice');
+const Loader = require('../Loader');
+const ErrorMessage = require('../ErrorMessage');
+const Volume = require('../Volume');
+const WaveForm = require('../WaveForm');
+const PlayerActions = require('./PlayerActions');
+const ShareInput = require('./ShareInput');
+const getDisplayName = require('../../helpers/getDisplayName');
+const formatTime = require('../../helpers/formatTime');
+const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
+const getAudioSlice = require('../../helpers/getAudioSlice');
 
 const MAX_SLICE_LENGTH = 90;
 const SHARE_PATH = '/api/share';
-
-function ShareInput(id) {
-  const url = `${window.location.origin}/slice/${id}`;
-  return wire()`
-  <p>
-    <label for="share" class="flex flex-justify-content-between">
-      <span>Sharing link for this slice:</span>
-      <a href="${url}">
-        Go to this slice
-      </a>
-    </label>
-    <input id="share" class="full-width" type="text" value=${url} />
-  </p>
-  `;
-}
-
-/* eslint-disable indent */
-function PlayerActions({
-  disabled,
-  paused,
-  sharing,
-  handlePlayPauseClick,
-  handleDownloadClick,
-  handleShareClick,
-}) {
-  return wire()`
-    <div class="flex flex-direction-column">
-      <button type="button"
-              disabled=${disabled}
-              onclick=${handlePlayPauseClick}
-      >
-        ${disabled || paused ? Play() : Pause()}
-      </button>
-      <button type="button"
-              onClick=${handleDownloadClick}
-              disabled=${disabled}
-              title="Your browser's download dialog should open instantly."
-      >
-        ${Download()}
-      </button>
-      <button type="button"
-              onClick=${handleShareClick}
-              disabled=${disabled}
-              title="${
-                !sharing
-                  ? 'A unique URL will be generated for you to share your slice.'
-                  : 'Generating unique URL...'
-              }"
-      >
-        ${Share()}
-      </button>
-    </div>
-  `;
-}
-/* eslint-enable indent */
 
 const initialState = {
   mounted: false,
   start: undefined,
   end: undefined,
   decoding: false,
+  submitted: false,
   loading: false,
   sharing: false,
   id: undefined,
   error: undefined,
+  file: undefined,
+  audio: undefined,
 };
 
 class Slice extends Component {
-  constructor(audio, file) {
+  constructor({ audio, file }) {
     super();
-    this.file = file;
-    this.audio = audio;
-    this.state = Object.assign({}, initialState);
+    this.state = Object.assign({}, initialState, { file, audio });
 
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
+    this.handleSubmitClick = this.handleSubmitClick.bind(this);
+    this.handleDismissClick = this.handleDismissClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
   }
@@ -104,7 +50,7 @@ class Slice extends Component {
       decoding: true,
     });
     try {
-      this.sourceAudioBuffer = await decodeFileAudioData(this.file);
+      this.sourceAudioBuffer = await decodeFileAudioData(this.state.file);
     } catch (err) {
       const error = [
         'Unable to decode audio data :(',
@@ -126,7 +72,7 @@ class Slice extends Component {
     await this.setBoundary('end', this.sourceAudioBuffer.duration);
 
     this.waveform = new WaveForm({
-      audio: this.audio,
+      audio: this.state.audio,
       audioBuffer: this.sourceAudioBuffer,
       slice: this.slice,
       setSliceBoundary: this.setBoundary,
@@ -149,17 +95,18 @@ class Slice extends Component {
     const current = this.state[name];
     const equal = current === parsedValue;
 
+    let boundaries = { start: this.state.start, end: this.state.end };
     const update = {
       [name]: parsedValue,
     };
 
     if (equal) {
-      return;
+      return Object.assign({ audio: this.slice, swap: false }, boundaries);
     }
 
     this.setState(update);
+    boundaries = { start: this.state.start, end: this.state.end };
 
-    let boundaries = { start: this.state.start, end: this.state.end };
     const swap =
       this.state.start !== undefined &&
       this.state.end !== undefined &&
@@ -209,7 +156,7 @@ class Slice extends Component {
     const link = document.createElement('a');
     link.style = 'display: none;';
     link.href = src;
-    const filename = getDisplayName(this.file.name) || 'Untitled';
+    const filename = getDisplayName(this.state.file.name) || 'Untitled';
     link.download = `${filename} - Sound Slice [${`${this.state.start}-${
       this.state.end
     }`}].mp3`;
@@ -225,7 +172,7 @@ class Slice extends Component {
   async handleShareClick(evt) {
     evt.preventDefault();
 
-    const original = getDisplayName(this.file.name) || 'Untitled';
+    const original = getDisplayName(this.state.file.name) || 'Untitled';
     const filename = `${original} - Sound Slice [${`${this.state.start}-${
       this.state.end
     }`}].mp3`;
@@ -272,7 +219,7 @@ class Slice extends Component {
     const state = this.state;
 
     const { audio, blob } = await getAudioSlice(
-      this.file,
+      this.state.file,
       state.start,
       state.end
     );
@@ -286,6 +233,24 @@ class Slice extends Component {
     this.slice = audio;
     this.slice.volume = volume;
     this.volume = new Volume(this.slice);
+  }
+
+  handleSubmitClick(evt) {
+    evt.preventDefault();
+    this.reset = Object.assign({}, this.state);
+    this.setState({
+      audio: this.slice,
+      file: this.blob,
+      submitted: true,
+    });
+
+    this.onconnected();
+  }
+
+  handleDismissClick(evt) {
+    evt.preventDefault();
+    this.setState(Object.assign({}, this.reset));
+    this.onconnected();
   }
 
   decorateContent(...children) {
@@ -341,9 +306,12 @@ class Slice extends Component {
                     disabled,
                     paused: this.slice.paused,
                     sharing: state.sharing,
+                    submitted: state.submitted,
                     handlePlayPauseClick: this.handlePlayPauseClick,
                     handleDownloadClick: this.handleDownloadClick,
                     handleShareClick: this.handleShareClick,
+                    handleSubmitClick: this.handleSubmitClick,
+                    handleDismissClick: this.handleDismissClick,
                   }),
                 ]}
                 ${[this.waveform ? this.waveform : '']}
