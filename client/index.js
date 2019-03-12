@@ -1,6 +1,5 @@
 import hyperApp from 'hyperhtml-app';
 
-import ensureMinWidthViewport from './minWidthViewport';
 import Home from '../shared/components/Home';
 import Upload from '../shared/components/Upload';
 import Link from '../shared/components/Link';
@@ -9,7 +8,6 @@ import Shared from '../shared/components/Shared';
 const app = hyperApp();
 
 function initialize() {
-  ensureMinWidthViewport();
   const render = require('./render').default();
 
   app.get('/', function home() {
