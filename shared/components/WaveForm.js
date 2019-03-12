@@ -552,11 +552,15 @@ class WaveForm extends Component {
 
   /* eslint-disable indent */
   render() {
+    const style = `height:${CONTAINER_HEIGHT}px;${
+      this.state.dragging ? 'touch-action: none;' : ''
+    }`;
+
     return this.html`
     <div
       id="WaveForm"
       onconnected=${this}
-      style="${`height:${CONTAINER_HEIGHT}px;`}"
+      style="${style}"
       class="${
         this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''
       }"
