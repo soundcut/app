@@ -365,7 +365,11 @@ class WaveForm extends Component {
   }
 
   handleMouseMove(evt) {
+    const touch = evt.touches;
     if (this.state.dragging) {
+      if (touch) {
+        evt.preventDefault();
+      }
       requestAnimationFrame(() => {
         if (!this.state.dragging) {
           return;
@@ -374,7 +378,7 @@ class WaveForm extends Component {
         const duration = this.getDuration();
         const boundary = this.state.dragging.boundary;
         const xContainer =
-          (evt.touches ? evt.touches[0] : evt).clientX -
+          (touch ? evt.touches[0] : evt).clientX -
           this.boundingClientRect.left +
           this.container.parentNode.scrollLeft;
         const delta = xContainer - this.state.dragging.position;
@@ -394,7 +398,7 @@ class WaveForm extends Component {
     }
 
     // Disacard hovering for touch events.
-    if (evt.touches) {
+    if (touch) {
       return;
     }
 
