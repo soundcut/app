@@ -315,8 +315,9 @@ class WaveForm extends Component {
   }
 
   handleMouseDown(evt) {
+    const touch = evt.touches;
     const x =
-      (evt.touches ? evt.touches[0] : evt).clientX -
+      (touch ? evt.touches[0] : evt).clientX -
       this.boundingClientRect.left +
       this.container.parentNode.scrollLeft;
 
@@ -344,6 +345,9 @@ class WaveForm extends Component {
         : null;
 
     if (boundary) {
+      if (touch) {
+        evt.preventDefault();
+      }
       this.setState({
         hovering: false,
         dragging: {
