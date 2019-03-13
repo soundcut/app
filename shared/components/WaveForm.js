@@ -106,8 +106,8 @@ class WaveForm extends Component {
   async onconnected() {
     this.supportsPassiveEventListener = checkPassiveEventListener();
     this.evtHandlerOptions = this.supportsPassiveEventListener
-      ? { passive: true }
-      : false;
+      ? { capture: true, passive: true }
+      : true;
 
     this.setupContainer();
     this.setupCanvases();
@@ -346,7 +346,7 @@ class WaveForm extends Component {
 
     if (boundary) {
       if (touch) {
-        evt.preventDefault();
+        evt.stopPropagation();
       }
       this.setState({
         hovering: false,
@@ -372,7 +372,7 @@ class WaveForm extends Component {
     const touch = evt.touches;
     if (this.state.dragging) {
       if (touch) {
-        evt.preventDefault();
+        evt.stopPropagation();
       }
       requestAnimationFrame(() => {
         if (!this.state.dragging) {
