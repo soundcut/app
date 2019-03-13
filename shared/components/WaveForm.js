@@ -106,7 +106,7 @@ class WaveForm extends Component {
   async onconnected() {
     this.supportsPassiveEventListener = checkPassiveEventListener();
     this.evtHandlerOptions = this.supportsPassiveEventListener
-      ? { capture: true, passive: true }
+      ? { passive: true }
       : true;
 
     this.setupContainer();
@@ -345,9 +345,6 @@ class WaveForm extends Component {
         : null;
 
     if (boundary) {
-      if (touch) {
-        evt.stopPropagation();
-      }
       this.setState({
         hovering: false,
         dragging: {
@@ -371,9 +368,6 @@ class WaveForm extends Component {
   handleMouseMove(evt) {
     const touch = evt.touches;
     if (this.state.dragging) {
-      if (touch) {
-        evt.stopPropagation();
-      }
       requestAnimationFrame(() => {
         if (!this.state.dragging) {
           return;
@@ -557,7 +551,7 @@ class WaveForm extends Component {
   /* eslint-disable indent */
   render() {
     const style = `height:${CONTAINER_HEIGHT}px;${
-      this.state.dragging ? 'touch-action: none;' : ''
+      this.state.dragging ? 'overflow-x: hidden; touch-action: none;' : ''
     }`;
 
     return this.html`
