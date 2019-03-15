@@ -187,7 +187,7 @@ class Slice extends Component {
     try {
       const response = await promise;
 
-      if (response.status !== 200) {
+      if (response.status !== 201) {
         const err = new Error('Server Error');
         err.response = response;
         throw err;
