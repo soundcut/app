@@ -8,6 +8,11 @@ const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
 const humanizedRequiredFileType = requiredFileTypes.join(', ');
 const fileSizeLimit = 1048576 * 1000;
 
+function preventDefaultDrag(evt) {
+  evt.preventDefault();
+  evt.stopPropagation();
+}
+
 function humanizeFileSize(bytes) {
   if (bytes < 1024) {
     return bytes + 'bytes';
@@ -53,6 +58,7 @@ function isFileValid(file) {
 }
 
 const initialState = {
+  dragging: false,
   file: undefined,
 };
 
@@ -62,12 +68,54 @@ class Upload extends Component {
     this.state = Object.assign({}, initialState);
     this.onFileValid = onFileValid;
     this.handleChange = this.handleChange.bind(this);
+    this.handleDragStart = this.handleDragStart.bind(this);
+    this.handleDragEnd = this.handleDragEnd.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
   }
 
-  handleChange(evt) {
-    const target = evt.target;
-    const file = target.files[0];
+  onconnected() {
+    const form = document.querySelector('form');
+    [
+      'drag',
+      'dragstart',
+      'dragend',
+      'dragover',
+      'dragenter',
+      'dragleave',
+      'drop',
+    ].forEach(function(evt) {
+      form.addEventListener(evt, preventDefaultDrag, false);
+    });
+    ['dragover', 'dragenter'].forEach(
+      function(evt) {
+        form.addEventListener(evt, this.handleDragStart, false);
+      }.bind(this)
+    );
+    ['dragleave', 'dragend'].forEach(
+      function(evt) {
+        form.addEventListener(evt, this.handleDragEnd, false);
+      }.bind(this)
+    );
+    form.addEventListener('drop', this.handleDrop, false);
+  }
 
+  handleDragStart() {
+    if (!this.state.dragging) {
+      this.setState({ dragging: true });
+    }
+  }
+
+  handleDragEnd() {
+    if (this.state.dragging) {
+      this.setState({ dragging: false });
+    }
+  }
+
+  handleDrop(evt) {
+    this.handleFile(evt.dataTransfer.files[0]);
+  }
+
+  handleFile(file) {
     this.setState({
       file,
     });
@@ -77,15 +125,25 @@ class Upload extends Component {
     }
   }
 
+  handleChange(evt) {
+    const target = evt.target;
+    const file = target.files[0];
+
+    this.handleFile(file);
+  }
+
   render() {
     const state = this.state;
     const file = state.file;
 
+    const fileFieldClass = `FileField ${state.dragging ? 'is-dragging' : ''}`;
+
     return this.html`
-      <form enctype="multipart/form-data"
+      <form onconnected=${this}
+            enctype="multipart/form-data"
             method="post"
       >
-        <fieldset class="FileField">
+        <fieldset class="${fileFieldClass}">
           <legend>
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>

@@ -25,9 +25,10 @@ fieldset.FileField {
     height: 0;
     font-size: 0;
     overflow: hidden;
+  }
 
-    &:focus + label {
-      border-style: solid;
-    }
+  &.is-dragging label,
+  & input[type='file']:focus + label {
+    border-style: solid;
   }
 }
