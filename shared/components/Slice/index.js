@@ -6,7 +6,7 @@ const Volume = require('../Volume');
 const WaveForm = require('../WaveForm');
 const PlayerActions = require('./PlayerActions');
 const ShareInput = require('./ShareInput');
-const getDisplayName = require('../../helpers/getDisplayName');
+const getSliceName = require('../../helpers/getSliceName');
 const formatTime = require('../../helpers/formatTime');
 const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
 const getAudioSlice = require('../../helpers/getAudioSlice');
@@ -160,10 +160,8 @@ class Slice extends Component {
     const link = document.createElement('a');
     link.style = 'display: none;';
     link.href = src;
-    const filename = getDisplayName(this.state.file.name) || 'Untitled';
-    link.download = `${filename} - Sound Slice [${`${this.state.start}-${
-      this.state.end
-    }`}].mp3`;
+    const filename = this.state.file.name;
+    link.download = `${filename}.mp3`;
     // Firefox appears to require appending the element to the DOM..
     // but FileSaver.js does not need to and it still works for some reason.
     document.body.appendChild(link);
@@ -176,10 +174,7 @@ class Slice extends Component {
   async handleShareClick(evt) {
     evt.preventDefault();
 
-    const original = getDisplayName(this.state.file.name) || 'Untitled';
-    const filename = `${original} - Sound Slice [${`${this.state.start}-${
-      this.state.end
-    }`}].mp3`;
+    const filename = this.state.file.name;
     const formData = new FormData();
     formData.append('file', this.blob, filename);
 
@@ -243,9 +238,14 @@ class Slice extends Component {
   handleSubmitClick(evt) {
     evt.preventDefault();
     this.reset = Object.assign({}, this.state);
+    const filename = getSliceName(
+      this.state.file,
+      this.state.start,
+      this.state.end
+    );
     this.setState({
       audio: this.state.slice,
-      file: this.blob,
+      file: new File([this.blob], filename),
       submitted: true,
     });
 
