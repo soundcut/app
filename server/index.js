@@ -344,9 +344,10 @@ const port = process.env.PORT || 3000;
 app.listen(port, async function start() {
   console.info(`Sound Slice HTTP Server now listening on port ${port}`);
   try {
-    await getClient();
-    console.info('Succesfuly retrieved database client');
+    const client = await getClient();
+    client.release();
+    console.info('Succesfuly retrieved and released database client');
   } catch (err) {
-    console.error('Unable to retrieve pg client. \n', err);
+    console.error('Unable to retrieve or release database client. \n', err);
   }
 });
