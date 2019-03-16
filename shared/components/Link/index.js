@@ -22,7 +22,7 @@ class Link extends Component {
 
   onFileValid(file) {
     this.setState({
-      localPlay: new LocalPlay({ file }),
+      localPlay: new LocalPlay({ file, source: true }),
     });
   }
 

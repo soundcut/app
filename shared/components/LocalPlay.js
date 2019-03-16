@@ -29,21 +29,25 @@ function humanizeFileSize(bytes) {
 }
 
 class LocalPlay extends Component {
-  constructor({ file }) {
+  constructor({ file, source }) {
     super();
     this.file = file;
+    this.source = source;
     this.handleDownload = this.handleDownload.bind(this);
     this.setSliceComponent = this.setSliceComponent.bind(this);
   }
 
   onconnected() {
     const filename = this.file.name;
-    const encodedName = encode(filename);
-    const historyState = { filename: encodedName };
-    const pathname = `/play?title=${encodedName}`;
     const newTitle = `${getDisplayName(filename)} | Sound Slice`;
     document.title = newTitle;
-    history.pushState(historyState, document.title, pathname);
+
+    if (this.source) {
+      const encodedName = encode(filename);
+      const historyState = { filename: encodedName };
+      const pathname = `/play?title=${encodedName}`;
+      history.pushState(historyState, document.title, pathname);
+    }
 
     this.objectURL = URL.createObjectURL(this.file);
     this.audio = new Audio(this.objectURL);
