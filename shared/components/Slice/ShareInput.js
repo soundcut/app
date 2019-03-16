@@ -2,6 +2,7 @@ const { wire } = require('hypermorphic');
 
 function ShareInput(id) {
   const url = `${window.location.origin}/slice/${id}`;
+  const shortUrl = `${window.location.origin}/slice/${id.slice(0, 10)}`;
   return wire()`
   <p>
     <label for="share" class="flex flex-justify-content-between">
@@ -10,7 +11,7 @@ function ShareInput(id) {
         Go to this slice
       </a>
     </label>
-    <input id="share" class="full-width" type="text" value=${url} />
+    <input id="share" class="full-width" type="text" value=${shortUrl} />
   </p>
   `;
 }
