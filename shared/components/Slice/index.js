@@ -26,6 +26,7 @@ const initialState = {
   error: undefined,
   file: undefined,
   audio: undefined,
+  slice: undefined,
 };
 
 class Slice extends Component {
@@ -74,7 +75,7 @@ class Slice extends Component {
     this.waveform = new WaveForm({
       audio: this.state.audio,
       audioBuffer: this.sourceAudioBuffer,
-      slice: this.slice,
+      slice: this.state.slice,
       setSliceBoundary: this.setBoundary,
       resetSlice: this.resetSlice,
       start: this.state.start,
@@ -84,9 +85,9 @@ class Slice extends Component {
   }
 
   ondisconnected() {
-    if (this.slice) {
-      this.slice.pause();
-      URL.revokeObjectURL(this.slice.currentSrc);
+    if (this.state.slice) {
+      this.state.slice.pause();
+      URL.revokeObjectURL(this.state.slice.currentSrc);
     }
   }
 
@@ -101,7 +102,10 @@ class Slice extends Component {
     };
 
     if (equal) {
-      return Object.assign({ audio: this.slice, swap: false }, boundaries);
+      return Object.assign(
+        { audio: this.state.slice, swap: false },
+        boundaries
+      );
     }
 
     this.setState(update);
@@ -123,12 +127,12 @@ class Slice extends Component {
       await this.createSlice();
     }
 
-    return Object.assign({ audio: this.slice, swap }, boundaries);
+    return Object.assign({ audio: this.state.slice, swap }, boundaries);
   }
 
   resetSlice() {
-    this.slice = undefined;
     this.setState({
+      slice: undefined,
       start: undefined,
       end: undefined,
     });
@@ -141,10 +145,10 @@ class Slice extends Component {
 
   handlePlayPauseClick(evt) {
     evt.preventDefault();
-    if (this.slice.paused) {
-      this.slice.play();
+    if (this.state.slice.paused) {
+      this.state.slice.play();
     } else {
-      this.slice.pause();
+      this.state.slice.pause();
     }
     this.render();
   }
@@ -152,7 +156,7 @@ class Slice extends Component {
   handleDownloadClick(evt) {
     evt.preventDefault();
 
-    const src = this.slice.currentSrc;
+    const src = this.state.slice.currentSrc;
     const link = document.createElement('a');
     link.style = 'display: none;';
     link.href = src;
@@ -224,22 +228,23 @@ class Slice extends Component {
       state.end
     );
     let volume = 0.5;
-    if (this.slice) {
-      this.slice.pause();
-      volume = this.slice.volume;
-      this.slice = undefined;
+    if (this.state.slice) {
+      this.state.slice.pause();
+      volume = this.state.slice.volume;
     }
     this.blob = blob;
-    this.slice = audio;
-    this.slice.volume = volume;
-    this.volume = new Volume(this.slice);
+    audio.volume = volume;
+    this.volume = new Volume(audio);
+    this.setState({
+      slice: audio,
+    });
   }
 
   handleSubmitClick(evt) {
     evt.preventDefault();
     this.reset = Object.assign({}, this.state);
     this.setState({
-      audio: this.slice,
+      audio: this.state.slice,
       file: this.blob,
       submitted: true,
     });
@@ -263,7 +268,7 @@ class Slice extends Component {
 
   render() {
     const state = this.state;
-    const disabled = !this.slice || this.state.loading;
+    const disabled = !state.slice || this.state.loading;
     const duration = state.end - state.start;
 
     if (!this.state.mounted) {
@@ -276,11 +281,11 @@ class Slice extends Component {
       );
     }
 
-    if (!this.slice && state.error) {
+    if (!state.slice && state.error) {
       return this.decorateContent(ErrorMessage(state.error));
     }
 
-    if (this.slice) {
+    if (state.slice) {
       /* eslint-disable indent */
       return this.decorateContent(
         this.sliceWire`
@@ -294,7 +299,7 @@ class Slice extends Component {
                 </strong>
                 <small>
                   ${
-                    this.slice
+                    state.slice
                       ? `${formatTime(duration)} (${duration}seconds)`
                       : ''
                   }
@@ -304,7 +309,7 @@ class Slice extends Component {
                 ${[
                   PlayerActions({
                     disabled,
-                    paused: this.slice.paused,
+                    paused: state.slice.paused,
                     sharing: state.sharing,
                     submitted: state.submitted,
                     handlePlayPauseClick: this.handlePlayPauseClick,
@@ -315,7 +320,7 @@ class Slice extends Component {
                   }),
                 ]}
                 ${[this.waveform ? this.waveform : '']}
-                ${[this.slice ? this.volume : '']}
+                ${[state.slice ? this.volume : '']}
               </div>
             </div>
           </div>
