@@ -195,13 +195,34 @@ app.get('/upload', function(req, res) {
 app.get('/slice/:id', async function(req, res) {
   const id = req.params.id;
 
+  if (!id) {
+    res.sendStatus(422);
+    res.end();
+    return;
+  }
+
   try {
-    const result = await query('SELECT COUNT(*) FROM slices WHERE id = $1', [
-      id,
+    const result = await query('SELECT COUNT(*) FROM slices WHERE id LIKE $1', [
+      `${id}%`,
     ]);
     const row = result.rows[0];
-    if (!Number.parseInt(row.count)) {
+    const count = Number.parseInt(row.count);
+    if (!count) {
       res.writeHead(404, {
+        'Content-Type': 'text/html',
+      });
+      res.write(
+        views.default(wire(), {
+          path: req.path,
+          title: title,
+          links: links,
+          main: new Home(),
+        })
+      );
+      res.end();
+      return;
+    } else if (count > 1) {
+      res.writeHead(409, {
         'Content-Type': 'text/html',
       });
       res.write(
@@ -250,13 +271,27 @@ app.get('/slice/:id', async function(req, res) {
 app.get('/api/slice/:id', async function(req, res) {
   const id = req.params.id;
 
+  if (!id) {
+    res.sendStatus(422);
+    res.end();
+    return;
+  }
+
   let result;
   try {
     console.info('Retrieving slice json', id);
-    result = await query('SELECT json FROM slices WHERE id = $1', [id]);
+    result = await query('SELECT json FROM slices WHERE id LIKE $1', [
+      `${id}%`,
+    ]);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
+    res.end();
+    return;
+  }
+
+  if (result.rows.length > 1) {
+    res.sendStatus(409);
     res.end();
     return;
   }
