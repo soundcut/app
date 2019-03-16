@@ -306,6 +306,12 @@ app.get('/link', function(req, res) {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, function() {
+app.listen(port, async function start() {
   console.info(`Sound Slice HTTP Server now listening on port ${port}`);
+  try {
+    await getClient();
+    console.info('Succesfuly retrieved database client');
+  } catch (err) {
+    console.error('Unable to retrieve pg client. \n', err);
+  }
 });
