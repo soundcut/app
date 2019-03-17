@@ -73,6 +73,7 @@ class Slice extends Component {
     await this.setBoundary('end', this.sourceAudioBuffer.duration);
 
     this.waveform = new WaveForm({
+      editable: !this.state.submitted,
       audio: this.state.audio,
       audioBuffer: this.sourceAudioBuffer,
       slice: this.state.slice,

@@ -55,12 +55,21 @@ function Canvases(containerWidth, width) {
 }
 
 class WaveForm extends Component {
-  constructor({ slice, audio, audioBuffer, setSliceBoundary, start, end }) {
+  constructor({
+    editable,
+    slice,
+    audio,
+    audioBuffer,
+    setSliceBoundary,
+    start,
+    end,
+  }) {
     super();
     this.audio = audio;
     this.buffer = audioBuffer;
     this.slice = slice;
     this.setSliceBoundary = setSliceBoundary;
+    this.editable = editable;
 
     this.state = {
       start,
@@ -112,27 +121,29 @@ class WaveForm extends Component {
     this.setupContainer();
     this.setupCanvases();
 
-    this.container.addEventListener(
-      'mousedown',
-      this.handleMouseDown,
-      this.evtHandlerOptions
-    );
-    this.container.addEventListener(
-      'touchstart',
-      this.handleMouseDown,
-      this.evtHandlerOptions
-    );
+    if (this.editable) {
+      this.container.addEventListener(
+        'mousedown',
+        this.handleMouseDown,
+        this.evtHandlerOptions
+      );
+      this.container.addEventListener(
+        'touchstart',
+        this.handleMouseDown,
+        this.evtHandlerOptions
+      );
 
-    this.container.addEventListener(
-      'mousemove',
-      this.handleMouseMove,
-      this.evtHandlerOptions
-    );
-    this.container.addEventListener(
-      'touchmove',
-      this.handleMouseMove,
-      this.evtHandlerOptions
-    );
+      this.container.addEventListener(
+        'mousemove',
+        this.handleMouseMove,
+        this.evtHandlerOptions
+      );
+      this.container.addEventListener(
+        'touchmove',
+        this.handleMouseMove,
+        this.evtHandlerOptions
+      );
+    }
     this.updateAudioListeners(this.slice);
 
     // const nominalWidth = Math.round(
@@ -144,7 +155,16 @@ class WaveForm extends Component {
     const end = this.width;
 
     const peaks = this.getPeaks(width, start, end);
-    this.drawBars(peaks, 0, this.width);
+    await this.drawBars(peaks, 0, this.width);
+    this.drawn = true;
+    this.doSnapshot('waveform');
+    if (this.editable) {
+      this.drawBoundary(this.canvasContexts['start'], SPACING);
+      this.drawBoundary(
+        this.canvasContexts['end'],
+        this.containerWidth - SPACING
+      );
+    }
   }
 
   getDuration() {
@@ -256,43 +276,39 @@ class WaveForm extends Component {
   }
 
   drawBars(peaks, start, end) {
-    return this.prepareDraw(
-      peaks,
-      start,
-      end,
-      ({ hasMinVals, offsetY, halfH, peaks }) => {
-        // Skip every other value if there are negatives.
-        const peakIndexScale = hasMinVals ? 2 : 1;
-        const length = peaks.length / peakIndexScale;
-        const bar = BAR_WIDTH * this.pixelRatio;
-        const gap = BAR_GAP ? Math.max(this.pixelRatio, ~~(bar / 2)) : 0;
-        const step = bar + gap;
+    return new Promise(resolve => {
+      this.prepareDraw(
+        peaks,
+        start,
+        end,
+        ({ hasMinVals, offsetY, halfH, peaks }) => {
+          // Skip every other value if there are negatives.
+          const peakIndexScale = hasMinVals ? 2 : 1;
+          const length = peaks.length / peakIndexScale;
+          const bar = BAR_WIDTH * this.pixelRatio;
+          const gap = BAR_GAP ? Math.max(this.pixelRatio, ~~(bar / 2)) : 0;
+          const step = bar + gap;
 
-        const scale = length / this.width;
-        const first = start;
-        const last = end;
-        let i;
+          const scale = length / this.width;
+          const first = start;
+          const last = end;
+          let i;
 
-        this.canvasContexts['waveform'].fillStyle = BAR_COLOR;
-        for (i = first; i < last; i += step) {
-          const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
-          const h = Math.round((peak / 1) * halfH);
-          this.canvasContexts['waveform'].fillRect(
-            i + this.halfPixel,
-            halfH - h + offsetY,
-            bar + this.halfPixel,
-            h * 2
-          );
+          this.canvasContexts['waveform'].fillStyle = BAR_COLOR;
+          for (i = first; i < last; i += step) {
+            const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
+            const h = Math.round((peak / 1) * halfH);
+            this.canvasContexts['waveform'].fillRect(
+              i + this.halfPixel,
+              halfH - h + offsetY,
+              bar + this.halfPixel,
+              h * 2
+            );
+          }
+          resolve();
         }
-        this.drawn = true;
-        this.doSnapshot('waveform');
-        this.drawBoundary(this.canvasContexts['start'], SPACING);
-        this.drawBoundary(
-          this.canvasContexts['end'],
-          this.containerWidth - SPACING
-        );
-      }
-    );
+      );
+    });
   }
 
   prepareDraw(peaks, start, end, fn) {
