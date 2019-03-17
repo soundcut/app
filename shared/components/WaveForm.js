@@ -99,10 +99,7 @@ class WaveForm extends Component {
     this.canvases = {};
     this.canvasContexts = {};
     this.snapshots = {};
-    this.container.insertAdjacentHTML(
-      'afterbegin',
-      Canvases(this.containerWidth, this.width)
-    );
+    this.container.innerHTML = Canvases(this.containerWidth, this.width);
     ['waveform', 'progress', 'duration', 'start', 'end'].forEach(canvas => {
       this.canvases[canvas] = document.getElementById(`${canvas}-canvas`);
       this.canvasContexts[canvas] = this.canvases[canvas].getContext('2d');

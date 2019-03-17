@@ -27,6 +27,7 @@ const initialState = {
   file: undefined,
   audio: undefined,
   slice: undefined,
+  sourceAudioBuffer: undefined,
 };
 
 class Slice extends Component {
@@ -45,37 +46,45 @@ class Slice extends Component {
   }
 
   async onconnected() {
-    this.sliceWire = wire();
+    if (!this.sliceWire) {
+      this.sliceWire = wire();
+    }
+
     this.setState({
       mounted: true,
-      decoding: true,
+      decoding: !this.state.sourceAudioBuffer,
     });
-    try {
-      this.sourceAudioBuffer = await decodeFileAudioData(this.state.file);
-    } catch (err) {
-      const error = [
-        'Unable to decode audio data :(',
-        'Please try again using a different browser.',
-        err.message,
-      ];
 
+    if (!this.state.sourceAudioBuffer) {
+      try {
+        this.state.sourceAudioBuffer = await decodeFileAudioData(
+          this.state.file
+        );
+      } catch (err) {
+        const error = [
+          'Unable to decode audio data :(',
+          'Please try again using a different browser.',
+          err.message,
+        ];
+
+        this.setState({
+          decoding: false,
+          error,
+        });
+        return;
+      }
       this.setState({
         decoding: false,
-        error,
       });
-      return;
     }
-    this.setState({
-      decoding: false,
-    });
 
     await this.setBoundary('start', 0);
-    await this.setBoundary('end', this.sourceAudioBuffer.duration);
+    await this.setBoundary('end', this.state.sourceAudioBuffer.duration);
 
     this.waveform = new WaveForm({
       editable: !this.state.submitted,
       audio: this.state.audio,
-      audioBuffer: this.sourceAudioBuffer,
+      audioBuffer: this.state.sourceAudioBuffer,
       slice: this.state.slice,
       setSliceBoundary: this.setBoundary,
       resetSlice: this.resetSlice,
@@ -244,12 +253,12 @@ class Slice extends Component {
       this.state.start,
       this.state.end
     );
-    this.setState({
+    const newState = Object.assign(initialState, {
       audio: this.state.slice,
       file: new File([this.blob], filename),
       submitted: true,
     });
-
+    this.setState(newState);
     this.onconnected();
   }
 
