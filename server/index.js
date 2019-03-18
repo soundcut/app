@@ -18,6 +18,7 @@ const Home = require('../shared/components/Home');
 const Upload = require('../shared/components/Upload');
 const Link = require('../shared/components/Link');
 const Shared = require('../shared/components/Shared');
+const Saved = require('../shared/components/Saved');
 
 const views = {
   default: require('../shared/views/default'),
@@ -335,6 +336,24 @@ app.get('/link', function(req, res) {
       title: title,
       links: links,
       main: new Link(),
+    })
+  );
+  res.end();
+});
+
+app.get('/saved/:id', function(req, res) {
+  const id = req.params.id;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/html',
+  });
+
+  res.write(
+    views.default(wire(), {
+      path: req.path,
+      title: title,
+      links: links,
+      main: new Saved(id),
     })
   );
   res.end();

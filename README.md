@@ -1,8 +1,8 @@
-# Sound Slice App - prototype
+# Sound Slice App - prototype - Extract sound memes in the browser
 
-Sound Slice is a - soon to be - Progressive Web App which enables you to extract, share, save, download or simply listen to specific moments (a `slice`) of a song or any audio source.
+Sound Slice is a - soon to be - Progressive Web App which lets you to extract, share, save, download or simply listen to specific moments (a `slice`) of a song or any audio source.
 
-Created by and developed by [Tim](https://twitter.com/tpillard).
+Created and developed by [Tim](https://twitter.com/tpillard).
 
 # Features
 
@@ -10,7 +10,7 @@ Created by and developed by [Tim](https://twitter.com/tpillard).
 
 - Upload an mp3 file
 - Link an external media and extract its audio (using [youtube-dl](https://github.com/rg3/youtube-dl))
-- Re-use an existing `slice`
+- Re-use an existing `slice`, saved on the server or in the browser via `indexedDB`
 
 ## Audio source manipulation
 
@@ -24,6 +24,7 @@ Created by and developed by [Tim](https://twitter.com/tpillard).
 - Submit a slice - re-draw a waveform just for the selected boundaries
 - Download a slice
 - Share a slice - save the slice on the server, generate a unique URL
+- Save a slice into `indexedDB`
 
 # Philosophy
 
@@ -42,6 +43,7 @@ It is mainly built on top of the following tools:
 - [hyperhtml-app](https://github.com/WebReflection/hyperhtml-app) for client-side routing
 - [express](https://github.com/expressjs/express)
 - [youtube-dl](https://github.com/rg3/youtube-dl)
+- [mp3-parser](https://github.com/biril/mp3-parser)
 - [postgreSQL](PostgreSQL)
 
 ## Installation & local development
@@ -65,3 +67,4 @@ Sound Slice staging is deployed to [GANDI Simple Hosting Node.js](https://www.ga
 - [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 - [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer)
 - [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB)

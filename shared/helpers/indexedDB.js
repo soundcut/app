@@ -35,23 +35,30 @@ const init = () =>
 const getStore = () =>
   db.transaction('slices', 'readwrite').objectStore('slices');
 
-const doGetItem = key =>
-  new Promise((resolve, reject) => {
+const doGetItem = key => {
+  return new Promise((resolve, reject) => {
     const request = getStore().get(key);
-    request.onsuccess = evt =>
-      resolve(evt.target.result && evt.target.result.value);
+    request.onsuccess = evt => resolve(evt.target.result && evt.target.result);
     request.onerror = err => reject(err);
   });
+};
 const doSetItem = item => {
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const request = getStore().put(item);
-    request.onsuccess = evt =>
-      resolve(evt.target.result && evt.target.result.value);
+    request.onsuccess = evt => resolve(evt.target.result && evt.target.result);
+    request.onerror = err => reject(err);
+  });
+};
+const doGetAllItems = () => {
+  return new Promise((resolve, reject) => {
+    const request = getStore().getAll();
+    request.onsuccess = evt => resolve(evt.target.result);
     request.onerror = err => reject(err);
   });
 };
 
 const getItem = key => init().then(() => doGetItem(key));
 const setItem = item => init().then(() => doSetItem(item));
+const getAllItems = () => init().then(() => doGetAllItems());
 
-module.exports = { getItem, setItem };
+module.exports = { getItem, getAllItems, setItem };
