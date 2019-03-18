@@ -3,6 +3,7 @@ const Play = require('../Icons/Play');
 const Pause = require('../Icons/Pause');
 const Download = require('../Icons/Download');
 const Share = require('../Icons/Share');
+const Floppy = require('../Icons/Floppy');
 const Check = require('../Icons/Check');
 const Cross = require('../Icons/Cross');
 
@@ -11,7 +12,9 @@ function PlayerActions({
   submitted,
   disabled,
   paused,
+  saving,
   sharing,
+  handleSaveClick,
   handleSubmitClick,
   handlePlayPauseClick,
   handleDownloadClick,
@@ -52,6 +55,12 @@ function PlayerActions({
               title="Download the selected slice"
       >
         ${Download()}
+      </button>
+      <button type="button"
+              onClick=${handleSaveClick}
+              disabled=${disabled}
+      >
+        ${Floppy()}
       </button>
       <button type="button"
               onClick=${handleShareClick}

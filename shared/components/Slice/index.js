@@ -10,6 +10,8 @@ const getSliceName = require('../../helpers/getSliceName');
 const formatTime = require('../../helpers/formatTime');
 const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
 const getAudioSlice = require('../../helpers/getAudioSlice');
+const getFileHash = require('../../helpers/getFileHash');
+const { setItem } = require('../../helpers/indexedDB');
 
 const MAX_SLICE_LENGTH = 90;
 const SHARE_PATH = '/api/share';
@@ -22,6 +24,7 @@ const initialState = {
   submitted: false,
   loading: false,
   sharing: false,
+  saving: false,
   id: undefined,
   error: undefined,
   file: undefined,
@@ -40,6 +43,7 @@ class Slice extends Component {
     this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
+    this.handleSaveClick = this.handleSaveClick.bind(this);
     this.handleDismissClick = this.handleDismissClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
@@ -262,6 +266,33 @@ class Slice extends Component {
     this.onconnected();
   }
 
+  async handleSaveClick(evt) {
+    evt.preventDefault();
+    this.setState({
+      saving: true,
+    });
+    try {
+      const hash = await getFileHash(this.state.file);
+      await setItem({
+        key: hash,
+        file: this.state.file,
+      });
+    } catch (err) {
+      const error = [
+        'Unable to save slice in indexedDB :(',
+        'Please try again using a different browser.',
+        err.message,
+      ];
+      this.setState({
+        error,
+      });
+    } finally {
+      this.setState({
+        saving: false,
+      });
+    }
+  }
+
   handleDismissClick(evt) {
     evt.preventDefault();
     this.setState(Object.assign({}, this.reset));
@@ -321,11 +352,13 @@ class Slice extends Component {
                     disabled,
                     paused: state.slice.paused,
                     sharing: state.sharing,
+                    saving: state.saving,
                     submitted: state.submitted,
                     handlePlayPauseClick: this.handlePlayPauseClick,
                     handleDownloadClick: this.handleDownloadClick,
                     handleShareClick: this.handleShareClick,
                     handleSubmitClick: this.handleSubmitClick,
+                    handleSaveClick: this.handleSaveClick,
                     handleDismissClick: this.handleDismissClick,
                   }),
                 ]}
