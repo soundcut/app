@@ -4,6 +4,7 @@ import Home from '../shared/components/Home';
 import Upload from '../shared/components/Upload';
 import Link from '../shared/components/Link';
 import Shared from '../shared/components/Shared';
+import Saved from '../shared/components/Saved';
 
 const app = hyperApp();
 
@@ -23,6 +24,11 @@ function initialize() {
   app.get('/upload', function() {
     const upload = new Upload();
     render.main(upload);
+  });
+
+  app.get('/saved/:id', function shared(ctx) {
+    const saved = new Saved(ctx.params.id);
+    render.main(saved);
   });
 
   app.get('/slice/:id', function shared(ctx) {

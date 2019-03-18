@@ -252,12 +252,13 @@ class Slice extends Component {
   handleSubmitClick(evt) {
     evt.preventDefault();
     this.reset = Object.assign({}, this.state);
+    this.state.slice.pause();
     const filename = getSliceName(
       this.state.file,
       this.state.start,
       this.state.end
     );
-    const newState = Object.assign(initialState, {
+    const newState = Object.assign({}, initialState, {
       audio: this.state.slice,
       file: new File([this.blob], filename),
       submitted: true,

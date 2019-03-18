@@ -164,6 +164,10 @@ class WaveForm extends Component {
     }
   }
 
+  ondisconnected() {
+    document.querySelector('main').classList.remove('has-waveform');
+  }
+
   getDuration() {
     return this.buffer.duration;
   }
@@ -571,6 +575,7 @@ class WaveForm extends Component {
     <div
       id="WaveForm"
       onconnected=${this}
+      ondisconnected=${this}
       style="${style}"
       class="${
         this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''

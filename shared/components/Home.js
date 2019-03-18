@@ -2,6 +2,7 @@ const { Component, wire } = require('hypermorphic');
 const Upload = require('./Upload');
 const LinkForm = require('./Link/Form');
 const LocalPlay = require('./LocalPlay');
+const List = require('./List');
 
 const initialState = {
   linkLoading: false,
@@ -19,6 +20,7 @@ class Home extends Component {
       onFileValid: this.onFileValid,
       loadingCallback: this.onLinkLoading,
     });
+    this.list = new List();
   }
 
   onconnected() {
@@ -55,11 +57,13 @@ class Home extends Component {
     }
 
     return this.decorateContent(
+      wire()`<h1>Extract sound memes in the browser</h1>`,
       wire()`<p>
-        Sound Slice allows you to listen, extract, download and share specific moments of a song or an external audio source.
+        Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.
       </p>`,
       this.upload,
-      this.link
+      this.link,
+      this.list
     );
   }
 }

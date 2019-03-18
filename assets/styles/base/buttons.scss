@@ -51,13 +51,7 @@ button {
 
   a.button + a.button,
   button + button {
-    margin-top: $spacing;
-    margin-left: 0;
-
-    @media screen and (min-width: $screen-medium) {
-      margin-top: 0;
-      margin-left: $spacing;
-    }
+    margin-left: $spacing;
   }
 }
 

@@ -1,12 +1,38 @@
 /* eslint-disable indent */
 
-const { Component } = require('hypermorphic');
+const { Component, wire } = require('hypermorphic');
 const { encode } = require('punycode');
 
 const Slice = require('./Slice');
+const ErrorMessage = require('./ErrorMessage');
 const Download = require('./Icons/Download');
+const Floppy = require('./Icons/Floppy');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDownloadName = require('../helpers/getDownloadName');
+const getFileHash = require('../helpers/getFileHash');
+const { setItem } = require('../helpers/indexedDB');
+
+function Buttons({ mediaIsLoaded, handleSave, handleDownload }) {
+  return wire()`
+    <div class="button-container padding-y-xsmall flex flex-grow1 flex-justify-content-end">
+      <button
+        disabled=${!mediaIsLoaded}
+        onClick=${handleDownload}
+        title="Download file."
+        class="button--xsmall button--withicon"
+      >
+        ${Download()} <span>Download</span>
+      </button>
+      <button
+        onClick=${handleSave}
+        title="Save in the browser."
+        class="button--xsmall button--withicon"
+      >
+        ${Floppy()} <span>Save</span>
+      </button>
+    </div>
+  `;
+}
 
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
@@ -28,12 +54,18 @@ function humanizeFileSize(bytes) {
   }
 }
 
+const initialState = {
+  error: undefined,
+};
+
 class LocalPlay extends Component {
   constructor({ file, source }) {
     super();
+    this.state = Object.assign({}, initialState);
     this.file = file;
     this.source = source;
     this.handleDownload = this.handleDownload.bind(this);
+    this.handleSave = this.handleSave.bind(this);
     this.setSliceComponent = this.setSliceComponent.bind(this);
   }
 
@@ -92,6 +124,27 @@ class LocalPlay extends Component {
     }, 0);
   }
 
+  async handleSave(evt) {
+    evt.preventDefault();
+
+    try {
+      const hash = await getFileHash(this.file);
+      await setItem({
+        key: hash,
+        file: this.file,
+      });
+    } catch (err) {
+      const error = [
+        'Unable to save slice in indexedDB :(',
+        'Please try again using a different browser.',
+        err.message,
+      ];
+      this.setState({
+        error,
+      });
+    }
+  }
+
   render() {
     const humanizedSize = humanizeFileSize(this.file.size);
     const mediaIsLoaded = isMediaLoaded(this.audio);
@@ -103,18 +156,14 @@ class LocalPlay extends Component {
           <h1 class="flex-grow1">
             ${displayName} <small>(${humanizedSize})</small>
           </h1>
-          <div class="padding-y-xsmall flex flex-grow1 flex-justify-content-end">
-            <button
-              disabled=${!mediaIsLoaded}
-              onClick=${this.handleDownload}
-              title="Download the source file."
-              class="button--xsmall button--withicon"
-            >
-              ${Download()} <span>Download</span>
-            </button>
-          </div>
+          ${Buttons({
+            mediaIsLoaded,
+            handleDownload: this.handleDownload,
+            handleSave: this.handleSave,
+          })}
         </div>
-        ${[this.slice || '']}
+        ${this.state.error ? ErrorMessage(this.state.error) : ''}
+        ${this.slice || ''}
       </div>
     `;
   }
