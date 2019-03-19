@@ -1,4 +1,4 @@
-const { Component } = require('hypermorphic');
+const { Component, wire } = require('hypermorphic');
 const formatTime = require('../helpers/formatTime');
 const hexToRGB = require('../helpers/hexToRGB');
 const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
@@ -19,38 +19,12 @@ const SLICE_COLOR = '#37f0c2';
 const DURATION_COLOR = '#f4ffdc';
 const PROGRESS_COLOR = '#24adc2';
 
-function Canvases(containerWidth, width) {
-  return `
-    <canvas
-      id="waveform-canvas"
-      width="${width}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="progress-canvas"
-      width="${width}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="duration-canvas"
-      width="${containerWidth}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="start-canvas"
-      width="${containerWidth}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="end-canvas"
-      width="${containerWidth}"
-      height="${HEIGHT}"
-    >
-    </canvas>
+function Canvases({ id, containerWidth, width }) {
+  return wire(id)`
+    <canvas id="waveform-canvas" width="${width}" height="${HEIGHT}" />
+    <canvas id="progress-canvas" width="${width}" height="${HEIGHT}" />
+    <canvas id="start-canvas" width="${containerWidth}" height="${HEIGHT}" />
+    <canvas id="end-canvas" width="${containerWidth}" height="${HEIGHT}" />
   `;
 }
 
@@ -99,10 +73,17 @@ class WaveForm extends Component {
     this.canvases = {};
     this.canvasContexts = {};
     this.snapshots = {};
-    this.container.innerHTML = Canvases(this.containerWidth, this.width);
-    ['waveform', 'progress', 'duration', 'start', 'end'].forEach(canvas => {
-      this.canvases[canvas] = document.getElementById(`${canvas}-canvas`);
-      this.canvasContexts[canvas] = this.canvases[canvas].getContext('2d');
+    this.setState({
+      canvases: Canvases({
+        id: this,
+        containerWidth: this.containerWidth,
+        width: this.width,
+      }),
+    });
+    this.state.canvases.childNodes.forEach(node => {
+      const canvas = node.id.replace('-canvas', '');
+      this.canvases[canvas] = node;
+      this.canvasContexts[canvas] = node.getContext('2d');
       this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
       this.canvasContexts[canvas].font = FONT;
       this.snapshots[canvas] = [];
@@ -582,6 +563,7 @@ class WaveForm extends Component {
       }"
     >
       <div>
+        ${this.state.canvases || ''}
       </div>
     </div>
     `;
