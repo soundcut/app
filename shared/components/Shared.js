@@ -75,9 +75,9 @@ class Shared extends Component {
 
     return this.html`
       <div onconnected=${this}>
-        ${[state.error ? ErrorMessage() : '']}
-        ${[state.loading ? Loading() : '']}
-        ${[file ? new LocalPlay({ file }) : '']}
+        ${state.error ? ErrorMessage() : ''}
+        ${state.loading ? Loading() : ''}
+        ${file ? new LocalPlay({ file }) : ''}
       </div>
     `;
   }

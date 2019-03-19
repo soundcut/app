@@ -332,8 +332,8 @@ class Slice extends Component {
       return this.decorateContent(
         this.sliceWire`
           <div>
-            ${[state.error ? ErrorMessage(state.error) : '']}
-            ${[state.id ? ShareInput(state.id) : '']}
+            ${state.error ? ErrorMessage(state.error) : ''}
+            ${state.id ? ShareInput(state.id) : ''}
             <div class="player-container">
               <div class="player-header">
                 <strong>
@@ -348,23 +348,21 @@ class Slice extends Component {
                 </small>
               </div>
               <div class="flex">
-                ${[
-                  PlayerActions({
-                    disabled,
-                    paused: state.slice.paused,
-                    sharing: state.sharing,
-                    saving: state.saving,
-                    submitted: state.submitted,
-                    handlePlayPauseClick: this.handlePlayPauseClick,
-                    handleDownloadClick: this.handleDownloadClick,
-                    handleShareClick: this.handleShareClick,
-                    handleSubmitClick: this.handleSubmitClick,
-                    handleSaveClick: this.handleSaveClick,
-                    handleDismissClick: this.handleDismissClick,
-                  }),
-                ]}
-                ${[this.waveform ? this.waveform : '']}
-                ${[state.slice ? this.volume : '']}
+                ${PlayerActions({
+                  disabled,
+                  paused: state.slice.paused,
+                  sharing: state.sharing,
+                  saving: state.saving,
+                  submitted: state.submitted,
+                  handlePlayPauseClick: this.handlePlayPauseClick,
+                  handleDownloadClick: this.handleDownloadClick,
+                  handleShareClick: this.handleShareClick,
+                  handleSubmitClick: this.handleSubmitClick,
+                  handleSaveClick: this.handleSaveClick,
+                  handleDismissClick: this.handleDismissClick,
+                })}
+                ${this.waveform}
+                ${this.volume}
               </div>
             </div>
           </div>
