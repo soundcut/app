@@ -18,13 +18,14 @@ Created and developed by [Tim](https://twitter.com/tpillard).
 - Decode the audio data to draw a waveform in a canvas
 - Play (looped) / Pause
 - Select `slice` boundaries (start / end) using drag and drop
+- Save/delete the audio source into/from `indexedDB`
 
 ## Slice features
 
 - Submit a slice - re-draw a waveform just for the selected boundaries
 - Download a slice
 - Share a slice - save the slice on the server, generate a unique URL
-- Save a slice into `indexedDB`
+- Save/delete a slice into/from `indexedDB`
 
 # Philosophy
 

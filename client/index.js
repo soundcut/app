@@ -26,8 +26,8 @@ function initialize() {
     render.main(upload);
   });
 
-  app.get('/saved/:id', function shared(ctx) {
-    const saved = new Saved(ctx.params.id);
+  app.get('/saved/:type/:id', function shared(ctx) {
+    const saved = new Saved(ctx.params);
     render.main(saved);
   });
 

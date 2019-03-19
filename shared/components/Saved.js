@@ -1,6 +1,8 @@
 const { Component } = require('hypermorphic');
+
 const LocalPlay = require('./LocalPlay');
 const ErrorMessage = require('./ErrorMessage');
+const getDisplayName = require('../helpers/getDisplayName');
 const { getItem } = require('../helpers/indexedDB');
 
 const initialState = {
@@ -10,21 +12,30 @@ const initialState = {
 };
 
 class Saved extends Component {
-  constructor(id) {
+  constructor({ id, type }) {
     super();
     this.id = id;
+    this.type = type;
     this.state = Object.assign({}, initialState);
   }
 
   async onconnected() {
     try {
-      const item = await getItem(this.id);
+      const item = await getItem({ store: this.type, key: this.id });
+      const filename = item.file.name;
+      const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+      document.title = newTitle;
+
       this.setState({
         item,
-        localplay: new LocalPlay({ file: item.file }),
+        localplay: new LocalPlay({
+          type: this.type,
+          file: item.file,
+          saved: this.id,
+        }),
       });
     } catch (err) {
-      const error = ['Unable to retrieve this slice :(', err.message];
+      const error = ['Unable to retrieve this item :(', err.message];
       this.setState({
         error,
       });

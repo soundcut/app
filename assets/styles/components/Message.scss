@@ -1,0 +1,11 @@
+@import '../abstracts/variables.scss';
+
+.Message {
+  padding: $spacing-small;
+  border-radius: $border-radius;
+
+  a {
+    color: $color-sand;
+    font-weight: 600;
+  }
+}

@@ -1,8 +1,10 @@
 const { Component, wire } = require('hypermorphic');
+const { encode } = require('punycode');
 const Upload = require('./Upload');
 const LinkForm = require('./Link/Form');
 const LocalPlay = require('./LocalPlay');
 const List = require('./List');
+const getDisplayName = require('../helpers/getDisplayName');
 
 const initialState = {
   linkLoading: false,
@@ -13,23 +15,39 @@ class Home extends Component {
   constructor() {
     super();
     this.state = Object.assign({}, initialState);
-    this.onFileValid = this.onFileValid.bind(this);
-    this.onLinkLoading = this.onLinkLoading.bind(this);
-    this.upload = new Upload(this.onFileValid);
+    this.upload = new Upload(this.onFileValid.bind(this, 'upload'));
     this.link = new LinkForm({
-      onFileValid: this.onFileValid,
-      loadingCallback: this.onLinkLoading,
+      onFileValid: this.onFileValid.bind(this, 'link'),
+      loadingCallback: this.onLinkLoading.bind(this),
     });
-    this.list = new List();
+    this.slices = new List('slice');
+    this.sounds = new List('sound');
   }
 
   onconnected() {
-    window.document.title = 'Sound Slice';
+    document.title = 'Sound Slice';
   }
 
-  onFileValid(file) {
+  onFileValid(type, file, from) {
+    const filename = file.name;
+    const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+    document.title = newTitle;
+    const encodedName = encode(filename);
+    const historyState = { filename: encodedName };
+    if (type === 'upload') {
+      const pathname = `/play?title=${encodedName}`;
+      history.pushState(historyState, document.title, pathname);
+    } else if (from) {
+      const pathname = `/link?title=${encodedName}&from=${from}`;
+      history.pushState(historyState, document.title, pathname);
+    }
+
     this.setState({
-      localPlay: new LocalPlay({ file, source: true }),
+      localPlay: new LocalPlay({
+        file,
+        type,
+        disconnectCallback: this.onconnected,
+      }),
     });
   }
 
@@ -41,7 +59,7 @@ class Home extends Component {
 
   decorateContent(...children) {
     return this.html`
-      <section connected=${this}>
+      <section onconnected=${this}>
         ${children}
       </section>
     `;
@@ -63,7 +81,8 @@ class Home extends Component {
       </p>`,
       this.upload,
       this.link,
-      this.list
+      this.slices,
+      this.sounds
     );
   }
 }

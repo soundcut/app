@@ -1,18 +1,44 @@
 /* eslint-disable indent */
 
 const { Component, wire } = require('hypermorphic');
-const { encode } = require('punycode');
 
 const Slice = require('./Slice');
 const ErrorMessage = require('./ErrorMessage');
 const Download = require('./Icons/Download');
 const Floppy = require('./Icons/Floppy');
+const Cross = require('./Icons/Cross');
 const getDisplayName = require('../helpers/getDisplayName');
 const getDownloadName = require('../helpers/getDownloadName');
 const getFileHash = require('../helpers/getFileHash');
-const { setItem } = require('../helpers/indexedDB');
+const { setItem, deleteItem } = require('../helpers/indexedDB');
 
-function Buttons({ mediaIsLoaded, handleSave, handleDownload }) {
+function Buttons({
+  saved,
+  mediaIsLoaded,
+  handleSave,
+  handleDelete,
+  handleDownload,
+}) {
+  const soundButton = saved
+    ? wire()`
+    <button
+      onClick=${handleDelete}
+      title="Delete from the browser."
+      class="button--xsmall button--withicon button--danger"
+    >
+      ${Cross('sand')} <span>Delete</span>
+    </button>
+    `
+    : wire()`
+    <button
+      onClick=${handleSave}
+      title="Save in the browser."
+      class="button--xsmall button--withicon"
+    >
+      ${Floppy()} <span>Save</span>
+    </button>
+    `;
+
   return wire()`
     <div class="button-container padding-y-xsmall flex flex-grow1 flex-justify-content-end">
       <button
@@ -23,13 +49,7 @@ function Buttons({ mediaIsLoaded, handleSave, handleDownload }) {
       >
         ${Download()} <span>Download</span>
       </button>
-      <button
-        onClick=${handleSave}
-        title="Save in the browser."
-        class="button--xsmall button--withicon"
-      >
-        ${Floppy()} <span>Save</span>
-      </button>
+      ${soundButton}
     </div>
   `;
 }
@@ -55,32 +75,25 @@ function humanizeFileSize(bytes) {
 }
 
 const initialState = {
+  type: undefined,
   error: undefined,
+  saved: undefined,
 };
 
 class LocalPlay extends Component {
-  constructor({ file, source }) {
+  constructor({ file, type, saved, disconnectCallback }) {
     super();
-    this.state = Object.assign({}, initialState);
+    this.state = Object.assign({}, initialState, { type, saved });
     this.file = file;
-    this.source = source;
+    // upload | link | slice | sound | shared
     this.handleDownload = this.handleDownload.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
     this.setSliceComponent = this.setSliceComponent.bind(this);
+    this.disconnectCallback = disconnectCallback;
   }
 
   onconnected() {
-    const filename = this.file.name;
-    const newTitle = `${getDisplayName(filename)} | Sound Slice`;
-    document.title = newTitle;
-
-    if (this.source) {
-      const encodedName = encode(filename);
-      const historyState = { filename: encodedName };
-      const pathname = `/play?title=${encodedName}`;
-      history.pushState(historyState, document.title, pathname);
-    }
-
     this.objectURL = URL.createObjectURL(this.file);
     this.audio = new Audio(this.objectURL);
     this.interval = setInterval(() => {
@@ -97,6 +110,9 @@ class LocalPlay extends Component {
     this.file = undefined;
     URL.revokeObjectURL(this.objectURL);
     clearInterval(this.interval);
+    if (typeof this.disconnectCallback === 'function') {
+      this.disconnectCallback();
+    }
   }
 
   setSliceComponent(audio, file) {
@@ -124,18 +140,45 @@ class LocalPlay extends Component {
     }, 0);
   }
 
+  async handleDelete(evt) {
+    evt.preventDefault();
+
+    try {
+      const hash = this.state.saved || (await getFileHash(this.file));
+      await deleteItem({
+        store: this.state.type,
+        key: hash,
+      });
+      this.setState({
+        saved: undefined,
+      });
+    } catch (err) {
+      const error = ['Unable to delete sound from indexedDB :(', err.message];
+      this.setState({
+        error,
+      });
+    }
+  }
+
   async handleSave(evt) {
     evt.preventDefault();
 
     try {
       const hash = await getFileHash(this.file);
       await setItem({
-        key: hash,
-        file: this.file,
+        store: 'sound',
+        item: {
+          key: hash,
+          file: this.file,
+        },
+      });
+      this.setState({
+        type: 'sound',
+        saved: hash,
       });
     } catch (err) {
       const error = [
-        'Unable to save slice in indexedDB :(',
+        'Unable to save sound in indexedDB :(',
         'Please try again using a different browser.',
         err.message,
       ];
@@ -158,8 +201,10 @@ class LocalPlay extends Component {
           </h1>
           ${Buttons({
             mediaIsLoaded,
+            saved: this.state.saved,
             handleDownload: this.handleDownload,
             handleSave: this.handleSave,
+            handleDelete: this.handleDelete,
           })}
         </div>
         ${this.state.error ? ErrorMessage(this.state.error) : ''}

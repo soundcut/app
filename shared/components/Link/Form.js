@@ -28,7 +28,6 @@ class LinkForm extends Component {
   }
 
   onconnected() {
-    document.title = 'Sound Slice | Link external media';
     this.link = document.getElementById('link');
     this.loader = Loader('Extracting audio... Please wait.');
     this.errorMessage = ErrorMessage(
@@ -111,7 +110,7 @@ class LinkForm extends Component {
       const file = new File([blob], filename);
 
       if (typeof this.onFileValid === 'function') {
-        this.onFileValid(file);
+        this.onFileValid(file, value);
       }
 
       this.setState({

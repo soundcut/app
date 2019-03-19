@@ -39,6 +39,15 @@ button {
   }
 }
 
+.button--danger {
+  background-color: $color-danger;
+  color: $color-sand;
+
+  &:focus {
+    border-color: $color-cement;
+  }
+}
+
 .button-container {
   a.button,
   button {

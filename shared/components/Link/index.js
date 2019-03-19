@@ -1,6 +1,9 @@
 const { Component } = require('hypermorphic');
+const { encode } = require('punycode');
+
 const LinkForm = require('./Form');
 const LocalPlay = require('../LocalPlay');
+const getDisplayName = require('../../helpers/getDisplayName');
 
 const initialState = {
   localPlay: undefined,
@@ -17,12 +20,20 @@ class Link extends Component {
   }
 
   onconnected() {
-    window.document.title = 'Sound Slice';
+    document.title = 'Sound Slice | Link external media';
   }
 
   onFileValid(file) {
+    const filename = file.name;
+    const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+    document.title = newTitle;
+    const encodedName = encode(file.name);
+    const historyState = { filename: encodedName };
+    const from = new URL(document.location).searchParams.get('from');
+    const pathname = `/link?title=${encodedName}&from=${from}`;
+    history.replaceState(historyState, document.title, pathname);
     this.setState({
-      localPlay: new LocalPlay({ file, source: true }),
+      localPlay: new LocalPlay({ file, type: 'link' }),
     });
   }
 

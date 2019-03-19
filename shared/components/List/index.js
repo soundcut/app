@@ -7,14 +7,33 @@ const initialState = {
   items: [],
 };
 
+function getTitle(type) {
+  let title;
+  switch (type) {
+  case 'slice':
+    title = 'Your saved slices';
+    break;
+  case 'sound':
+    title = 'Your saved sounds';
+    break;
+  default:
+    title = 'Your saved things';
+    break;
+  }
+
+  return title;
+}
+
 class List extends Component {
-  constructor() {
+  constructor(type) {
     super();
+    this.type = type;
     this.state = Object.assign({}, initialState);
+    this.renderItem = this.renderItem.bind(this);
   }
 
   async onconnected() {
-    const items = await getAllItems();
+    const items = await getAllItems(this.type);
 
     this.setState({
       items,
@@ -26,7 +45,6 @@ class List extends Component {
         item.duration = audio.duration;
         this.render();
       } catch (err) {
-        console.error(err);
         // pass
       }
     });
@@ -40,19 +58,23 @@ class List extends Component {
     `;
   }
 
+  renderItem(item) {
+    return ListItem({ type: this.type, item });
+  }
+
   render() {
     if (!this.state.items.length) {
       return this.decorateContent('');
     }
 
-    return this.decorateContent(
-      wire()`<h2>Your saved slices</h2>`,
-      wire()`
-        <ul>
-          ${this.state.items.map(ListItem)}
-        </ul>
-      `
-    );
+    const title = wire()`<h2>${getTitle(this.type)}</h2>`;
+    const items = wire()`
+      <ul>
+        ${this.state.items.map(this.renderItem)}
+      </ul>
+    `;
+
+    return this.decorateContent(title, items);
   }
 }
 

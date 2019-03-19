@@ -41,7 +41,7 @@ app.use(morgan(env === 'development' ? 'dev' : 'tiny'));
 app.use('/public', serveStatic('public'));
 app.use('/public', serveStatic('dist'));
 
-const title = 'SoundSlice';
+const title = 'Sound Slice';
 
 const links = [
   {
@@ -341,9 +341,7 @@ app.get('/link', function(req, res) {
   res.end();
 });
 
-app.get('/saved/:id', function(req, res) {
-  const id = req.params.id;
-
+app.get('/saved/:type/:id', function(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/html',
   });
@@ -353,7 +351,7 @@ app.get('/saved/:id', function(req, res) {
       path: req.path,
       title: title,
       links: links,
-      main: new Saved(id),
+      main: new Saved(req.params),
     })
   );
   res.end();

@@ -1,8 +1,8 @@
 @import '../abstracts/variables.scss';
 @import './Message.scss';
 
-.Error {
+.Success {
   @extend .Message;
-  background-color: $color-danger;
+  background-color: $color-success;
   color: $color-cement;
 }

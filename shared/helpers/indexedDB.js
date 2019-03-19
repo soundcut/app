@@ -1,10 +1,21 @@
 let db;
 
-const init = () =>
-  new Promise((resolve, reject) => {
+function createStore(db, store) {
+  try {
+    db.deleteObjectStore(store);
+  } catch (err) {
+    /* pass */
+  }
+  db.createObjectStore(store, {
+    keyPath: 'key',
+  });
+}
+
+function init() {
+  return new Promise((resolve, reject) => {
     if (!db) {
       const name = 'soundslice';
-      const version = 1;
+      const version = 2;
       const openRequest = window.indexedDB.open(name, version);
 
       openRequest.onsuccess = () => {
@@ -18,47 +29,53 @@ const init = () =>
         );
 
       openRequest.onupgradeneeded = event => {
-        try {
-          event.target.result.deleteObjectStore('slices');
-        } catch (err) {
-          /* pass */
-        }
-        event.target.result.createObjectStore('slices', {
-          keyPath: 'key',
-        });
+        const db_ = event.target.result;
+        createStore(db_, 'slice');
+        createStore(db_, 'sound');
       };
     } else {
       resolve();
     }
   });
+}
 
-const getStore = () =>
-  db.transaction('slices', 'readwrite').objectStore('slices');
+const getStore = store => db.transaction(store, 'readwrite').objectStore(store);
 
-const doGetItem = key => {
+const doGetItem = ({ key, store }) => {
   return new Promise((resolve, reject) => {
-    const request = getStore().get(key);
+    const request = getStore(store).get(key);
     request.onsuccess = evt => resolve(evt.target.result && evt.target.result);
     request.onerror = err => reject(err);
   });
 };
-const doSetItem = item => {
+const doSetItem = ({ item, store }) => {
   return new Promise((resolve, reject) => {
-    const request = getStore().put(item);
+    const request = getStore(store).put(item);
     request.onsuccess = evt => resolve(evt.target.result && evt.target.result);
     request.onerror = err => reject(err);
   });
 };
-const doGetAllItems = () => {
+const doDeleteItem = ({ key, store }) => {
   return new Promise((resolve, reject) => {
-    const request = getStore().getAll();
+    const request = getStore(store).delete(key);
+    request.onsuccess = evt => resolve(evt.target.result && evt.target.result);
+    request.onerror = err => reject(err);
+  });
+};
+const doGetAllItems = store => {
+  return new Promise((resolve, reject) => {
+    const request = getStore(store).getAll();
     request.onsuccess = evt => resolve(evt.target.result);
     request.onerror = err => reject(err);
   });
 };
 
-const getItem = key => init().then(() => doGetItem(key));
-const setItem = item => init().then(() => doSetItem(item));
-const getAllItems = () => init().then(() => doGetAllItems());
+const getItem = ({ store, key }) =>
+  init().then(() => doGetItem({ store, key }));
+const setItem = ({ store, item }) =>
+  init().then(() => doSetItem({ store, item }));
+const deleteItem = ({ store, key }) =>
+  init().then(() => doDeleteItem({ store, key }));
+const getAllItems = store => init().then(() => doGetAllItems(store));
 
-module.exports = { getItem, getAllItems, setItem };
+module.exports = { getItem, getAllItems, setItem, deleteItem };

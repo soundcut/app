@@ -22,7 +22,10 @@
 @import './components/Volume.scss';
 @import './components/WaveForm.scss';
 @import './components/Loader.scss';
+@import './components/Message.scss';
 @import './components/Error.scss';
+@import './components/Success.scss';
+
 
 body {
   background-color: $color-blue;

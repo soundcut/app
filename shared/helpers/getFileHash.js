@@ -21,7 +21,7 @@ async function getFileHash(file) {
   });
 
   const digest = await window.crypto.subtle.digest('SHA-256', arrayBuffer);
-  return hexString(digest);
+  return hexString(digest).slice(0, 10);
 }
 
 module.exports = getFileHash;

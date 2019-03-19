@@ -5,10 +5,10 @@ const getDisplayName = require('../../helpers/getDisplayName');
 const formatTime = require('../../helpers/formatTime');
 
 /* eslint-disable indent */
-function ListItem(item) {
+function ListItem({ type, item }) {
   return wire()`
     <li>
-      <a href="${`/saved/${item.key}`}"
+      <a href="${`/saved/${type}/${item.key}`}"
          class="flex flex-justify-content-between flex-items-center"
       >
         <strong>
