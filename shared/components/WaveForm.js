@@ -21,36 +21,11 @@ const PROGRESS_COLOR = '#24adc2';
 
 function Canvases(containerWidth, width) {
   return wire()`
-    <canvas
-      id="waveform-canvas"
-      width="${width}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="progress-canvas"
-      width="${width}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="duration-canvas"
-      width="${containerWidth}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="start-canvas"
-      width="${containerWidth}"
-      height="${HEIGHT}"
-    >
-    </canvas>
-    <canvas
-      id="end-canvas"
-      width="${containerWidth}"
-      height="${HEIGHT}"
-    >
-    </canvas>
+    <canvas id="waveform-canvas" width="${width}" height="${HEIGHT}"></canvas>
+    <canvas id="progress-canvas" width="${width}" height="${HEIGHT}"></canvas>
+    <canvas id="duration-canvas" width="${containerWidth}" height="${HEIGHT}"></canvas>
+    <canvas id="start-canvas" width="${containerWidth}" height="${HEIGHT}"></canvas>
+    <canvas id="end-canvas" width="${containerWidth}" height="${HEIGHT}"></canvas>
   `;
 }
 
