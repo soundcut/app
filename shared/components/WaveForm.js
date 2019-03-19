@@ -76,7 +76,7 @@ class WaveForm extends Component {
     this.setState({
       wiredCanvases: Canvases(this.containerWidth, this.width),
     });
-    ['waveform', 'progress', 'start', 'end'].forEach(canvas => {
+    ['waveform', 'progress', 'duration', 'start', 'end'].forEach(canvas => {
       this.canvases[canvas] = this.state.wiredCanvases.childNodes.find(node => node.id === `${canvas}-canvas`);
       this.canvasContexts[canvas] = this.canvases[canvas].getContext('2d');
       this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
