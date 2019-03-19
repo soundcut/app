@@ -1,4 +1,4 @@
-const { Component, wire } = require('hypermorphic');
+const { Component } = require('hypermorphic');
 const formatTime = require('../helpers/formatTime');
 const hexToRGB = require('../helpers/hexToRGB');
 const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
@@ -20,7 +20,7 @@ const DURATION_COLOR = '#f4ffdc';
 const PROGRESS_COLOR = '#24adc2';
 
 function Canvases(containerWidth, width) {
-  return wire()`
+  return `
     <canvas
       id="waveform-canvas"
       width="${width}"
@@ -99,11 +99,9 @@ class WaveForm extends Component {
     this.canvases = {};
     this.canvasContexts = {};
     this.snapshots = {};
-    this.setState({
-      wiredCanvases: Canvases(this.containerWidth, this.width),
-    });
+    this.container.innerHTML = Canvases(this.containerWidth, this.width);
     ['waveform', 'progress', 'duration', 'start', 'end'].forEach(canvas => {
-      this.canvases[canvas] = this.state.wiredCanvases.childNodes.find(node => node.id === `${canvas}-canvas`);
+      this.canvases[canvas] = document.getElementById(`${canvas}-canvas`);
       this.canvasContexts[canvas] = this.canvases[canvas].getContext('2d');
       this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
       this.canvasContexts[canvas].font = FONT;
@@ -584,7 +582,6 @@ class WaveForm extends Component {
       }"
     >
       <div>
-        ${this.state.wiredCanvases || ''}
       </div>
     </div>
     `;
