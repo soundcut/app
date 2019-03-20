@@ -15,7 +15,7 @@ function init() {
   return new Promise((resolve, reject) => {
     if (!db) {
       const name = 'soundslice';
-      const version = 2;
+      const version = 3;
       const openRequest = window.indexedDB.open(name, version);
 
       openRequest.onsuccess = () => {
@@ -32,6 +32,7 @@ function init() {
         const db_ = event.target.result;
         createStore(db_, 'slice');
         createStore(db_, 'sound');
+        createStore(db_, 'shared');
       };
     } else {
       resolve();

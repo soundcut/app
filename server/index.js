@@ -193,11 +193,19 @@ app.get('/upload', function(req, res) {
   res.end();
 });
 
-app.get('/slice/:id', async function(req, res) {
+app.get('/shared/:id', async function(req, res) {
   const id = req.params.id;
 
   if (!id) {
     res.sendStatus(422);
+    res.write(
+      views.default(wire(), {
+        path: req.path,
+        title: title,
+        links: links,
+        main: new Home(),
+      })
+    );
     res.end();
     return;
   }

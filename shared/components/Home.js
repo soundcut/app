@@ -22,6 +22,7 @@ class Home extends Component {
     });
     this.slices = new List('slice');
     this.sounds = new List('sound');
+    this.shared = new List('shared');
   }
 
   onconnected() {
@@ -82,7 +83,8 @@ class Home extends Component {
       this.upload,
       this.link,
       this.slices,
-      this.sounds
+      this.sounds,
+      this.shared
     );
   }
 }

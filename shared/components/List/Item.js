@@ -6,13 +6,16 @@ const formatTime = require('../../helpers/formatTime');
 
 /* eslint-disable indent */
 function ListItem({ type, item }) {
+  const url =
+    type == 'shared' ? `/shared/${item.key}` : `/saved/${type}/${item.key}`;
+
   return wire()`
     <li>
-      <a href="${`/saved/${type}/${item.key}`}"
+      <a href="${url}"
          class="flex flex-justify-content-between flex-items-center"
       >
         <strong>
-          ${getDisplayName(item.file.name)}
+          ${getDisplayName(item.file ? item.file.name : item.filename)}
         </strong>
         <em class="flex flex-items-center">
           <span>
@@ -21,9 +24,9 @@ function ListItem({ type, item }) {
                 ? ''
                 : formatTime(item.duration)
             }
-          </span>        
+          </span>
           <span>
-            ${humanizeFileSize(item.file.size)}
+            ${humanizeFileSize(item.file ? item.file.size : item.filesize)}
           </span>
           ${Headphones()}
         </em>

@@ -2,11 +2,11 @@ const { Component, wire } = require('hypermorphic');
 
 const Loader = require('../Loader');
 const ErrorMessage = require('../ErrorMessage');
-const SuccessMessage = require('../SuccessMessage');
+const SavedAlert = require('../SavedAlert');
+const SharedAlert = require('../SharedAlert');
 const Volume = require('../Volume');
 const WaveForm = require('../WaveForm');
 const PlayerActions = require('./PlayerActions');
-const ShareInput = require('./ShareInput');
 const getSliceName = require('../../helpers/getSliceName');
 const formatTime = require('../../helpers/formatTime');
 const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
@@ -33,16 +33,6 @@ const initialState = {
   slice: undefined,
   sourceAudioBuffer: undefined,
 };
-
-function SavedAlert(hash) {
-  const messages = [
-    'This slice has been saved to your browser.',
-    wire()`It is now available on the <a href="/">home screen</a>.`,
-    wire()`<a href="${`/saved/slice/${hash}`}">Go to slice</a>.`,
-  ];
-
-  return SuccessMessage(messages);
-}
 
 class Slice extends Component {
   constructor({ audio, file }) {
@@ -348,7 +338,7 @@ class Slice extends Component {
         this.sliceWire`
           <div>
             ${state.error ? ErrorMessage(state.error) : ''}
-            ${state.id ? ShareInput(state.id) : ''}
+            ${state.id ? SharedAlert(state.id) : ''}
             ${state.saved ? SavedAlert(state.saved) : ''}
             <div class="player-container">
               <div class="player-header">

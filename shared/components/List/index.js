@@ -16,6 +16,9 @@ function getTitle(type) {
   case 'sound':
     title = 'Your saved sounds';
     break;
+  case 'shared':
+    title = 'Your saved shares';
+    break;
   default:
     title = 'Your saved things';
     break;
@@ -39,15 +42,17 @@ class List extends Component {
       items,
     });
 
-    this.state.items.forEach(async item => {
-      try {
-        const audio = await getFileAudio(item.file);
-        item.duration = audio.duration;
-        this.render();
-      } catch (err) {
-        // pass
-      }
-    });
+    if (this.type !== 'shared') {
+      this.state.items.forEach(async item => {
+        try {
+          const audio = await getFileAudio(item.file);
+          item.duration = audio.duration;
+          this.render();
+        } catch (err) {
+          // pass
+        }
+      });
+    }
   }
 
   decorateContent(...children) {

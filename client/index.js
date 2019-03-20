@@ -31,7 +31,7 @@ function initialize() {
     render.main(saved);
   });
 
-  app.get('/slice/:id', function shared(ctx) {
+  app.get('/shared/:id', function shared(ctx) {
     const shared = new Shared(ctx.params.id);
     render.main(shared);
   });
