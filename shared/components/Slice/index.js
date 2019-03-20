@@ -1,4 +1,5 @@
 const { Component, wire } = require('hypermorphic');
+const { encode } = require('punycode');
 
 const Loader = require('../Loader');
 const ErrorMessage = require('../ErrorMessage');
@@ -7,15 +8,22 @@ const SharedAlert = require('../SharedAlert');
 const Volume = require('../Volume');
 const WaveForm = require('../WaveForm');
 const PlayerActions = require('./PlayerActions');
+const SliceActions = require('./SliceActions');
+const Tutorial = require('./Tutorial');
+const Ready = require('./Ready');
+const Form = require('./Form');
+const Reslice = require('./Reslice');
+
 const getSliceName = require('../../helpers/getSliceName');
+const getDisplayName = require('../../helpers/getDisplayName');
 const formatTime = require('../../helpers/formatTime');
 const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
 const getAudioSlice = require('../../helpers/getAudioSlice');
+const shareSlice = require('../../helpers/shareSlice');
 const getFileHash = require('../../helpers/getFileHash');
-const { setItem } = require('../../helpers/indexedDB');
+const { setItem, deleteItem } = require('../../helpers/indexedDB');
 
 const MAX_SLICE_LENGTH = 90;
-const SHARE_PATH = '/api/share';
 
 const initialState = {
   mounted: false,
@@ -25,8 +33,7 @@ const initialState = {
   submitted: false,
   loading: false,
   sharing: false,
-  saving: false,
-  id: undefined,
+  shared: undefined,
   error: undefined,
   file: undefined,
   audio: undefined,
@@ -35,16 +42,20 @@ const initialState = {
 };
 
 class Slice extends Component {
-  constructor({ audio, file }) {
+  constructor({ audio, file, onSubmit, onDismiss }) {
     super();
     this.state = Object.assign({}, initialState, { file, audio });
 
+    this.onSubmit = onSubmit;
+    this.onDismiss = onDismiss;
     this.handleSliceChange = this.handleSliceChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
     this.handleSaveClick = this.handleSaveClick.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleDismissClick = this.handleDismissClick.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
     this.resetSlice = this.resetSlice.bind(this);
@@ -158,77 +169,6 @@ class Slice extends Component {
     this.setBoundary(evt.target.name, evt.target.value);
   }
 
-  handlePlayPauseClick(evt) {
-    evt.preventDefault();
-    if (this.state.slice.paused) {
-      this.state.slice.play();
-    } else {
-      this.state.slice.pause();
-    }
-    this.render();
-  }
-
-  handleDownloadClick(evt) {
-    evt.preventDefault();
-
-    const src = this.state.slice.currentSrc;
-    const link = document.createElement('a');
-    link.style = 'display: none;';
-    link.href = src;
-    const filename = this.state.file.name;
-    link.download = `${filename}.mp3`;
-    // Firefox appears to require appending the element to the DOM..
-    // but FileSaver.js does not need to and it still works for some reason.
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      document.body.removeChild(link);
-    }, 0);
-  }
-
-  async handleShareClick(evt) {
-    evt.preventDefault();
-
-    const filename = this.state.file.name;
-    const formData = new FormData();
-    formData.append('file', this.blob, filename);
-
-    const promise = fetch(SHARE_PATH, {
-      method: 'POST',
-      body: formData,
-    });
-    this.setState({ loading: true, sharing: true, error: false });
-    try {
-      const response = await promise;
-
-      if (response.status !== 201) {
-        const err = new Error('Server Error');
-        err.response = response;
-        throw err;
-      }
-
-      const data = await response.json();
-      this.setState({
-        loading: false,
-        sharing: false,
-        id: data.id,
-      });
-    } catch (err) {
-      console.error({ err });
-      const error = [
-        'Unable to share this slice :(',
-        !err.response && 'Is this device connected to the internet?',
-        err.message,
-      ];
-      this.setState({
-        loading: false,
-        sharing: false,
-        error,
-      });
-      return;
-    }
-  }
-
   async createSlice() {
     const state = this.state;
 
@@ -259,6 +199,7 @@ class Slice extends Component {
       this.state.start,
       this.state.end
     );
+    this.onSubmit();
     const newState = Object.assign({}, initialState, {
       audio: this.state.slice,
       file: new File([this.blob], filename),
@@ -268,11 +209,16 @@ class Slice extends Component {
     this.onconnected();
   }
 
+  handleDismissClick(evt) {
+    evt.preventDefault();
+    this.onDismiss();
+    this.setState(Object.assign({}, this.reset));
+    this.onconnected();
+  }
+
   async handleSaveClick(evt) {
     evt.preventDefault();
-    this.setState({
-      saving: true,
-    });
+
     try {
       const hash = await getFileHash(this.state.file);
       await setItem({
@@ -283,7 +229,6 @@ class Slice extends Component {
         },
       });
       this.setState({
-        saving: false,
         saved: hash,
       });
     } catch (err) {
@@ -293,16 +238,87 @@ class Slice extends Component {
         err.message,
       ];
       this.setState({
-        saving: false,
         error,
       });
     }
   }
 
-  handleDismissClick(evt) {
+  async handleDeleteClick(evt) {
     evt.preventDefault();
-    this.setState(Object.assign({}, this.reset));
-    this.onconnected();
+
+    try {
+      const hash = this.state.saved || (await getFileHash(this.file));
+      await deleteItem({
+        store: 'slice',
+        key: hash,
+      });
+      this.setState({
+        saved: undefined,
+      });
+    } catch (err) {
+      const error = ['Unable to delete slice from indexedDB :(', err.message];
+      this.setState({
+        error,
+      });
+    }
+  }
+
+  handlePlayPauseClick(evt) {
+    evt.preventDefault();
+    if (this.state.slice.paused) {
+      this.state.slice.play();
+    } else {
+      this.state.slice.pause();
+    }
+    this.render();
+  }
+
+  handleDownloadClick(evt) {
+    evt.preventDefault();
+
+    const src = this.state.slice.currentSrc;
+    const link = document.createElement('a');
+    link.style = 'display: none;';
+    link.href = src;
+    const filename = getDisplayName(this.state.file.name);
+    link.download = `${filename}.mp3`;
+    // Firefox appears to require appending the element to the DOM..
+    // but FileSaver.js does not need to and it still works for some reason.
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 0);
+  }
+
+  async handleShareClick(evt) {
+    evt.preventDefault();
+
+    this.setState({ loading: true, sharing: true, error: false });
+    try {
+      const shared = await shareSlice(this.state.file);
+      this.setState({
+        loading: false,
+        sharing: false,
+        shared,
+      });
+    } catch (err) {
+      const error = [
+        'Unable to share this slice :(',
+        !err.response && 'Is this device connected to the internet?',
+        err.message,
+      ];
+      this.setState({
+        loading: false,
+        sharing: false,
+        error,
+      });
+    }
+  }
+
+  handleNameChange(evt) {
+    const filename = evt.target.textContent;
+    this.state.file = new File([this.blob], encode(filename));
   }
 
   decorateContent(...children) {
@@ -315,7 +331,7 @@ class Slice extends Component {
 
   render() {
     const state = this.state;
-    const disabled = !state.slice || this.state.loading;
+    const disabled = !state.slice || this.state.loading || this.state.sharing;
     const duration = state.end - state.start;
 
     if (!this.state.mounted) {
@@ -332,37 +348,53 @@ class Slice extends Component {
       return this.decorateContent(ErrorMessage(state.error));
     }
 
+    /* eslint-disable indent */
     if (state.slice) {
-      /* eslint-disable indent */
       return this.decorateContent(
         this.sliceWire`
           <div>
+            ${!state.submitted ? Tutorial() : ''}
+            ${state.submitted ? Ready() : ''}
+            ${
+              state.submitted
+                ? Form({
+                    id: state.slice,
+                    initialValue: getDisplayName(state.file.name),
+                    onChange: this.handleNameChange,
+                  })
+                : ''
+            }
+            ${SliceActions({
+              disabled,
+              submitted: state.submitted,
+              saved: state.saved,
+              shared: state.shared,
+              handleDownload: this.handleDownloadClick,
+              handleShare: this.handleShareClick,
+              handleSubmit: this.handleSubmitClick,
+              toggleSave: !state.saved
+                ? this.handleSaveClick
+                : this.handleDeleteClick,
+            })}
+            ${
+              state.sharing
+                ? Loader('Saving the slice to the server... Please wait.')
+                : ''
+            }
             ${state.error ? ErrorMessage(state.error) : ''}
-            ${state.id ? SharedAlert(state.id) : ''}
+            ${state.shared ? SharedAlert(state.shared) : ''}
             ${state.saved ? SavedAlert(state.saved) : ''}
+            ${state.submitted ? Reslice() : ''}
             <div class="player-container">
-              <div class="player-header">
-                <strong>
-                  Drag handles to slice
-                </strong>
-                <small>
-                  ${
-                    state.slice
-                      ? `${formatTime(duration)} (${duration}seconds)`
-                      : ''
-                  }
-                </small>
-              </div>
+              <strong class="block margin-y-small text-center">
+                ${formatTime(duration)}
+              </strong>
               <div class="flex">
                 ${PlayerActions({
                   disabled,
                   paused: state.slice.paused,
-                  sharing: state.sharing,
-                  saving: state.saving,
                   submitted: state.submitted,
                   handlePlayPauseClick: this.handlePlayPauseClick,
-                  handleDownloadClick: this.handleDownloadClick,
-                  handleShareClick: this.handleShareClick,
                   handleSubmitClick: this.handleSubmitClick,
                   handleSaveClick: this.handleSaveClick,
                   handleDismissClick: this.handleDismissClick,

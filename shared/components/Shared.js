@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
 const { Component, wire } = require('hypermorphic');
-const LocalPlay = require('./LocalPlay');
+const Source = require('./Source');
 
 function getFilePath(id) {
   return `/api/slice/${id}`;
@@ -77,7 +77,7 @@ class Shared extends Component {
       <div onconnected=${this}>
         ${state.error ? ErrorMessage() : ''}
         ${state.loading ? Loading() : ''}
-        ${file ? new LocalPlay({ file, type: 'shared' }) : ''}
+        ${file ? new Source({ file, type: 'shared' }) : ''}
       </div>
     `;
   }

@@ -1,9 +1,7 @@
 const { wire } = require('hypermorphic');
+
 const Play = require('../Icons/Play');
 const Pause = require('../Icons/Pause');
-const Download = require('../Icons/Download');
-const Share = require('../Icons/Share');
-const Floppy = require('../Icons/Floppy');
 const Check = require('../Icons/Check');
 const Cross = require('../Icons/Cross');
 
@@ -12,77 +10,39 @@ function PlayerActions({
   submitted,
   disabled,
   paused,
-  saving,
-  sharing,
-  handleSaveClick,
   handleSubmitClick,
   handlePlayPauseClick,
-  handleDownloadClick,
-  handleShareClick,
   handleDismissClick,
 }) {
-  if (!submitted) {
-    return wire()`
-    <div class="flex flex-direction-column">
-      <button type="button"
-          disabled=${disabled}
-          onclick=${handlePlayPauseClick}
-      >
-        ${disabled || paused ? Play() : Pause()}
-      </button>
-      <button type="button"
-              disabled=${disabled}
-              onclick=${handleSubmitClick}
-              title="Create the slice for the selected boundaries"
-      >
-        ${Check()}
-      </button>
-    </div>
+  const playPauseButton = wire()`
+    <button type="button"
+      disabled=${disabled}
+      onclick=${handlePlayPauseClick}
+    >
+      ${disabled || paused ? Play() : Pause()}
+    </button>
   `;
-  }
+
+  const actionButton = wire()`
+    <button type="button"
+      onClick=${submitted ? handleDismissClick : handleSubmitClick}
+      disabled=${disabled}
+      title=${
+        submitted
+          ? 'Dismiss slice'
+          : 'Create the slice for the selected boundaries'
+      }
+    >
+      ${submitted ? Cross() : Check()}
+    </button>
+  `;
 
   return wire()`
     <div class="flex flex-direction-column">
-      <button type="button"
-              disabled=${disabled}
-              onclick=${handlePlayPauseClick}
-      >
-        ${disabled || paused ? Play() : Pause()}
-      </button>
-      <button type="button"
-              onClick=${handleDownloadClick}
-              disabled=${disabled}
-              title="Download the selected slice"
-      >
-        ${Download()}
-      </button>
-      <button type="button"
-              onClick=${handleSaveClick}
-              disabled=${disabled}
-      >
-        ${Floppy()}
-      </button>
-      <button type="button"
-              onClick=${handleShareClick}
-              disabled=${disabled}
-              title="${
-                !sharing
-                  ? 'A unique URL will be generated for you to share your slice.'
-                  : 'Generating unique URL...'
-              }"
-      >
-        ${Share()}
-      </button>
-      <button type="button"
-              onClick=${handleDismissClick}
-              disabled=${disabled}
-              title="Dismiss slice"
-      >
-        ${Cross()}
-      </button>
+      ${playPauseButton}
+      ${actionButton}
     </div>
   `;
 }
-/* eslint-enable indent */
 
 module.exports = PlayerActions;

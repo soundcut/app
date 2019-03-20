@@ -1,12 +1,12 @@
-const { Component } = require('hypermorphic');
+const { Component, wire } = require('hypermorphic');
 
-const LocalPlay = require('./LocalPlay');
+const Source = require('./Source');
 const ErrorMessage = require('./ErrorMessage');
 const getDisplayName = require('../helpers/getDisplayName');
 const { getItem } = require('../helpers/indexedDB');
 
 const initialState = {
-  localplay: undefined,
+  source: undefined,
   error: undefined,
   item: undefined,
 };
@@ -28,7 +28,7 @@ class Saved extends Component {
 
       this.setState({
         item,
-        localplay: new LocalPlay({
+        source: new Source({
           type: this.type,
           file: item.file,
           saved: this.id,
@@ -59,7 +59,7 @@ class Saved extends Component {
       return this.decorateContent('');
     }
 
-    return this.decorateContent(this.state.localplay);
+    return this.decorateContent(this.state.source);
   }
 }
 
