@@ -2,7 +2,7 @@ const { Component } = require('hypermorphic');
 const { encode } = require('punycode');
 
 const LinkForm = require('./Form');
-const LocalPlay = require('../LocalPlay');
+const Source = require('../Source');
 const getDisplayName = require('../../helpers/getDisplayName');
 
 const initialState = {
@@ -33,7 +33,7 @@ class Link extends Component {
     const pathname = `/link?title=${encodedName}&from=${from}`;
     history.replaceState(historyState, document.title, pathname);
     this.setState({
-      localPlay: new LocalPlay({ file, type: 'link' }),
+      localPlay: new Source({ file, type: 'link' }),
     });
   }
 

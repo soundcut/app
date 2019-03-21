@@ -21,10 +21,47 @@
   margin-bottom: $spacing-small;
 }
 
+.margin-bottom {
+  margin-bottom: $spacing;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0;
+}
+
+.margin-right-small {
+  margin-right: $spacing-small;
+}
+
+.no-margin {
+  margin: 0;
+}
+
+.margin-y-small {
+  margin-top: $spacing-small;
+  margin-bottom: $spacing-small;
+}
+
+.text-center {
+  text-align: center;
+}
+
 .text-right {
   text-align: right;
 }
 
 .flip {
   transform: rotate(180deg);
+}
+
+.border-dashed {
+  border: 1px dashed;
+}
+
+.block {
+  display: block;
+}
+
+.text-white {
+  color: white;
 }

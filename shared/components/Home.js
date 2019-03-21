@@ -2,7 +2,7 @@ const { Component, wire } = require('hypermorphic');
 const { encode } = require('punycode');
 const Upload = require('./Upload');
 const LinkForm = require('./Link/Form');
-const LocalPlay = require('./LocalPlay');
+const Source = require('./Source');
 const List = require('./List');
 const getDisplayName = require('../helpers/getDisplayName');
 
@@ -22,7 +22,6 @@ class Home extends Component {
     });
     this.slices = new List('slice');
     this.sounds = new List('sound');
-    this.shared = new List('shared');
   }
 
   onconnected() {
@@ -44,7 +43,7 @@ class Home extends Component {
     }
 
     this.setState({
-      localPlay: new LocalPlay({
+      localPlay: new Source({
         file,
         type,
         disconnectCallback: this.onconnected,
@@ -83,8 +82,7 @@ class Home extends Component {
       this.upload,
       this.link,
       this.slices,
-      this.sounds,
-      this.shared
+      this.sounds
     );
   }
 }

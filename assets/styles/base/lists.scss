@@ -1,0 +1,41 @@
+
+ul {
+  list-style-type: none;
+}
+
+ol {
+  list-style-type: none;
+  list-style-position: inside;
+
+  counter-reset: li-counter;
+}
+
+ol > li {
+  display: flex;
+  align-items: flex-end;
+
+  position: relative;
+
+  margin-bottom: $spacing-small;
+  padding-left: $font-size-medium * 1.4;
+  min-height: $font-size-medium;
+
+  font-weight: bold;
+}
+
+ol > li:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: $font-size-medium;
+  font-family: monospace;
+  font-size: $font-size-medium;
+  line-height: 1;
+  font-weight: bold;
+  text-align: right;
+  color: $color-sand;
+
+  content: counter(li-counter)".";
+  counter-increment: li-counter;
+}

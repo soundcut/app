@@ -9,6 +9,7 @@
 @import './base/buttons.scss';
 @import './base/typography.scss';
 @import './base/forms.scss';
+@import './base/lists.scss';
 
 @import './misc/forms.scss';
 
@@ -16,7 +17,6 @@
 @import './helpers/misc.scss';
 
 @import './components/FileField.scss';
-@import './components/LocalPlay.scss';
 @import './components/List.scss';
 @import './components/Slice.scss';
 @import './components/Volume.scss';
@@ -38,7 +38,5 @@ body {
 }
 
 main {
-  margin-top: $spacing-medium;
+  margin-top: $spacing;
 }
-
-
