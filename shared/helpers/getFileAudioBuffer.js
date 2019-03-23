@@ -48,6 +48,10 @@ function getArrayBuffer(file) {
   });
 }
 
+function decodeArrayBuffer(audioCtx, arrayBuffer) {
+  return new Promise(audioCtx.decodeAudioData.bind(audioCtx, arrayBuffer));
+}
+
 async function getFileAudioBuffer(file, audioCtx) {
   const arrayBuffer = await getArrayBuffer(file);
 
@@ -92,7 +96,7 @@ async function getFileAudioBuffer(file, audioCtx) {
   const source = chunkArrayBuffers;
   const items = chunkArrayBuffers.slice();
   const audioBuffers = new Array(chunkArrayBuffers.length);
-  const decode = audioCtx.decodeAudioData.bind(audioCtx);
+  const decode = decodeArrayBuffer.bind(null, audioCtx);
 
   for (let i = 0; i < CONCCURENT_DECODE_WORKERS; i++) {
     workers.push(asyncWorker(source, items, decode, audioBuffers)());
