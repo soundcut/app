@@ -48,6 +48,8 @@ function getArrayBuffer(file) {
   });
 }
 
+// Use a promise wrapper on top of event based syntax
+// for browsers (Safari) which do not support promise-based syntax.
 function decodeArrayBuffer(audioCtx, arrayBuffer) {
   return new Promise(audioCtx.decodeAudioData.bind(audioCtx, arrayBuffer));
 }
