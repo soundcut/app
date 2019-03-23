@@ -383,8 +383,14 @@ class WaveForm extends Component {
           (this.width / duration) * this.state[boundary] + SPACING;
         const newBoundaryPos =
           boundary === 'start'
-            ? Math.max(SPACING, boundaryPos + delta)
-            : Math.min(this.width + SPACING, boundaryPos + delta);
+            ? Math.max(
+              SPACING,
+              Math.min(this.width + SPACING, boundaryPos + delta)
+            )
+            : Math.min(
+              this.width + SPACING,
+              Math.max(SPACING, boundaryPos + delta)
+            );
 
         const canvasCtx = this.canvasContexts[boundary];
         canvasCtx.clearRect(0, 0, this.containerWidth, CONTAINER_HEIGHT);
