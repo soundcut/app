@@ -14,33 +14,34 @@ function PlayerActions({
   handlePlayPauseClick,
   handleDismissClick,
 }) {
-  const playPauseButton = wire()`
-    <button type="button"
-      disabled=${disabled}
-      onclick=${handlePlayPauseClick}
-    >
-      ${disabled || paused ? Play() : Pause()}
-    </button>
-  `;
-
-  const actionButton = wire()`
-    <button type="button"
-      onClick=${submitted ? handleDismissClick : handleSubmitClick}
-      disabled=${disabled}
-      title=${
-        submitted
-          ? 'Dismiss slice'
-          : 'Create the slice for the selected boundaries'
-      }
-    >
-      ${submitted ? Cross() : Check()}
-    </button>
-  `;
-
   return wire()`
     <div class="flex flex-direction-column">
-      ${playPauseButton}
-      ${actionButton}
+      <button type="button"
+        disabled=${disabled}
+        onclick=${handlePlayPauseClick}
+      >
+        ${disabled || paused ? Play() : Pause()}
+      </button>
+      <button type="button"
+        onClick=${handleSubmitClick}
+        disabled=${disabled}
+        title="Create the slice for the selected boundaries"
+      >
+        ${Check()}
+      </button>
+      ${
+        submitted
+          ? wire()`
+          <button type="button"
+            onClick=${handleDismissClick}
+            disabled=${disabled}
+            title="Dismiss slice"
+          >
+            ${Cross()}
+          </button>
+        `
+          : ''
+      }
     </div>
   `;
 }

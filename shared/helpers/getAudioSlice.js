@@ -45,17 +45,17 @@ function getAudioSlice(file, start, end) {
       const tags = parser.readTags(view);
       const id3v2Tag = tags[0];
       const id3v2TagArrayBuffer = sourceArrayBuffer.slice(
-        id3v2Tag._section,
-        id3v2Tag._section.offset
+        0,
+        id3v2Tag._section.byteLength
       );
 
-      const firstFrame = tags[tags.length - 1];
+      const firstFrame = tags.pop();
       let next = firstFrame._section.nextFrameIndex;
 
       const sliceFrames = [];
       let duration = 0;
       while (next) {
-        const frame = parser.readFrame(view, next, true);
+        const frame = parser.readFrame(view, next);
         if (frame) {
           frame.duration = getDuration(
             frame._section.byteLength,
