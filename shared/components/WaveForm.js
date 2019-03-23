@@ -498,7 +498,7 @@ class WaveForm extends Component {
       const snapshot = this.canvasContexts['waveform'].getImageData(
         0,
         0,
-        x,
+        Math.round(x),
         HEIGHT
       );
       const imageData = snapshot.data;
