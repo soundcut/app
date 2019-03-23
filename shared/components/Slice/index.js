@@ -118,7 +118,7 @@ class Slice extends Component {
   }
 
   async setBoundary(name, value) {
-    const parsedValue = Number.parseFloat(value, 10).toFixed(2);
+    const parsedValue = Math.round(Number.parseFloat(value, 10) * 1e2) / 1e2;
     const current = this.state[name];
     const equal = current === parsedValue;
 
