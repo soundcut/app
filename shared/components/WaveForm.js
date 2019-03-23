@@ -16,7 +16,6 @@ const FONT = `${FONT_SIZE}px ${FONT_FAMILY}`;
 const TIME_ANNOTATION_WIDTH = 40;
 const BAR_COLOR = '#166a77';
 const SLICE_COLOR = '#37f0c2';
-const DURATION_COLOR = '#f4ffdc';
 const PROGRESS_COLOR = '#24adc2';
 
 function Canvases({ id, containerWidth, width }) {
@@ -492,20 +491,21 @@ class WaveForm extends Component {
     if (!this.drawn) return;
 
     requestAnimationFrame(() => {
+      const duration = this.getDuration();
       const currentTime = this.state.start + this.slice.currentTime;
-      const x = (this.width / this.getDuration()) * currentTime;
 
-      const snapshot = this.canvasContexts['waveform'].getImageData(
+      const x = (this.width / duration) * currentTime;
+      const startX = (this.width / duration) * this.state.start;
+
+      const partial = this.canvasContexts['waveform'].getImageData(
+        startX,
         0,
-        0,
-        Math.round(x),
+        Math.round(x - startX),
         HEIGHT
       );
-      const imageData = snapshot.data;
-      const progressColor = hexToRGB(PROGRESS_COLOR);
+      const imageData = partial.data;
 
-      const canvasCtx = this.canvasContexts['progress'];
-
+      const progressColor = hexToRGB(SLICE_COLOR);
       // Loops through all of the pixels and modifies the components.
       for (let i = 0, n = imageData.length; i < n; i += 4) {
         imageData[i] = progressColor[0]; // Red component
@@ -514,8 +514,9 @@ class WaveForm extends Component {
         //pix[i+3] is the transparency.
       }
 
+      const canvasCtx = this.canvasContexts['progress'];
       canvasCtx.clearRect(0, 0, this.width, HEIGHT);
-      canvasCtx.putImageData(snapshot, 0, 0);
+      canvasCtx.putImageData(partial, startX, 0);
     });
   }
 
