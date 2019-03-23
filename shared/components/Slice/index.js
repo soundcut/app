@@ -192,8 +192,8 @@ class Slice extends Component {
 
   handleSubmitClick(evt) {
     evt.preventDefault();
-    this.reset = Object.assign({}, this.state);
     this.state.slice.pause();
+    this.reset = Object.assign({}, this.state);
     const filename = getSliceName(
       this.state.file,
       this.state.start,
@@ -211,6 +211,7 @@ class Slice extends Component {
 
   handleDismissClick(evt) {
     evt.preventDefault();
+    this.state.slice.pause();
     this.onDismiss();
     this.setState(Object.assign({}, this.reset));
     this.onconnected();
