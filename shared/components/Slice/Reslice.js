@@ -6,7 +6,7 @@ function Reslice() {
       Not satisfied with your slice?
     </h3>
     <p>
-      You can <strong>dismiss</strong> this slice and do it better!
+      You can <strong>dismiss</strong> or <strong>keep slicing</strong> this slice and do it better!
     </p>
     <h3>
       Want to create a new slice?

@@ -19,26 +19,6 @@
     #WaveForm {
       z-index: 3;
     }
-
-    .Volume {
-      z-index: 2;
-      position: relative;
-      margin-bottom: 0;
-      width: 60px;
-
-      input[type=range] {
-        transform: rotate(270deg);
-        position: absolute;
-        width: 200px;
-        left: -70px;
-        height: 100%;
-        top: -12px;
-      }
-
-      output {
-        width: 100%;
-      }
-    }
   }
 
   .player-header {

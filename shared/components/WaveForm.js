@@ -16,7 +16,6 @@ const FONT = `${FONT_SIZE}px ${FONT_FAMILY}`;
 const TIME_ANNOTATION_WIDTH = 40;
 const BAR_COLOR = '#166a77';
 const SLICE_COLOR = '#37f0c2';
-const PROGRESS_COLOR = '#24adc2';
 
 function Canvases({ id, containerWidth, width }) {
   return wire(id)`
@@ -28,19 +27,10 @@ function Canvases({ id, containerWidth, width }) {
 }
 
 class WaveForm extends Component {
-  constructor({
-    editable,
-    slice,
-    audio,
-    audioBuffer,
-    setSliceBoundary,
-    start,
-    end,
-  }) {
+  constructor({ editable, audio, audioBuffer, setSliceBoundary, start, end }) {
     super();
     this.audio = audio;
     this.buffer = audioBuffer;
-    this.slice = slice;
     this.setSliceBoundary = setSliceBoundary;
     this.editable = editable;
 
@@ -61,7 +51,6 @@ class WaveForm extends Component {
   }
 
   setupContainer() {
-    document.querySelector('main').classList.add('has-waveform');
     this.container = document.getElementById('WaveForm').firstElementChild;
     this.boundingClientRect = this.container.getBoundingClientRect();
     this.containerWidth = this.boundingClientRect.width;
@@ -121,7 +110,12 @@ class WaveForm extends Component {
         this.evtHandlerOptions
       );
     }
-    this.updateAudioListeners(this.slice);
+
+    this.audio.addEventListener(
+      'timeupdate',
+      this.handleSourceTimeUpdate,
+      this.evtHandlerOptions
+    );
 
     // const nominalWidth = Math.round(
     //   this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
@@ -145,7 +139,35 @@ class WaveForm extends Component {
   }
 
   ondisconnected() {
-    document.querySelector('main').classList.remove('has-waveform');
+    this.audio.removeEventListener(
+      'timeupdate',
+      this.handleSourceTimeUpdate,
+      this.evtHandlerOptions
+    );
+
+    if (this.editable) {
+      this.container.removeEventListener(
+        'mousedown',
+        this.handleMouseDown,
+        this.evtHandlerOptions
+      );
+      this.container.removeEventListener(
+        'touchstart',
+        this.handleMouseDown,
+        this.evtHandlerOptions
+      );
+
+      this.container.removeEventListener(
+        'mousemove',
+        this.handleMouseMove,
+        this.evtHandlerOptions
+      );
+      this.container.removeEventListener(
+        'touchmove',
+        this.handleMouseMove,
+        this.evtHandlerOptions
+      );
+    }
   }
 
   getDuration() {
@@ -155,23 +177,6 @@ class WaveForm extends Component {
   doSnapshot(canvas) {
     this.snapshots[canvas].push(
       this.canvasContexts[canvas].getImageData(0, 0, this.width, HEIGHT)
-    );
-  }
-
-  updateAudioListeners(slice) {
-    if (this.slice) {
-      this.slice.removeEventListener(
-        'timeupate',
-        this.handleSourceTimeUpdate,
-        this.evtHandlerOptions
-      );
-    }
-
-    this.slice = slice;
-    this.slice.addEventListener(
-      'timeupdate',
-      this.handleSourceTimeUpdate,
-      this.evtHandlerOptions
     );
   }
 
@@ -467,9 +472,8 @@ class WaveForm extends Component {
         : Math.min(this.width, xContainer - SPACING);
 
     const time = Math.max((this.getDuration() / this.width) * x, 0);
-    const slice = await this.setSliceBoundary(boundary, time);
+    const slice = this.setSliceBoundary(boundary, time);
     this.setState({ dragging: null, start: slice.start, end: slice.end });
-    this.updateAudioListeners(slice.audio);
 
     // FIXME:
     // Dirty fix in case `start` boundary is put after `end` boundary.
@@ -492,9 +496,8 @@ class WaveForm extends Component {
 
     requestAnimationFrame(() => {
       const duration = this.getDuration();
-      const currentTime = this.state.start + this.slice.currentTime;
 
-      const x = (this.width / duration) * currentTime;
+      const x = (this.width / duration) * this.audio.currentTime;
       const startX = (this.width / duration) * this.state.start;
 
       const partial = this.canvasContexts['waveform'].getImageData(

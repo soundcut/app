@@ -63,6 +63,8 @@ class Source extends Component {
   onconnected() {
     this.objectURL = URL.createObjectURL(this.file);
     this.audio = new Audio(this.objectURL);
+    this.audio.loop = true;
+    this.audio.volume = 0.5;
     this.interval = setInterval(() => {
       if (isMediaLoaded(this.audio)) {
         clearInterval(this.interval);
