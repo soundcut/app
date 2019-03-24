@@ -4,6 +4,7 @@
 
 CREATE TABLE slices (
     id character(64) NOT NULL,
+    owner character varying(10) NOT NULL,    
     json json NOT NULL
 );
 

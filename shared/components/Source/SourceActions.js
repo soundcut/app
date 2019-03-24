@@ -11,10 +11,12 @@ function SourceActions({
   type,
   saved,
   shared,
+  owner,
   disabled,
   mediaIsLoaded,
   handleSave,
   handleShare,
+  handleUnshare,
   handleDelete,
   handleDownload,
 }) {
@@ -40,18 +42,25 @@ function SourceActions({
       </button>
     `;
 
-  const shareButton =
-    shareAllowedTypes.indexOf(type) > -1
-      ? wire()`
+  const sharedOwner = shared && owner;
+  const shareAllowed =
+    shareAllowedTypes.indexOf(type) > -1 && (!shared || sharedOwner);
+  let shareButton = '';
+  if (shareAllowed) {
+    const className = `button--xsmall button--withicon ${
+      sharedOwner ? 'button--danger' : ''
+    }`;
+    const icon = sharedOwner ? Cross('sand') : Share();
+    shareButton = wire()`
       <button
-        disabled=${disabled || shared}
-        onClick=${handleShare}
-        class="button--xsmall button--withicon"
+        disabled=${disabled}
+        onClick=${sharedOwner ? handleUnshare : handleShare}
+        class="${className}"
       >
-        ${Share()} <span>Share</span>
+        ${icon} <span>${sharedOwner ? 'Unshare' : 'Share'}</span>
       </button>
-    `
-      : '';
+    `;
+  }
 
   return wire()`
     <div class="button-container padding-y-xsmall flex flex-grow1 flex-justify-content-end">

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 const path = require('path');
-const { rename, createReadStream } = require('fs');
+const { unlink, rename, createReadStream } = require('fs');
 const { createHash } = require('crypto');
 const express = require('express');
 const favicon = require('serve-favicon');
@@ -31,6 +31,12 @@ const finalDir = env === 'development' ? '/tmp' : '/home/hosting-user/uploads';
 function renameAsync(oldPath, newPath) {
   return new Promise((resolve, reject) => {
     rename(oldPath, newPath, err => (err ? reject(err) : resolve()));
+  });
+}
+
+function unlinkAsync(path) {
+  return new Promise((resolve, reject) => {
+    unlink(path, err => (err ? reject(err) : resolve()));
   });
 }
 
@@ -70,6 +76,9 @@ app.post('/api/share', function(req, res) {
       res.end(JSON.stringify({ status: 'error', message: 'Missing file' }));
       return;
     }
+
+    const owner = req.get('X-Browser-Id') || 'anonymous';
+
     // {
     //   fieldName: 'file',
     //   originalFilename: 'foobarbaz.mp3',
@@ -100,10 +109,10 @@ app.post('/api/share', function(req, res) {
           path: destination,
           name: file.originalFilename,
         });
-        await client.query('INSERT INTO slices(id, json) VALUES($1, $2)', [
-          id,
-          json,
-        ]);
+        await client.query(
+          'INSERT INTO slices(id, owner, json) VALUES($1, $2, $3)',
+          [id, owner, json]
+        );
         console.info('DID insert', id);
         await renameAsync(file.path, destination);
         console.info('Moved file to final location', destination);
@@ -289,7 +298,7 @@ app.get('/api/slice/:id', async function(req, res) {
   let result;
   try {
     console.info('Retrieving slice json', id);
-    result = await query('SELECT json FROM slices WHERE id LIKE $1', [
+    result = await query('SELECT owner, json FROM slices WHERE id LIKE $1', [
       `${id}%`,
     ]);
   } catch (err) {
@@ -312,6 +321,7 @@ app.get('/api/slice/:id', async function(req, res) {
     return;
   }
 
+  const isOwner = row.owner === req.get('X-Browser-Id');
   const { path, name } = row.json;
 
   console.info('Is file readable?', path);
@@ -327,10 +337,103 @@ app.get('/api/slice/:id', async function(req, res) {
   const headers = {
     'content-disposition': `attachment; filename="${encode(name)}"`,
     'content-type': 'audio/mp3',
+    'X-Owner': isOwner ? 1 : 0,
   };
+
   res.writeHead(200, headers);
   console.info('Streaming slice back to client', name);
   fileStream.pipe(res);
+});
+
+app.delete('/api/slice/:id', async function(req, res) {
+  const id = req.params.id;
+
+  if (!id) {
+    res.sendStatus(422);
+    res.end();
+    return;
+  }
+
+  const owner = req.get('X-Browser-Id') || '';
+  if (!owner) {
+    res.sendStatus(401);
+    res.end();
+    return;
+  }
+
+  let result;
+  try {
+    console.info('Retrieving slice json', id);
+    result = await query('SELECT owner, json FROM slices WHERE id LIKE $1', [
+      `${id}%`,
+    ]);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+    res.end();
+    return;
+  }
+
+  if (result.rows.length > 1) {
+    res.sendStatus(409);
+    res.end();
+    return;
+  }
+
+  const row = result.rows[0];
+  if (!row) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
+  const isOwner = row.owner === req.get('X-Browser-Id');
+  if (!isOwner || req.get('X-Browser-Id') === 'anonymous') {
+    res.sendStatus(403);
+    res.end();
+    return;
+  }
+
+  const { path } = row.json;
+  console.info('Is file readable?', path);
+  const readOK = await isFileReadable(path);
+  if (!readOK) {
+    res.sendStatus(404);
+    res.end();
+    return;
+  }
+
+  try {
+    const client = await getClient();
+    try {
+      await client.query('BEGIN');
+      console.info('BEGIN transaction', id);
+      await client.query('DELETE FROM slices WHERE id = $1 AND owner = $2', [
+        id,
+        owner,
+      ]);
+      console.info('DID delete', id);
+      await unlinkAsync(path);
+      console.info('Removed file', path);
+      await client.query('COMMIT');
+      console.info('COMMIT transaction', id);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.info('ROLLBACK transaction', id);
+      throw err;
+    } finally {
+      console.info('Releasing connection', id);
+      client.release();
+    }
+  } catch (err) {
+    console.error(err);
+    res.writeHead(500);
+    res.end();
+    return;
+  }
+
+  res.writeHead(204);
+  res.end();
 });
 
 app.get('/link', function(req, res) {

@@ -1,25 +1,18 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
-const { Component, wire } = require('hypermorphic');
+const { Component } = require('hypermorphic');
+
 const Source = require('./Source');
-
-function getFilePath(id) {
-  return `/api/slice/${id}`;
-}
-
-function ErrorMessage() {
-  return wire()`<p>Oops! Something went wrong.</p>`;
-}
+const ErrorMessage = require('./ErrorMessage');
+const Loader = require('./Loader');
+const fetchSlice = require('../helpers/fetchSlice');
 
 const initialState = {
   error: false,
   loading: false,
   file: undefined,
+  owner: false,
 };
-
-function Loading() {
-  return wire()`<p>Loading...</p>`;
-}
 
 class Shared extends Component {
   constructor(id) {
@@ -35,33 +28,16 @@ class Shared extends Component {
   }
 
   async fetchSlice() {
-    const url = getFilePath(this.id);
-
-    const fetchPromise = fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'audio/mpeg; charset=utf-8',
-      },
-    });
-
     this.setState({ loading: true, error: false });
-    try {
-      const response = await fetchPromise;
-      if (response.status !== 200) {
-        throw response;
-      }
 
-      const blob = await response.blob();
-      const filename = response.headers
-        .get('content-disposition')
-        .match(/filename="(.+)"/)[1];
-      const file = new File([blob], filename);
+    try {
+      const { file, owner } = await fetchSlice(this.id);
       this.setState({
         file,
+        owner,
         loading: false,
       });
     } catch (err) {
-      console.error(err);
       this.setState({
         error: true,
         loading: false,
@@ -72,12 +48,17 @@ class Shared extends Component {
   render() {
     const state = this.state;
     const file = state.file;
+    const owner = state.owner;
 
     return this.html`
       <div onconnected=${this}>
         ${state.error ? ErrorMessage() : ''}
-        ${state.loading ? Loading() : ''}
-        ${file ? new Source({ file, type: 'shared' }) : ''}
+        ${state.loading ? Loader() : ''}
+        ${
+          file
+            ? new Source({ shared: this.id, file, owner, type: 'shared' })
+            : ''
+        }
       </div>
     `;
   }
