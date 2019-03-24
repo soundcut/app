@@ -1,4 +1,4 @@
-const { Component, wire } = require('hypermorphic');
+const { Component } = require('hypermorphic');
 
 const Source = require('./Source');
 const ErrorMessage = require('./ErrorMessage');
@@ -21,7 +21,7 @@ class Saved extends Component {
 
   async onconnected() {
     try {
-      const item = await getItem({ store: this.type, key: this.id });
+      const item = await getItem({ store: 'file', key: this.id });
       const filename = item.file.name;
       const newTitle = `${getDisplayName(filename)} | Sound Slice`;
       document.title = newTitle;

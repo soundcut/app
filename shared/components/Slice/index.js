@@ -20,7 +20,11 @@ const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
 const getAudioSlice = require('../../helpers/getAudioSlice');
 const shareSlice = require('../../helpers/shareSlice');
 const getFileHash = require('../../helpers/getFileHash');
-const { setItem, deleteItem } = require('../../helpers/indexedDB');
+const {
+  saveAudioFile,
+  deleteAudioFile,
+} = require('../../helpers/audioFileStorage');
+const { deleteItem } = require('../../helpers/indexedDB');
 
 const initialState = {
   mounted: false,
@@ -189,14 +193,12 @@ class Slice extends Component {
     evt.preventDefault();
 
     try {
-      const hash = await getFileHash(this.state.file);
-      await setItem({
-        store: 'slice',
-        item: {
-          key: hash,
-          file: this.state.file,
-        },
-      });
+      const hash = await saveAudioFile(
+        'slice',
+        this.state.audio,
+        this.state.file
+      );
+
       this.setState({
         saved: hash,
       });
@@ -216,11 +218,7 @@ class Slice extends Component {
     evt.preventDefault();
 
     try {
-      const hash = this.state.saved || (await getFileHash(this.file));
-      await deleteItem({
-        store: 'slice',
-        key: hash,
-      });
+      await deleteAudioFile('slice', this.state.saved, this.file);
       this.setState({
         saved: undefined,
       });

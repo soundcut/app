@@ -15,7 +15,7 @@ function ListItem({ type, item }) {
          class="flex flex-justify-content-between flex-items-center"
       >
         <strong>
-          ${getDisplayName(item.file ? item.file.name : item.filename)}
+          ${getDisplayName(item.filename)}
         </strong>
         <em class="flex flex-items-center">
           <span>
@@ -26,7 +26,7 @@ function ListItem({ type, item }) {
             }
           </span>
           <span>
-            ${humanizeFileSize(item.file ? item.file.size : item.filesize)}
+            ${humanizeFileSize(item.filesize)}
           </span>
           ${Headphones()}
         </em>

@@ -11,9 +11,11 @@ const SavedDisclaimer = require('./SavedDisclaimer');
 
 const getDisplayName = require('../../helpers/getDisplayName');
 const getDownloadName = require('../../helpers/getDownloadName');
-const getFileHash = require('../../helpers/getFileHash');
-const { setItem, deleteItem } = require('../../helpers/indexedDB');
 const shareSlice = require('../../helpers/shareSlice');
+const {
+  saveAudioFile,
+  deleteAudioFile,
+} = require('../../helpers/audioFileStorage');
 
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
@@ -130,11 +132,7 @@ class Source extends Component {
     evt.preventDefault();
 
     try {
-      const hash = this.state.saved || (await getFileHash(this.file));
-      await deleteItem({
-        store: this.state.type,
-        key: hash,
-      });
+      await deleteAudioFile(this.state.type, this.state.saved, this.file);
       this.setState({
         saved: undefined,
       });
@@ -150,14 +148,8 @@ class Source extends Component {
     evt.preventDefault();
 
     try {
-      const hash = await getFileHash(this.file);
-      await setItem({
-        store: 'sound',
-        item: {
-          key: hash,
-          file: this.file,
-        },
-      });
+      const hash = await saveAudioFile('sound', this.audio, this.file);
+
       this.setState({
         type: 'sound',
         saved: hash,

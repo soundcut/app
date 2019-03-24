@@ -41,18 +41,6 @@ class List extends Component {
     this.setState({
       items,
     });
-
-    if (this.type !== 'shared') {
-      this.state.items.forEach(async item => {
-        try {
-          const audio = await getFileAudio(item.file);
-          item.duration = audio.duration;
-          this.render();
-        } catch (err) {
-          // pass
-        }
-      });
-    }
   }
 
   decorateContent(...children) {
