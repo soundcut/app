@@ -2,7 +2,7 @@ const { ensureBrowserId } = require('./browserId');
 
 const SLICE_PATH = '/api/slice';
 
-async function fetchSlice(id) {
+async function fetchSlice(id, head = false) {
   let browserId = 'anonymous';
   try {
     browserId = ensureBrowserId();
@@ -14,7 +14,7 @@ async function fetchSlice(id) {
   const url = `${SLICE_PATH}/${id}`;
 
   const fetchPromise = fetch(url, {
-    method: 'GET',
+    method: head ? 'HEAD' : 'GET',
     headers: {
       'Content-Type': 'audio/mpeg; charset=utf-8',
       'X-Browser-Id': browserId,
@@ -23,12 +23,20 @@ async function fetchSlice(id) {
 
   try {
     const response = await fetchPromise;
-    if (response.status !== 200) {
-      throw response;
+    if (response) {
+      if (response.status !== 200) {
+        const error = new Error('Unable to fetch slice');
+        error.response = response;
+        throw error;
+      }
     }
 
-    const blob = await response.blob();
+    if (head) {
+      return;
+    }
+
     const owner = response.headers.get('X-Owner') === '1';
+    const blob = await response.blob();
     const filename = response.headers
       .get('content-disposition')
       .match(/filename="(.+)"/)[1];

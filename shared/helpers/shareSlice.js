@@ -1,4 +1,7 @@
 const { ensureBrowserId } = require('./browserId');
+const getFileHash = require('./getFileHash');
+const { getItem, setItem, deleteItem } = require('./indexedDB');
+const fetchSlice = require('./fetchSlice');
 
 const SHARE_PATH = '/api/share';
 
@@ -9,6 +12,41 @@ async function shareSlice(file) {
   } catch (err) {
     console.error({ err });
     /* pass */
+  }
+
+  let hash = '';
+  try {
+    hash = await getFileHash(file);
+  } catch (err) {
+    console.error({ err });
+    /* pass */
+  }
+
+  if (hash) {
+    try {
+      const item = await getItem({
+        store: 'shared',
+        key: hash,
+      });
+      if (item) {
+        try {
+          await fetchSlice(item.id, true);
+        } catch (err) {
+          if (err.response && err.response.status === 404) {
+            await deleteItem({
+              store: 'shared',
+              key: hash,
+            });
+            throw err;
+          }
+        }
+
+        return item.id;
+      }
+    } catch (err) {
+      console.error({ err });
+      /* pass */
+    }
   }
 
   const filename = file.name;
@@ -33,7 +71,22 @@ async function shareSlice(file) {
     }
 
     const data = await response.json();
-    return data.id;
+    const id = data.id;
+
+    try {
+      await setItem({
+        store: 'shared',
+        item: {
+          key: hash,
+          id,
+        },
+      });
+    } catch (err) {
+      console.error({ err });
+      /* pass */
+    }
+
+    return id;
   } catch (err) {
     console.error({ err });
     throw err;
