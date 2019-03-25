@@ -1,7 +1,7 @@
 const { wire } = require('hypermorphic');
 const SuccessMessage = require('./SuccessMessage');
 
-function SavedAlert(id) {
+function SharedAlert(id) {
   const url = `${window.location.origin}/shared/${id.slice(0, 10)}`;
 
   const messages = [
@@ -18,4 +18,4 @@ function SavedAlert(id) {
   return SuccessMessage(messages);
 }
 
-module.exports = SavedAlert;
+module.exports = SharedAlert;

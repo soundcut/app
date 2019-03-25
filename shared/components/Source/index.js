@@ -253,7 +253,11 @@ class Source extends Component {
         })}
       </div>
       ${this.state.error ? ErrorMessage(this.state.error) : ''}
-      ${this.justSaved ? SavedAlert(this.state.saved) : ''}
+      ${
+        this.justSaved
+          ? SavedAlert({ type: 'sound', hash: this.state.saved })
+          : ''
+      }
       ${this.justShared ? SharedAlert(this.state.shared) : ''}
       ${this.shared && !this.state.shared ? UnsharedAlert() : ''}
     `;

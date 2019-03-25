@@ -350,7 +350,11 @@ class Slice extends Component {
             }
             ${state.error ? ErrorMessage(state.error) : ''}
             ${state.shared ? SharedAlert(state.shared) : ''}
-            ${state.saved ? SavedAlert(state.saved) : ''}
+            ${
+              state.saved
+                ? SavedAlert({ type: 'slice', hash: state.saved })
+                : ''
+            }
             ${state.submitted ? Reslice() : ''}
             <div class="player-container">
               <strong class="block margin-y-small text-center">
