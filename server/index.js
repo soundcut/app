@@ -27,6 +27,7 @@ app.get('/saved/:type/:id', routes.saved);
 
 app.post('/api/link', bodyParser.json(), api.link);
 app.get('/api/slice/:id', api.getSlice);
+app.head('/api/slice/:id', api.headSlice);
 app.delete('/api/slice/:id', api.deleteSlice);
 app.post('/api/share', api.shareSlice);
 
