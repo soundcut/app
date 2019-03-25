@@ -1,7 +1,6 @@
 import hyperApp from 'hyperhtml-app';
 
 import Home from '../shared/components/Home';
-import Upload from '../shared/components/Upload';
 import Link from '../shared/components/Link';
 import Shared from '../shared/components/Shared';
 import Saved from '../shared/components/Saved';
@@ -19,11 +18,6 @@ function initialize() {
   app.get('/link', function link() {
     const link = new Link();
     render.main(link);
-  });
-
-  app.get('/upload', function() {
-    const upload = new Upload();
-    render.main(upload);
   });
 
   app.get('/saved/:type/:id', function shared(ctx) {
