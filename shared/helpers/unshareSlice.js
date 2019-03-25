@@ -1,8 +1,8 @@
 const { ensureBrowserId } = require('./browserId');
 
-const SHARE_PATH = '/api/share';
+const SLICE_PATH = '/api/slice';
 
-async function shareSlice(file) {
+async function unshareSlice(id) {
   let browserId = 'anonymous';
   try {
     browserId = ensureBrowserId();
@@ -11,13 +11,10 @@ async function shareSlice(file) {
     /* pass */
   }
 
-  const filename = file.name;
-  const formData = new FormData();
-  formData.append('file', file, filename);
+  const url = `${SLICE_PATH}/${id}`;
 
-  const promise = fetch(SHARE_PATH, {
-    method: 'POST',
-    body: formData,
+  const promise = fetch(url, {
+    method: 'DELETE',
     headers: {
       'X-Browser-Id': browserId,
     },
@@ -26,18 +23,15 @@ async function shareSlice(file) {
   try {
     const response = await promise;
 
-    if (response.status !== 201) {
+    if (response.status !== 204) {
       const err = new Error('Server Error');
       err.response = response;
       throw err;
     }
-
-    const data = await response.json();
-    return data.id;
   } catch (err) {
     console.error({ err });
     throw err;
   }
 }
 
-module.exports = shareSlice;
+module.exports = unshareSlice;

@@ -4,14 +4,18 @@ const { Component, wire } = require('hypermorphic');
 
 const Slice = require('../Slice');
 const ErrorMessage = require('../ErrorMessage');
+const UnsharedAlert = require('../UnsharedAlert');
 const SharedAlert = require('../SharedAlert');
 const SavedAlert = require('../SavedAlert');
 const SourceActions = require('./SourceActions');
 const SavedDisclaimer = require('./SavedDisclaimer');
+const SharedDisclaimer = require('./SharedDisclaimer');
 
 const getDisplayName = require('../../helpers/getDisplayName');
 const getDownloadName = require('../../helpers/getDownloadName');
+const humanizeFileSize = require('../../helpers/humanizeFileSize');
 const shareSlice = require('../../helpers/shareSlice');
+const unshareSlice = require('../../helpers/unshareSlice');
 const {
   saveAudioFile,
   deleteAudioFile,
@@ -27,35 +31,33 @@ function isMediaLoaded(media) {
   );
 }
 
-function humanizeFileSize(bytes) {
-  if (bytes < 1024) {
-    return bytes + 'bytes';
-  } else if (bytes >= 1024 && bytes < 1048576) {
-    return (bytes / 1024).toFixed(1) + 'KB';
-  } else if (bytes >= 1048576) {
-    return (bytes / 1048576).toFixed(1) + 'MB';
-  }
-}
-
 const initialState = {
   type: undefined,
   error: undefined,
   saved: undefined,
   loading: undefined,
+  owner: undefined,
 };
 
 class Source extends Component {
-  constructor({ file, type, saved, disconnectCallback }) {
+  constructor({ file, owner, type, saved, shared, disconnectCallback }) {
     super();
-    this.state = Object.assign({}, initialState, { type, saved });
+    this.state = Object.assign({}, initialState, {
+      type,
+      owner,
+      saved,
+      shared,
+    });
     this.type = type;
     this.saved = saved;
+    this.shared = shared;
     this.file = file;
     // upload | link | slice | sound | shared
     this.handleDownload = this.handleDownload.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleShare = this.handleShare.bind(this);
+    this.handleUnshare = this.handleUnshare.bind(this);
     this.setSliceComponent = this.setSliceComponent.bind(this);
     this.handleSliceSubmit = this.handleSliceSubmit.bind(this);
     this.handleSliceDismiss = this.handleSliceDismiss.bind(this);
@@ -88,6 +90,10 @@ class Source extends Component {
 
   get justSaved() {
     return this.state.saved && !this.saved;
+  }
+
+  get justShared() {
+    return this.state.shared && !this.shared;
   }
 
   setSliceComponent(audio, file) {
@@ -191,13 +197,41 @@ class Source extends Component {
     }
   }
 
+  async handleUnshare(evt) {
+    evt.preventDefault();
+
+    this.setState({ loading: true, error: false });
+    try {
+      await unshareSlice(this.state.shared);
+      this.setState({
+        loading: false,
+        shared: undefined,
+      });
+    } catch (err) {
+      const error = [
+        'Unable to unshare this slice :(',
+        !err.response && 'Is this device connected to the internet?',
+        err.message,
+      ];
+      this.setState({
+        loading: false,
+        error,
+      });
+    }
+  }
+
   render() {
     const humanizedSize = humanizeFileSize(this.file.size);
     const mediaIsLoaded = isMediaLoaded(this.audio);
     const displayName = getDisplayName(this.file.name);
 
     const source = wire()`
-      ${this.state.saved ? SavedDisclaimer(this.type) : ''}
+      ${this.state.saved && !this.justSaved ? SavedDisclaimer(this.type) : ''}
+      ${
+        this.shared && this.state.shared
+          ? SharedDisclaimer({ owner: this.state.owner, id: this.shared })
+          : ''
+      }
       <div class="flex flex-wrap flex-justify-between flex-items-center margin-bottom">
         <h2 class="flex flex-items-center flex-grow1 no-margin-bottom margin-right-small">
           <span class="margin-right-small">${displayName}</span>
@@ -211,14 +245,17 @@ class Source extends Component {
           saved: this.state.saved,
           shared: this.state.shared,
           handleShare: this.handleShare,
+          handleUnshare: this.handleUnshare,
           handleDownload: this.handleDownload,
           handleSave: this.handleSave,
           handleDelete: this.handleDelete,
+          owner: this.state.owner,
         })}
       </div>
       ${this.state.error ? ErrorMessage(this.state.error) : ''}
       ${this.justSaved ? SavedAlert(this.state.saved) : ''}
-      ${this.state.shared ? SharedAlert(this.state.shared) : ''}
+      ${this.justShared ? SharedAlert(this.state.shared) : ''}
+      ${this.shared && !this.state.shared ? UnsharedAlert() : ''}
     `;
 
     return this.html`
