@@ -55,7 +55,10 @@ async function getSlice(req, res) {
   const headers = {
     'content-disposition': `attachment; filename="${encode(name)}"`,
     'content-type': 'audio/mp3',
+    // Effectively ruin cache cardinality
+    // FIXME: Retrieve slice ownership separately so this route can be cached.
     'X-Owner': isOwner ? 1 : 0,
+    Vary: 'X-Browser-Id',
   };
 
   res.writeHead(200, headers);

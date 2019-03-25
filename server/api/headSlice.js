@@ -37,7 +37,7 @@ async function headSlice(req, res) {
   }
 
   const isOwner = row.owner === req.get('X-Browser-Id');
-  const { path, name } = row.json;
+  const { path } = row.json;
 
   console.info('Is file readable?', path);
   const readOK = await isFileReadable(path);
@@ -48,7 +48,10 @@ async function headSlice(req, res) {
   }
 
   const headers = {
+    // Effectively ruin cache cardinality
+    // FIXME: Retrieve slice ownership separately so this route can be cached.
     'X-Owner': isOwner ? 1 : 0,
+    Vary: 'X-Browser-Id',
   };
 
   res.writeHead(204, headers);
