@@ -7,12 +7,15 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const serveStatic = require('serve-static');
 
+const Queue = require('./queue');
 const { getClient } = require('./db');
 const routes = require('./routes');
 const api = require('./api');
 
 const env = process.env.NODE_ENV || 'development';
 const app = express();
+
+app.locals.queue = new Queue(5);
 
 app.use(favicon(path.join(__dirname, '..', 'public', 'favicon.ico')));
 app.use(morgan(env === 'development' ? 'dev' : 'tiny'));

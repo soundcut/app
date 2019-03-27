@@ -4,8 +4,11 @@ const { spawnYouTubeDL } = require('../../lib');
 async function link(req, res) {
   if (!req.body) return res.sendStatus(400);
 
+  const queue = req.app.locals.queue;
+  const job = async () => await spawnYouTubeDL(req.body.url, req);
+
   try {
-    const ret = await spawnYouTubeDL(req.body.url, req);
+    const ret = await queue.push(job);
     const headers = {
       'content-disposition': `attachment; filename="${encode(ret.title)}"`,
       'content-type': 'audio/mp3',
