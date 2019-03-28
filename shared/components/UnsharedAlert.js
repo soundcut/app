@@ -2,7 +2,7 @@ const { wire } = require('hypermorphic');
 
 /* eslint-disable indent */
 function UnsharedAlert() {
-  return wire()`
+  return wire(UnsharedAlert)`
     <h3>
       This slice is no longer saved on the server.
     </h3>

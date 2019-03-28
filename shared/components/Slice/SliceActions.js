@@ -19,7 +19,7 @@ function SliceActions({
   }
 
   const soundButton = saved
-    ? wire()`
+    ? wire(SliceActions, ':delete-button')`
     <button
       disabled=${disabled}
       onClick=${toggleSave}
@@ -29,7 +29,7 @@ function SliceActions({
       ${Cross('sand')} <span>Delete</span>
     </button>
     `
-    : wire()`
+    : wire(SliceActions, ':save-button')`
     <button
       disabled=${disabled}
       onClick=${toggleSave}
@@ -40,7 +40,7 @@ function SliceActions({
     </button>
     `;
 
-  const shareButton = wire()`
+  const shareButton = wire(SliceActions, ':share-button')`
     <button
       disabled=${disabled || shared}
       onClick=${handleShare}
@@ -51,7 +51,7 @@ function SliceActions({
     </button>
     `;
 
-  return wire()`
+  return wire(SliceActions, ':slice-actions')`
     <div class="button-container padding-y-xsmall margin-bottom flex flex-grow1 flex-justify-content-end">
       <button
         disabled=${disabled}

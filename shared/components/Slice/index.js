@@ -318,7 +318,7 @@ class Slice extends Component {
     /* eslint-disable indent */
     if (this.waveform) {
       return this.decorateContent(
-        wire(state)`
+        wire(this, ':with-waveform')`
           <div>
             ${!state.submitted ? Tutorial() : ''}
             ${state.submitted ? Ready() : ''}

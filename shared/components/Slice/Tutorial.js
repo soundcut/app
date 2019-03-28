@@ -1,7 +1,7 @@
 const { wire } = require('hypermorphic');
 
 function Tutorial() {
-  return wire()`
+  return wire(Tutorial)`
     <h3>
       What now? Create a slice!
     </h3>

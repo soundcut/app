@@ -17,8 +17,8 @@ const TIME_ANNOTATION_WIDTH = 40;
 const BAR_COLOR = '#166a77';
 const SLICE_COLOR = '#37f0c2';
 
-function Canvases({ id, containerWidth, width }) {
-  return wire(id)`
+function Canvases({ containerWidth, width }) {
+  return wire(Canvases)`
     <canvas id="waveform-canvas" width="${width}" height="${HEIGHT}" />
     <canvas id="progress-canvas" width="${width}" height="${HEIGHT}" />
     <canvas id="start-canvas" width="${containerWidth}" height="${HEIGHT}" />
@@ -63,7 +63,6 @@ class WaveForm extends Component {
     this.snapshots = {};
     this.setState({
       canvases: Canvases({
-        id: this,
         containerWidth: this.containerWidth,
         width: this.width,
       }),

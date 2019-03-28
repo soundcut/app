@@ -21,7 +21,7 @@ function SourceActions({
   handleDownload,
 }) {
   const soundButton = saved
-    ? wire()`
+    ? wire(SourceActions, ':delete-button')`
       <button
         disabled=${disabled}
         onClick=${handleDelete}
@@ -31,7 +31,7 @@ function SourceActions({
         ${Cross('sand')} <span>Delete</span>
       </button>
     `
-    : wire()`
+    : wire(SourceActions, ':save-button')`
       <button
         disabled=${disabled}
         onClick=${handleSave}
@@ -51,7 +51,7 @@ function SourceActions({
       sharedOwner ? 'button--danger' : ''
     }`;
     const icon = sharedOwner ? Cross('sand') : Share();
-    shareButton = wire()`
+    shareButton = wire(SourceActions, ':share-button')`
       <button
         disabled=${disabled}
         onClick=${sharedOwner ? handleUnshare : handleShare}
@@ -62,7 +62,7 @@ function SourceActions({
     `;
   }
 
-  return wire()`
+  return wire(SourceActions, ':SourceActions')`
     <div class="button-container padding-y-xsmall flex flex-grow1 flex-justify-content-end">
       <button
         disabled=${!mediaIsLoaded}

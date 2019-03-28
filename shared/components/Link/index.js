@@ -6,7 +6,7 @@ const Source = require('../Source');
 const getDisplayName = require('../../helpers/getDisplayName');
 
 const initialState = {
-  localPlay: undefined,
+  source: undefined,
 };
 
 class Link extends Component {
@@ -33,7 +33,7 @@ class Link extends Component {
     const pathname = `/link?title=${encodedName}&from=${from}`;
     history.replaceState(historyState, document.title, pathname);
     this.setState({
-      localPlay: new Source({ file, type: 'link' }),
+      source: new Source({ file, type: 'link' }),
     });
   }
 
@@ -46,8 +46,8 @@ class Link extends Component {
   }
 
   render() {
-    if (this.state.localPlay) {
-      return this.decorateContent(this.state.localPlay);
+    if (this.state.source) {
+      return this.decorateContent(this.state.source);
     }
 
     return this.decorateContent(this.link);

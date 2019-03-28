@@ -1,7 +1,7 @@
 const { wire } = require('hypermorphic');
 
 function Reslice() {
-  return wire()`
+  return wire(Reslice)`
     <h3>
       Not satisfied with your slice?
     </h3>

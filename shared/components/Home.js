@@ -8,8 +8,22 @@ const getDisplayName = require('../helpers/getDisplayName');
 
 const initialState = {
   linkLoading: false,
-  localPlay: undefined,
+  source: undefined,
 };
+
+function Title() {
+  return wire(Title)`
+    <h1>Extract sound memes in the browser</h1>
+  `;
+}
+
+function Description() {
+  return wire(Description)`
+    <p>
+      Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.
+    </p>
+  `;
+}
 
 class Home extends Component {
   constructor() {
@@ -43,7 +57,7 @@ class Home extends Component {
     }
 
     this.setState({
-      localPlay: new Source({
+      source: new Source({
         file,
         type,
         disconnectCallback: this.onconnected,
@@ -70,15 +84,13 @@ class Home extends Component {
       return this.decorateContent(this.link);
     }
 
-    if (this.state.localPlay) {
-      return this.decorateContent(this.state.localPlay);
+    if (this.state.source) {
+      return this.decorateContent(this.state.source);
     }
 
     return this.decorateContent(
-      wire()`<h1>Extract sound memes in the browser</h1>`,
-      wire()`<p>
-        Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.
-      </p>`,
+      Title(),
+      Description(),
       this.upload,
       this.link,
       this.slices,

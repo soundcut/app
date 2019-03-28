@@ -14,7 +14,7 @@ function PlayerActions({
   handlePlayPauseClick,
   handleDismissClick,
 }) {
-  return wire()`
+  return wire(PlayerActions, ':PlayerActions')`
     <div class="flex flex-direction-column">
       <button type="button"
         disabled=${disabled}
@@ -31,7 +31,7 @@ function PlayerActions({
       </button>
       ${
         submitted
-          ? wire()`
+          ? wire(PlayerActions, ':dismiss')`
           <button type="button"
             onClick=${handleDismissClick}
             disabled=${disabled}
