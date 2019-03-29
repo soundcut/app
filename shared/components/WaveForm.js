@@ -496,13 +496,21 @@ class WaveForm extends Component {
     requestAnimationFrame(() => {
       const duration = this.getDuration();
 
-      const x = (this.width / duration) * this.audio.currentTime;
-      const startX = (this.width / duration) * this.state.start;
+      const x = Math.round((this.width / duration) * this.audio.currentTime);
+      const startX = Math.round((this.width / duration) * this.state.start);
+      const width = x - startX;
+
+      const canvasCtx = this.canvasContexts['progress'];
+
+      if (!width) {
+        canvasCtx.clearRect(0, 0, this.width, HEIGHT);
+        return;
+      }
 
       const partial = this.canvasContexts['waveform'].getImageData(
         startX,
         0,
-        Math.round(x - startX),
+        width,
         HEIGHT
       );
       const imageData = partial.data;
@@ -516,7 +524,6 @@ class WaveForm extends Component {
         //pix[i+3] is the transparency.
       }
 
-      const canvasCtx = this.canvasContexts['progress'];
       canvasCtx.clearRect(0, 0, this.width, HEIGHT);
       canvasCtx.putImageData(partial, startX, 0);
     });
