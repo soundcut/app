@@ -58,18 +58,10 @@ class WaveForm extends Component {
   }
 
   setupCanvases() {
-    this.canvases = {};
     this.canvasContexts = {};
     this.snapshots = {};
-    this.setState({
-      canvases: Canvases({
-        containerWidth: this.containerWidth,
-        width: this.width,
-      }),
-    });
-    this.state.canvases.childNodes.forEach(node => {
+    this.container.querySelectorAll('canvas').forEach(node => {
       const canvas = node.id.replace('-canvas', '');
-      this.canvases[canvas] = node;
       this.canvasContexts[canvas] = node.getContext('2d');
       this.canvasContexts[canvas].clearRect(0, 0, this.width, HEIGHT);
       this.canvasContexts[canvas].font = FONT;
@@ -84,6 +76,9 @@ class WaveForm extends Component {
       : true;
 
     this.setupContainer();
+    this.setState({
+      mounted: true,
+    });
     this.setupCanvases();
 
     if (this.editable) {
@@ -567,6 +562,8 @@ class WaveForm extends Component {
     const style = `height:${CONTAINER_HEIGHT}px;${
       this.state.dragging ? 'overflow-x: hidden; touch-action: none;' : ''
     }`;
+    const className =
+      this.state.dragging || this.state.hovering ? 'cursor-grabbing' : '';
 
     return this.html`
     <div
@@ -574,12 +571,17 @@ class WaveForm extends Component {
       onconnected=${this}
       ondisconnected=${this}
       style="${style}"
-      class="${
-        this.state.dragging || this.state.hovering ? 'cursor-grabbing' : ''
-      }"
+      class="${className}"
     >
       <div>
-        ${this.state.canvases || ''}
+        ${
+          this.state.mounted
+            ? Canvases({
+                containerWidth: this.containerWidth,
+                width: this.width,
+              })
+            : ''
+        }
       </div>
     </div>
     `;
