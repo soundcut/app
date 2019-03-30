@@ -1,7 +1,7 @@
 const { wire } = require('hypermorphic');
 
-function Start() {
-  return wire()`
+function Start(id = 'default') {
+  return wire(Start, `:${id}`)`
     <svg xmlns="http://www.w3.org/2000/svg"
          width="24"
          height="24"

@@ -16,10 +16,10 @@ function getColor(theme) {
   return color;
 }
 
-function Cross(theme = 'primary') {
+function Cross(theme = 'primary', id = 'default') {
   const color = getColor(theme);
 
-  return wire()`
+  return wire(Cross, `:${theme}-${id}`)`
     <svg xmlns="http://www.w3.org/2000/svg"
          width="24"
          height="24"

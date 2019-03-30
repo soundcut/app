@@ -9,7 +9,7 @@ function ListItem({ type, item }) {
   const url =
     type == 'shared' ? `/shared/${item.key}` : `/saved/${type}/${item.key}`;
 
-  return wire()`
+  return wire(item, `:${item.key}`)`
     <li>
       <a href="${url}"
          class="flex flex-justify-content-between flex-items-center"
@@ -28,7 +28,7 @@ function ListItem({ type, item }) {
           <span>
             ${humanizeFileSize(item.filesize)}
           </span>
-          ${Headphones()}
+          ${Headphones(item, item.key)}
         </em>
       </a>
     </li>

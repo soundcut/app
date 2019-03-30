@@ -1,7 +1,7 @@
 const { wire } = require('hypermorphic');
 
-function CloudDownload() {
-  return wire()`
+function CloudDownload(id = 'default') {
+  return wire(CloudDownload, `:${id}`)`
     <svg xmlns="http://www.w3.org/2000/svg"
          width="24"
          height="24"

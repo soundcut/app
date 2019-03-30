@@ -1,7 +1,7 @@
 const { wire } = require('hypermorphic');
 
-function AlertCircle() {
-  return wire()`
+function AlertCircle(id = 'default') {
+  return wire(AlertCircle, `:${id}`)`
     <svg xmlns="http://www.w3.org/2000/svg"
          width="24"
          height="24"

@@ -1,8 +1,8 @@
 const { wire } = require('hypermorphic');
 
 // stroke = $color-green;
-function Headphones(stroke = '#37f0c2') {
-  return wire()`
+function Headphones(ref, id, stroke = '#37f0c2') {
+  return wire(ref, `:${id}`)`
     <svg xmlns="http://www.w3.org/2000/svg"
          width="24"
          height="24"
