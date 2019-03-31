@@ -28,7 +28,7 @@ function SourceActions({
         title="Delete from the browser."
         class="button--xsmall button--withicon button--danger"
       >
-        ${Cross('sand')} <span>Delete</span>
+        ${Cross('sand', 'source-actions--sound-button')} <span>Delete</span>
       </button>
     `
     : wire(SourceActions, ':save-button')`
@@ -38,7 +38,7 @@ function SourceActions({
         title="Save in the browser."
         class="button--xsmall button--withicon"
       >
-        ${Floppy()} <span>Save</span>
+        ${Floppy('source-actions')} <span>Save</span>
       </button>
     `;
 
@@ -50,7 +50,9 @@ function SourceActions({
     const className = `button--xsmall button--withicon ${
       sharedOwner ? 'button--danger' : ''
     }`;
-    const icon = sharedOwner ? Cross('sand') : Share();
+    const icon = sharedOwner
+      ? Cross('sand', 'source-actions--share-button')
+      : Share('source-actions');
     shareButton = wire(SourceActions, ':share-button')`
       <button
         disabled=${disabled}
@@ -62,7 +64,7 @@ function SourceActions({
     `;
   }
 
-  return wire(SourceActions, ':SourceActions')`
+  return wire(SourceActions, ':root')`
     <div class="button-container padding-y-xsmall flex flex-grow1 flex-justify-content-end">
       <button
         disabled=${!mediaIsLoaded}
@@ -70,7 +72,7 @@ function SourceActions({
         title="Download file."
         class="button--xsmall button--withicon"
       >
-        ${Download()} <span>Download</span>
+        ${Download('source-actions')} <span>Download</span>
       </button>
       ${shareButton}
       ${soundButton}

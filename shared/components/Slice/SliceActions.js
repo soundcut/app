@@ -26,7 +26,7 @@ function SliceActions({
       title="Delete from the browser."
       class="button--xsmall button--withicon button--danger"
     >
-      ${Cross('sand')} <span>Delete</span>
+      ${Cross('sand', 'slice-actions')} <span>Delete</span>
     </button>
     `
     : wire(SliceActions, ':save-button')`
@@ -36,7 +36,7 @@ function SliceActions({
       title="Save in the browser."
       class="button--xsmall button--withicon"
     >
-      ${Floppy()} <span>Save</span>
+      ${Floppy('slice-actions')} <span>Save</span>
     </button>
     `;
 
@@ -47,7 +47,7 @@ function SliceActions({
       title="A unique URL will be generated for you to share your slice."
       class="button--xsmall button--withicon"
     >
-      ${Share()} <span>Share</span>
+      ${Share('slice-actions')} <span>Share</span>
     </button>
     `;
 
@@ -59,7 +59,7 @@ function SliceActions({
         title="Download file."
         class="button--xsmall button--withicon"
       >
-        ${Download()} <span>Download</span>
+        ${Download('slice-actions')} <span>Download</span>
       </button>
       ${shareButton}
       ${soundButton}
