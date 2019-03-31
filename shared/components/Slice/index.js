@@ -1,3 +1,5 @@
+/* global MediaMetadata */
+
 const { Component, wire } = require('hypermorphic');
 const { encode } = require('punycode');
 
@@ -25,6 +27,7 @@ const {
   deleteAudioFile,
 } = require('../../helpers/audioFileStorage');
 const { deleteItem } = require('../../helpers/indexedDB');
+const withMediaSession = require('../../helpers/withMediaSession');
 
 const initialState = {
   mounted: false,
@@ -41,6 +44,7 @@ const initialState = {
   audio: undefined,
   blob: undefined,
   sourceAudioBuffer: undefined,
+  mediaMetadata: undefined,
 };
 
 class Slice extends Component {
@@ -54,6 +58,8 @@ class Slice extends Component {
     this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
+    this.play = this.play.bind(this);
+    this.pause = this.pause.bind(this);
     this.handleShareClick = this.handleShareClick.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
     this.handleSaveClick = this.handleSaveClick.bind(this);
@@ -113,6 +119,10 @@ class Slice extends Component {
     this.state.audio.pause();
     URL.revokeObjectURL(this.state.audio.currentSrc);
     document.querySelector('main').classList.remove('has-waveform');
+    withMediaSession(() => {
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.metadata = null;
+    });
   }
 
   setBoundary(name, value) {
@@ -230,14 +240,45 @@ class Slice extends Component {
     }
   }
 
+  play() {
+    withMediaSession(() => {
+      navigator.mediaSession.playbackState = 'playing';
+    });
+    this.state.audio.play();
+    this.render();
+  }
+
+  pause() {
+    withMediaSession(() => {
+      navigator.mediaSession.playbackState = 'paused';
+    });
+    this.state.audio.pause();
+    this.render();
+  }
+
+  setMediaMetaData() {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: getDisplayName(this.state.file.name),
+    });
+    this.state.mediaMetadata = navigator.mediaSession.metadata;
+  }
+
   handlePlayPauseClick(evt) {
     evt.preventDefault();
+
+    withMediaSession(() => {
+      if (!this.state.mediaMetadata) {
+        this.setMediaMetaData();
+      }
+      navigator.mediaSession.setActionHandler('play', this.play);
+      navigator.mediaSession.setActionHandler('pause', this.pause);
+    });
+
     if (this.state.audio.paused) {
-      this.state.audio.play();
+      this.play();
     } else {
-      this.state.audio.pause();
+      this.pause();
     }
-    this.render();
   }
 
   handleDownloadClick(evt) {
@@ -286,6 +327,7 @@ class Slice extends Component {
   handleNameChange(evt) {
     const filename = evt.target.textContent;
     this.state.file = new File([this.state.blob], encode(filename));
+    withMediaSession(() => this.setMediaMetaData());
   }
 
   decorateContent(...children) {
