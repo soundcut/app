@@ -21,12 +21,10 @@ const formatTime = require('../../helpers/formatTime');
 const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
 const getAudioSlice = require('../../helpers/getAudioSlice');
 const shareSlice = require('../../helpers/shareSlice');
-const getFileHash = require('../../helpers/getFileHash');
 const {
   saveAudioFile,
   deleteAudioFile,
 } = require('../../helpers/audioFileStorage');
-const { deleteItem } = require('../../helpers/indexedDB');
 const withMediaSession = require('../../helpers/withMediaSession');
 
 const initialState = {

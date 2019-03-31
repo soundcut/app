@@ -1,4 +1,4 @@
-import { bind, wire } from 'hypermorphic';
+import { bind } from 'hypermorphic';
 
 let render;
 export default function makeRender() {

@@ -12,7 +12,7 @@ function hexString(buffer) {
 
 async function getFileHash(file) {
   const fileReader = new FileReader();
-  const arrayBuffer = await new Promise((resolve, reject) => {
+  const arrayBuffer = await new Promise(resolve => {
     fileReader.onloadend = function onFileReaderLoadEnd() {
       resolve(fileReader.result);
     };

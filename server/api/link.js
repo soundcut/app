@@ -16,6 +16,7 @@ async function link(req, res) {
 
     res.writeHead(201, headers);
     res.on('error', function(err) {
+      console.error(err);
       ret.fileStream.end();
     });
     ret.fileStream.pipe(res);

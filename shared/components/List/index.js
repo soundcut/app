@@ -1,7 +1,6 @@
 const { Component, wire } = require('hypermorphic');
 const ListItem = require('./Item');
 const { getAllItems } = require('../../helpers/indexedDB');
-const getFileAudio = require('../../helpers/getFileAudio');
 
 const initialState = {
   items: [],
