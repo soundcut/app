@@ -69,3 +69,4 @@ Sound Slice staging is deployed to [GANDI Simple Hosting Node.js](https://www.ga
 - [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer)
 - [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
 - [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB)
+- [Media Session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API)
