@@ -328,6 +328,19 @@ class Slice extends Component {
     withMediaSession(() => this.setMediaMetaData());
   }
 
+  handleInputFocus() {
+    const container = document.querySelector('.player-container');
+    const top = container.getBoundingClientRect().top;
+    container.style.top = top + 'px';
+    container.style.bottom = 'auto';
+  }
+
+  handleInputBlur() {
+    const container = document.querySelector('.player-container');
+    container.style.top = 'auto';
+    container.style.bottom = '0';
+  }
+
   decorateContent(...children) {
     return this.html`
       <div id="Slice" onconnected=${this} ondisconnected=${this}>
@@ -368,6 +381,8 @@ class Slice extends Component {
                     id: state.audio,
                     initialValue: getDisplayName(state.file.name),
                     onChange: this.handleNameChange,
+                    onFocus: this.handleInputFocus,
+                    onBlur: this.handleInputBlur,
                   })
                 : ''
             }

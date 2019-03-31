@@ -1,6 +1,6 @@
 const { wire } = require('hypermorphic');
 
-function Form({ id, initialValue, onChange }) {
+function Form({ id, initialValue, onChange, onFocus, onBlur }) {
   return wire(id)`
     <p>
       You can edit your slice's name before saving, downloading or sharing it.
@@ -9,6 +9,8 @@ function Form({ id, initialValue, onChange }) {
         spellcheck="false"
         class="margin-bottom-small padding-xsmall border-dashed"
         oninput=${onChange}
+        onfocus=${onFocus}
+        onblur=${onBlur}
     >
       ${initialValue}
     </h4>
