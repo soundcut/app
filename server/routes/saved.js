@@ -2,8 +2,6 @@ const { wire } = require('hypermorphic');
 const Saved = require('../../shared/components/Saved');
 const view = require('../../shared/views/default');
 
-const title = 'Sound Slice';
-
 function saved(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/html',
@@ -11,9 +9,11 @@ function saved(req, res) {
 
   res.write(
     view(wire(), {
-      path: req.path,
-      title: title,
       main: new Saved(req.params),
+      url: res.locals.url,
+      title: req.app.locals.title,
+      assetPath: res.app.locals.assetPath,
+      description: req.app.locals.description,
     })
   );
   res.end();

@@ -4,9 +4,7 @@ const LoaderIcon = require('./Icons/Loader');
 function Loader(message = 'Loading... Please wait.') {
   return wire()`
     <div class="Loader">
-      <p>
-        ${message}
-      </p>
+      <p>${message}</p>
       ${LoaderIcon()}
     </div>
   `;

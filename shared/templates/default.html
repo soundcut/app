@@ -5,16 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>${props.title}</title>
-    <link rel="stylesheet" media="all" href="/public/stylesheets/main.css" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#113042">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="props.description">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@soundsliceapp">
+    <meta name="twitter:image" content="${props.assetPath('img/logo.png')}">
+    <meta name="twitter:image:alt" content="Sound Slice">
+    <meta property="og:title" content="${props.title}">
+    <meta property="og:site_name" content="Sound Slice">
+    <meta property="og:url" content="${props.url}">
+    <meta property="og:description" content="${props.description}">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" media="all" href="${props.assetPath('app.css')}" />
     <link rel="icon" href="/favicon.ico" />
-    <script async src="/public/js/main.js"></script>
+    <script async src="${props.assetPath('app.js')}"></script>
   </head>
   <body>
     <header>
       <a href="/" title="Sound Slice">
         <img
           id="logo"
-          src="/public/img/logo.png"
+          src="${props.assetPath('img/logo.png')}"
           alt="Sound Slice"
         />
       </a>

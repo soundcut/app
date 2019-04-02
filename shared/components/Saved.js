@@ -43,11 +43,7 @@ class Saved extends Component {
   }
 
   decorateContent(...children) {
-    return this.html`
-      <section onconnected=${this}>
-        ${children}
-      </section>
-    `;
+    return this.html`<section onconnected=${this}>${children}</section>`;
   }
 
   render() {

@@ -11,23 +11,18 @@ function ListItem({ type, item }) {
 
   return wire(item, `:${item.key}`)`
     <li>
-      <a href="${url}"
-         class="flex flex-justify-content-between flex-items-center"
+      <a
+        href="${url}"
+        class="flex flex-justify-content-between flex-items-center"
       >
-        <strong>
-          ${getDisplayName(item.filename)}
-        </strong>
+        <strong>${getDisplayName(item.filename)}</strong>
         <em class="flex flex-items-center">
           <span>
-            ${
-              typeof item.duration === 'undefined'
-                ? ''
-                : formatTime(item.duration)
-            }
+            ${typeof item.duration === 'undefined'
+              ? ''
+              : formatTime(item.duration)}
           </span>
-          <span>
-            ${humanizeFileSize(item.filesize)}
-          </span>
+          <span>${humanizeFileSize(item.filesize)}</span>
           ${Headphones(item, item.key)}
         </em>
       </a>

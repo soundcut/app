@@ -1,0 +1,4 @@
+server:
+  hostname: 'http://localhost'
+
+SEO: false

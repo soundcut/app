@@ -5,9 +5,11 @@ function SuccessMessage(messages_ = 'Yay, success!') {
     ? messages_.filter(Boolean)
     : [messages_];
 
-  return wire()`<p class="Success">
-    ${messages.map(message => wire()`${message} <br/>`)}
-  </p>`;
+  return wire()`
+    <p class="Success">
+      ${messages.map(message => wire()`${message} <br/>`)}
+    </p>
+  `;
 }
 
 module.exports = SuccessMessage;

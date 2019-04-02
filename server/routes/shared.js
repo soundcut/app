@@ -4,8 +4,6 @@ const Shared = require('../../shared/components/Shared');
 const view = require('../../shared/views/default');
 const { query } = require('../db');
 
-const title = 'Sound Slice';
-
 async function shared(req, res) {
   const id = req.params.id;
 
@@ -13,9 +11,11 @@ async function shared(req, res) {
     res.sendStatus(422);
     res.write(
       view(wire(), {
-        path: req.path,
-        title: title,
         main: new Home(),
+        url: res.locals.url,
+        title: req.app.locals.title,
+        assetPath: res.app.locals.assetPath,
+        description: req.app.locals.description,
       })
     );
     res.end();
@@ -34,9 +34,11 @@ async function shared(req, res) {
       });
       res.write(
         view(wire(), {
-          path: req.path,
-          title: title,
           main: new Home(),
+          url: res.locals.url,
+          title: req.app.locals.title,
+          assetPath: res.app.locals.assetPath,
+          description: req.app.locals.description,
         })
       );
       res.end();
@@ -47,9 +49,11 @@ async function shared(req, res) {
       });
       res.write(
         view(wire(), {
-          path: req.path,
-          title: title,
           main: new Home(),
+          url: res.locals.url,
+          title: req.app.locals.title,
+          assetPath: res.app.locals.assetPath,
+          description: req.app.locals.description,
         })
       );
       res.end();
@@ -62,9 +66,11 @@ async function shared(req, res) {
     });
     res.write(
       view(wire(), {
-        path: req.path,
-        title: title,
         main: new Home(),
+        url: res.locals.url,
+        title: req.app.locals.title,
+        assetPath: res.app.locals.assetPath,
+        description: req.app.locals.description,
       })
     );
     res.end();
@@ -77,9 +83,11 @@ async function shared(req, res) {
 
   res.write(
     view(wire(), {
-      path: req.path,
-      title: title,
       main: new Shared(),
+      url: res.locals.url,
+      title: req.app.locals.title,
+      assetPath: res.app.locals.assetPath,
+      description: req.app.locals.description,
     })
   );
   res.end();

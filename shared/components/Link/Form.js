@@ -132,11 +132,7 @@ class LinkForm extends Component {
   }
 
   decorateContent(...children) {
-    return this.html`
-      <div onconnected=${this}>
-        ${children}
-      </div>
-    `;
+    return this.html`<div onconnected=${this}>${children}</div>`;
   }
 
   render() {
@@ -147,29 +143,26 @@ class LinkForm extends Component {
     }
 
     return this.decorateContent(this.formWire`
-      <form onSubmit=${this.handleSubmit}
-            method="get"
-            action="/link"
-      >
+      <form onSubmit=${this.handleSubmit} method="get" action="/link">
         <fieldset>
           <legend>
             <span>Link to an external media (YouTube, ...)</span>
             <em>Audio will be extracted for you to slice</em>
           </legend>
           ${state.error ? ErrorMessage() : ''}
-          <label for="link">
-            URL
-          </label>
-          <input onInput=${this.handleChange}
-                 type="url"
-                 id="link"
-                 name="link"
+          <label for="link">URL</label>
+          <input
+            onInput=${this.handleChange}
+            type="url"
+            id="link"
+            name="link"
           />
         </fieldset>
         <p class="button-container flex flex-wrap flex-justify-content-end">
-          <button type="submit"
-                  disabled=${!state.hasValue}
-                  class="button--withicon"
+          <button
+            type="submit"
+            disabled=${!state.hasValue}
+            class="button--withicon"
           >
             ${CloudDownload()}
             <span>Extract audio</span>

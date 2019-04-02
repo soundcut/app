@@ -2,8 +2,6 @@ const { wire } = require('hypermorphic');
 const Home = require('../../shared/components/Home');
 const view = require('../../shared/views/default');
 
-const title = 'Sound Slice';
-
 function home(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/html',
@@ -11,9 +9,11 @@ function home(req, res) {
 
   res.write(
     view(wire(), {
-      path: req.path,
-      title: title,
       main: new Home(),
+      url: res.locals.url,
+      assetPath: res.app.locals.assetPath,
+      title: `${req.app.locals.title} | Extract sound memes in the browser`,
+      description: req.app.locals.description,
     })
   );
   res.end();

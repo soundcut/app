@@ -60,11 +60,7 @@ class List extends Component {
     }
 
     const title = wire()`<h2>${getTitle(this.type)}</h2>`;
-    const items = wire()`
-      <ul>
-        ${this.state.items.map(this.renderItem)}
-      </ul>
-    `;
+    const items = wire()`<ul>${this.state.items.map(this.renderItem)}</ul>`;
 
     return this.decorateContent(title, items);
   }

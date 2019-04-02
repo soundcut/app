@@ -38,11 +38,7 @@ class Link extends Component {
   }
 
   decorateContent(...children) {
-    return this.html`
-      <section connected=${this}>
-        ${children}
-      </section>
-    `;
+    return this.html`<section connected=${this}>${children}</section>`;
   }
 
   render() {

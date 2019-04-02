@@ -22,25 +22,25 @@ function SourceActions({
 }) {
   const soundButton = saved
     ? wire(SourceActions, ':delete-button')`
-      <button
-        disabled=${disabled}
-        onClick=${handleDelete}
-        title="Delete from the browser."
-        class="button--xsmall button--withicon button--danger"
-      >
-        ${Cross('sand', 'source-actions--sound-button')} <span>Delete</span>
-      </button>
-    `
+        <button
+          disabled=${disabled}
+          onClick=${handleDelete}
+          title="Delete from the browser."
+          class="button--xsmall button--withicon button--danger"
+        >
+          ${Cross('sand', 'source-actions--sound-button')} <span>Delete</span>
+        </button>
+      `
     : wire(SourceActions, ':save-button')`
-      <button
-        disabled=${disabled}
-        onClick=${handleSave}
-        title="Save in the browser."
-        class="button--xsmall button--withicon"
-      >
-        ${Floppy('source-actions')} <span>Save</span>
-      </button>
-    `;
+        <button
+          disabled=${disabled}
+          onClick=${handleSave}
+          title="Save in the browser."
+          class="button--xsmall button--withicon"
+        >
+          ${Floppy('source-actions')} <span>Save</span>
+        </button>
+      `;
 
   const sharedOwner = shared && owner;
   const shareAllowed =

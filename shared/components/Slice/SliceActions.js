@@ -20,25 +20,25 @@ function SliceActions({
 
   const soundButton = saved
     ? wire(SliceActions, ':delete-button')`
-    <button
-      disabled=${disabled}
-      onClick=${toggleSave}
-      title="Delete from the browser."
-      class="button--xsmall button--withicon button--danger"
-    >
-      ${Cross('sand', 'slice-actions')} <span>Delete</span>
-    </button>
-    `
+        <button
+          disabled=${disabled}
+          onClick=${toggleSave}
+          title="Delete from the browser."
+          class="button--xsmall button--withicon button--danger"
+        >
+          ${Cross('sand', 'slice-actions')} <span>Delete</span>
+        </button>
+      `
     : wire(SliceActions, ':save-button')`
-    <button
-      disabled=${disabled}
-      onClick=${toggleSave}
-      title="Save in the browser."
-      class="button--xsmall button--withicon"
-    >
-      ${Floppy('slice-actions')} <span>Save</span>
-    </button>
-    `;
+        <button
+          disabled=${disabled}
+          onClick=${toggleSave}
+          title="Save in the browser."
+          class="button--xsmall button--withicon"
+        >
+          ${Floppy('slice-actions')} <span>Save</span>
+        </button>
+      `;
 
   const shareButton = wire(SliceActions, ':share-button')`
     <button
@@ -49,7 +49,7 @@ function SliceActions({
     >
       ${Share('slice-actions')} <span>Share</span>
     </button>
-    `;
+  `;
 
   return wire(SliceActions, ':slice-actions')`
     <div class="button-container padding-y-xsmall margin-bottom flex flex-grow1 flex-justify-content-end">

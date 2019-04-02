@@ -139,24 +139,20 @@ class Upload extends Component {
     const fileFieldClass = `FileField ${state.dragging ? 'is-dragging' : ''}`;
 
     return this.html`
-      <form onconnected=${this}
-            enctype="multipart/form-data"
-            method="post"
-      >
+      <form onconnected=${this} enctype="multipart/form-data" method="post">
         <fieldset class="${fileFieldClass}">
           <legend>
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
           </legend>
-          ${
-            file
-              ? [
-                  !isFileSizeValid(file.size) && InvalidFileSize(file.size),
-                  !isFileTypeValid(file.type) && InvalidFileType(file.type),
-                ].filter(Boolean)
-              : ''
-          }
-          <input onChange=${this.handleChange}
+          ${file
+            ? [
+                !isFileSizeValid(file.size) && InvalidFileSize(file.size),
+                !isFileTypeValid(file.type) && InvalidFileType(file.type),
+              ].filter(Boolean)
+            : ''}
+          <input
+            onChange=${this.handleChange}
             type="file"
             id="source"
             name="source"
@@ -165,9 +161,7 @@ class Upload extends Component {
           <label for="source">
             ${UploadIcon()}
             <span>
-              <span>
-                Source material
-              </span>
+              <span>Source material</span>
               <em>${humanizedRequiredFileType}</em>
             </span>
           </label>

@@ -566,24 +566,20 @@ class WaveForm extends Component {
       this.state.dragging || this.state.hovering ? 'cursor-grabbing' : '';
 
     return this.html`
-    <div
-      id="WaveForm"
-      onconnected=${this}
-      ondisconnected=${this}
-      style="${style}"
-      class="${className}"
-    >
-      <div>
-        ${
-          this.state.mounted
-            ? Canvases({
-                containerWidth: this.containerWidth,
-                width: this.width,
-              })
-            : ''
-        }
+      <div
+        id="WaveForm"
+        onconnected=${this}
+        ondisconnected=${this}
+        style="${style}"
+        class="${className}"
+      >
+        <div>${this.state.mounted
+          ? Canvases({
+              containerWidth: this.containerWidth,
+              width: this.width,
+            })
+          : ''}</div>
       </div>
-    </div>
     `;
   }
 }

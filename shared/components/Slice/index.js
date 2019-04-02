@@ -375,17 +375,15 @@ class Slice extends Component {
           <div>
             ${!state.submitted ? Tutorial() : ''}
             ${state.submitted ? Ready() : ''}
-            ${
-              state.submitted
-                ? Form({
-                    id: state.audio,
-                    initialValue: getDisplayName(state.file.name),
-                    onChange: this.handleNameChange,
-                    onFocus: this.handleInputFocus,
-                    onBlur: this.handleInputBlur,
-                  })
-                : ''
-            }
+            ${state.submitted
+              ? Form({
+                  id: state.audio,
+                  initialValue: getDisplayName(state.file.name),
+                  onChange: this.handleNameChange,
+                  onFocus: this.handleInputFocus,
+                  onBlur: this.handleInputBlur,
+                })
+              : ''}
             ${SliceActions({
               disabled,
               submitted: state.submitted,
@@ -398,18 +396,14 @@ class Slice extends Component {
                 ? this.handleSaveClick
                 : this.handleDeleteClick,
             })}
-            ${
-              state.sharing
-                ? Loader('Saving the slice to the server... Please wait.')
-                : ''
-            }
+            ${state.sharing
+              ? Loader('Saving the slice to the server... Please wait.')
+              : ''}
             ${state.error ? ErrorMessage(state.error) : ''}
             ${state.shared ? SharedAlert(state.shared) : ''}
-            ${
-              state.saved
-                ? SavedAlert({ type: 'slice', hash: state.saved })
-                : ''
-            }
+            ${state.saved
+              ? SavedAlert({ type: 'slice', hash: state.saved })
+              : ''}
             ${state.submitted ? Reslice() : ''}
             <div class="player-container">
               <strong class="block margin-y-small text-center">

@@ -12,15 +12,14 @@ const initialState = {
 };
 
 function Title() {
-  return wire(Title)`
-    <h1>Extract sound memes in the browser</h1>
-  `;
+  return wire(Title)`<h1>Extract sound memes in the browser</h1>`;
 }
 
 function Description() {
   return wire(Description)`
     <p>
-      Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.
+      Sound Slice lets you listen, extract, download and share specific moments
+      of a song or an external audio source.
     </p>
   `;
 }
@@ -39,7 +38,7 @@ class Home extends Component {
   }
 
   onconnected() {
-    document.title = 'Sound Slice';
+    document.title = 'Sound Slice | Extract sound memes in the browser';
   }
 
   onFileValid(type, file, from) {
@@ -72,11 +71,7 @@ class Home extends Component {
   }
 
   decorateContent(...children) {
-    return this.html`
-      <section onconnected=${this}>
-        ${children}
-      </section>
-    `;
+    return this.html`<section onconnected=${this}>${children}</section>`;
   }
 
   render() {

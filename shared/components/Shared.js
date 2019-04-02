@@ -54,11 +54,9 @@ class Shared extends Component {
       <div onconnected=${this}>
         ${state.error ? ErrorMessage() : ''}
         ${state.loading ? Loader() : ''}
-        ${
-          file
-            ? new Source({ shared: this.id, file, owner, type: 'shared' })
-            : ''
-        }
+        ${file
+          ? new Source({ shared: this.id, file, owner, type: 'shared' })
+          : ''}
       </div>
     `;
   }
