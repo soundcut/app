@@ -21,6 +21,7 @@ const api = require('./api');
 const env = process.env.NODE_ENV || 'development';
 const DEV = env !== 'production';
 
+const rootPath = path.join(__dirname, '..');
 const configPath =
   process.env.CONFIG || path.join(__dirname, '..', `config.${env}.yml`);
 const config = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
@@ -32,6 +33,7 @@ const app = express();
 
 const base = DEV ? `${hostname}:${port}` : hostname;
 const publicPath = '/public';
+const distDir = path.join(rootPath, 'dist');
 const assetPath = makeAssetPath(base, publicPath);
 
 app.locals.config = config;
@@ -42,11 +44,9 @@ app.locals.description =
 app.locals.assetPath = assetPath;
 app.locals.queue = new Queue(5);
 
-app.use(
-  favicon(path.join(__dirname, '..', 'dist', assetPath('favicon.ico', false)))
-);
+app.use(favicon(path.join(distDir, assetPath('favicon.ico', false))));
 app.use(morgan(env === 'development' ? 'dev' : 'tiny'));
-app.use('/public', serveStatic('dist'));
+app.use('/public', serveStatic(distDir));
 app.use('/', function setResponseLocals(req, res, next) {
   res.locals.url = url.resolve(hostname, req.originalUrl);
   next();
