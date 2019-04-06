@@ -18,16 +18,16 @@ const { getClient } = require('./db');
 const routes = require('./routes');
 const api = require('./api');
 
-const DEV = !(process.env.NODE_ENV === 'production');
+const env = process.env.NODE_ENV || 'development';
+const DEV = env !== 'production';
 
 const configPath =
-  process.env.CONFIG || path.join(__dirname, '..', 'config.yml');
+  process.env.CONFIG || path.join(__dirname, '..', `config.${env}.yml`);
 const config = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
 
 const port = process.env.PORT || 3000;
 const { hostname = 'http://localhost' } = config.server || {};
 
-const env = process.env.NODE_ENV || 'development';
 const app = express();
 
 const base = DEV ? `${hostname}:${port}` : hostname;
