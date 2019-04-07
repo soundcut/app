@@ -71,15 +71,27 @@ app.get('/service-worker.js', function serveServiceWorker(req, res) {
   res.end(sw);
 });
 
-const manifest = fs.readFileSync(
-  path.join(distDir, assetPath('manifest.webmanifest', false))
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(distDir, assetPath('manifest.webmanifest', false)))
+);
+manifest.icons.push(
+  {
+    src: assetPath('img/logo-192.png'),
+    sizes: '192x192',
+    type: 'image/png',
+  },
+  {
+    src: assetPath('img/logo-512.png'),
+    sizes: '512x512',
+    type: 'image/png',
+  }
 );
 app.get('/manifest.webmanifest', function serveManifest(req, res) {
   res.writeHead(200, {
     'Content-Type': 'application/manifest+json; charset=utf-8',
     'Cache-Control': 'no-store',
   });
-  res.end(manifest);
+  res.end(JSON.stringify(manifest));
 });
 
 app.get('/', routes.home);
