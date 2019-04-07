@@ -1,0 +1,17 @@
+{
+  "name": "Sound Slice",
+  "short_name": "Sound Slice",
+  "lang": "en",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#17384b",
+  "description": "Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

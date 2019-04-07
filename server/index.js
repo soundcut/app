@@ -71,6 +71,17 @@ app.get('/service-worker.js', function serveServiceWorker(req, res) {
   res.end(sw);
 });
 
+const manifest = fs.readFileSync(
+  path.join(distDir, assetPath('manifest.webmanifest', false))
+);
+app.get('/manifest.webmanifest', function serveManifest(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'application/manifest+json; charset=utf-8',
+    'Cache-Control': 'no-store',
+  });
+  res.end(manifest);
+});
+
 app.get('/', routes.home);
 app.get('/play', routes.play);
 app.get('/shared/:id', routes.shared);
