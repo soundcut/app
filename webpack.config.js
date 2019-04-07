@@ -24,7 +24,7 @@ module.exports = {
     },
   },
   optimization: {
-    minimizer: [new TerserPlugin({}), new OptimizeCSSPlugin({})],
+    minimizer: [new TerserPlugin(), new OptimizeCSSPlugin()],
   },
   module: {
     rules: [
@@ -51,8 +51,6 @@ module.exports = {
   },
   plugins: [
     new MiniCSSExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
       filename: `css/[name]${!DEV ? '.[contenthash]' : ''}.css`,
     }),
     new CopyPlugin([
