@@ -4,6 +4,8 @@ $logo-height: 110px;
 $header-heigth: $logo-height + $spacing-small * 2;
 
 header {
+  display: flex;
+  justify-content: space-between;
   width: 100%;
   height: $header-heigth;
   padding: $spacing-small;
