@@ -64,6 +64,7 @@ class Slice extends Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleDismissClick = this.handleDismissClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.setBoundary = this.setBoundary.bind(this);
   }
 
@@ -111,6 +112,19 @@ class Slice extends Component {
     });
     document.querySelector('main').classList.add('has-waveform');
     this.render();
+
+    window.addEventListener('keydown', this.handleKeyDown, true);
+  }
+
+  handleKeyDown(evt) {
+    if (evt.defaultPrevented) {
+      return;
+    }
+
+    if (evt.key === ' ') {
+      evt.preventDefault();
+      this.togglePlayPause();
+    }
   }
 
   ondisconnected() {
@@ -261,9 +275,7 @@ class Slice extends Component {
     this.state.mediaMetadata = navigator.mediaSession.metadata;
   }
 
-  handlePlayPauseClick(evt) {
-    evt.preventDefault();
-
+  togglePlayPause() {
     withMediaSession(() => {
       if (!this.state.mediaMetadata) {
         this.setMediaMetaData();
@@ -277,6 +289,11 @@ class Slice extends Component {
     } else {
       this.pause();
     }
+  }
+
+  handlePlayPauseClick(evt) {
+    evt.preventDefault();
+    this.togglePlayPause();
   }
 
   handleDownloadClick(evt) {
