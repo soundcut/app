@@ -116,6 +116,17 @@ class Slice extends Component {
     window.addEventListener('keydown', this.handleKeyDown, true);
   }
 
+  ondisconnected() {
+    this.state.audio.pause();
+    URL.revokeObjectURL(this.state.audio.currentSrc);
+    document.querySelector('main').classList.remove('has-waveform');
+    withMediaSession(() => {
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.metadata = null;
+    });
+    window.removeEventListener('keydown', this.handleKeyDown, true);
+  }
+
   handleKeyDown(evt) {
     if (evt.defaultPrevented || evt.target !== document.body) {
       return;
@@ -125,16 +136,6 @@ class Slice extends Component {
       evt.preventDefault();
       this.togglePlayPause();
     }
-  }
-
-  ondisconnected() {
-    this.state.audio.pause();
-    URL.revokeObjectURL(this.state.audio.currentSrc);
-    document.querySelector('main').classList.remove('has-waveform');
-    withMediaSession(() => {
-      navigator.mediaSession.playbackState = 'none';
-      navigator.mediaSession.metadata = null;
-    });
   }
 
   setBoundary(name, value) {
