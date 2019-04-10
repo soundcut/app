@@ -48,6 +48,7 @@ class WaveForm extends Component {
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   setupContainer() {
@@ -111,6 +112,8 @@ class WaveForm extends Component {
       this.evtHandlerOptions
     );
 
+    document.addEventListener('keydown', this.handleKeyDown, true);
+
     // const nominalWidth = Math.round(
     //   this.buffer.duration * MIN_PX_PER_SEC * this.pixelRatio
     // );
@@ -138,6 +141,8 @@ class WaveForm extends Component {
       this.handleSourceTimeUpdate,
       this.evtHandlerOptions
     );
+
+    document.removeEventListener('keydown', this.handleKeyDown, true);
 
     if (this.editable) {
       this.container.removeEventListener(
@@ -308,6 +313,53 @@ class WaveForm extends Component {
         peaks: peaks,
       });
     });
+  }
+
+  handleKeyDown(evt) {
+    if (evt.defaultPrevented || evt.target !== document.body) {
+      return;
+    }
+
+    const duration = this.getDuration();
+    const delta = duration * 0.05;
+    let slice;
+    let boundary;
+    let value;
+    if (evt.key === 'ArrowRight' && (evt.ctrlKey || evt.metaKey)) {
+      boundary = 'start';
+      value = Math.min(this.state.start + delta, this.state.end);
+    }
+
+    if (evt.key === 'ArrowRight' && evt.shiftKey) {
+      boundary = 'end';
+      value = Math.min(this.state.end + delta, duration);
+    }
+
+    if (evt.key === 'ArrowLeft' && (evt.ctrlKey || evt.metaKey)) {
+      boundary = 'start';
+      value = Math.max(this.state.start - delta, 0);
+    }
+
+    if (evt.key === 'ArrowLeft' && evt.shiftKey) {
+      boundary = 'end';
+      value = Math.max(this.state.end - delta, this.state.start);
+    }
+
+    if (boundary) {
+      evt.preventDefault();
+
+      this.setState({
+        [boundary]: this.setSliceBoundary(boundary, value)[boundary],
+      });
+
+      requestAnimationFrame(() => {
+        const boundaryPos =
+          (this.width / duration) * this.state[boundary] + SPACING;
+        const canvasCtx = this.canvasContexts[boundary];
+        canvasCtx.clearRect(0, 0, this.containerWidth, CONTAINER_HEIGHT);
+        this.drawBoundary(canvasCtx, boundaryPos);
+      });
+    }
   }
 
   handleMouseDown(evt) {
