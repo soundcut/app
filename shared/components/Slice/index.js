@@ -117,7 +117,7 @@ class Slice extends Component {
   }
 
   handleKeyDown(evt) {
-    if (evt.defaultPrevented) {
+    if (evt.defaultPrevented || evt.target !== document.body) {
       return;
     }
 
