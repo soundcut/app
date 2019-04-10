@@ -69,3 +69,4 @@ Sound Slice staging is deployed to [GANDI Simple Hosting Node.js](https://www.ga
 - [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)
 - [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 - [Progressive Web Apps](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+- [Web Share Target API](https://developers.google.com/web/updates/2018/12/web-share-target)

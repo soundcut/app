@@ -13,5 +13,12 @@
       "sizes": "64x64",
       "type": "image/x-icon"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/link",
+    "params": {
+      "title": "title",
+      "url": "from"
+    }
+  }
 }
