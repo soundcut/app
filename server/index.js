@@ -62,14 +62,16 @@ app.get('/robots.txt', function serveRobots(req, res) {
   `);
 });
 
-const sw = fs.readFileSync(path.join(distDir, 'service-worker.js'));
-app.get('/service-worker.js', function serveServiceWorker(req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'application/javascript; charset=utf-8',
-    'Cache-Control': 'no-store',
+if (!DEV) {
+  const sw = fs.readFileSync(path.join(distDir, 'service-worker.js'));
+  app.get('/service-worker.js', function serveServiceWorker(req, res) {
+    res.writeHead(200, {
+      'Content-Type': 'application/javascript; charset=utf-8',
+      'Cache-Control': 'no-store',
+    });
+    res.end(sw);
   });
-  res.end(sw);
-});
+}
 
 const manifest = JSON.parse(
   fs.readFileSync(path.join(distDir, assetPath('manifest.webmanifest', false)))
