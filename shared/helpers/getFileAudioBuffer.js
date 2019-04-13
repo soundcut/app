@@ -20,8 +20,10 @@ function makeSaveChunk(chunkArrayBuffers, tagsArrayBuffer, sourceArrayBuffer) {
   };
 }
 
-function getEmptyChunk() {
-  return { byteLength: 0, frames: [] };
+function emptyChunk(chunk) {
+  chunk.byteLength = 0;
+  chunk.frames.length = 0;
+  return chunk;
 }
 
 function addChunkFrame(chunk, frame) {
@@ -68,7 +70,7 @@ async function getFileAudioBuffer(file, audioCtx) {
     tagsArrayBuffer,
     arrayBuffer
   );
-  let chunk;
+  let chunk = { byteLength: 0, frames: [] };
   let next = firstFrame._section.offset + firstFrame._section.byteLength;
   while (next) {
     const frame = parser.readFrame(view, next);
@@ -79,11 +81,7 @@ async function getFileAudioBuffer(file, audioCtx) {
         chunk && chunk.byteLength + frame._section.byteLength >= CHUNK_MAX_SIZE;
       if (chunkEnd) {
         saveChunk(chunk);
-        chunk = getEmptyChunk();
-      }
-
-      if (!chunk) {
-        chunk = getEmptyChunk();
+        chunk = emptyChunk(chunk);
       }
 
       addChunkFrame(chunk, frame);
