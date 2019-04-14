@@ -27,6 +27,8 @@ self.addEventListener('activate', event => {
   );
 });
 
+const SHARED_PATH_REGEXP = /^\/shared\/([^/]+?)(?:\/)?$/i;
+
 self.addEventListener('fetch', event => {
   const request = event.request;
 
@@ -35,6 +37,32 @@ self.addEventListener('fetch', event => {
   }
 
   const resource = global.caches.match(request).then(cached => {
+    if (cached) {
+      return cached;
+    }
+
+    if (new URL(request.url).pathname.match(SHARED_PATH_REGEXP)) {
+      const cacheRequest = new Request('/shared');
+      return caches.match(cacheRequest).then(cachedResponse => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return fetch(request).then(responseNetwork => {
+          const cloned = responseNetwork.clone();
+          if (!cloned || !cloned.ok) {
+            return responseNetwork;
+          }
+
+          global.caches
+            .open(CACHE_NAME)
+            .then(cache => cache.put(cacheRequest, cloned));
+
+          return responseNetwork;
+        });
+      });
+    }
+
     return (
       cached ||
       fetch(request).then(responseNetwork => {
