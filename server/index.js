@@ -89,11 +89,23 @@ manifest.icons.push(
   }
 );
 app.get('/manifest.webmanifest', function serveManifest(req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'application/manifest+json; charset=utf-8',
+  const serveManifest = !(
+    (req.get('User-Agent') || '').toLowerCase().indexOf('firefox') > -1
+  );
+
+  if (serveManifest) {
+    res.writeHead(200, {
+      'Content-Type': 'application/manifest+json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    });
+    res.end(JSON.stringify(manifest));
+    return;
+  }
+
+  res.writeHead(404, {
     'Cache-Control': 'no-store',
   });
-  res.end(JSON.stringify(manifest));
+  res.end();
 });
 
 app.get('/', routes.home);
