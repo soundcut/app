@@ -1,4 +1,7 @@
 server:
   hostname: 'http://localhost'
 
+uploads:
+  path: '/tmp'
+
 SEO: false

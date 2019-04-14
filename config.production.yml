@@ -1,4 +1,7 @@
 server:
   hostname: 'https://www.soundslice.pw'
 
+uploads:
+  path: '/home/hosting-user/uploads'
+
 SEO: false

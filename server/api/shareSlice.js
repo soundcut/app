@@ -7,9 +7,13 @@ const { renameAsync } = require('../utils');
 const { getClient } = require('../db');
 
 const env = process.env.NODE_ENV || 'development';
-const finalDir = env === 'development' ? '/tmp' : '/home/hosting-user/uploads';
 
 async function shareSlice(req, res) {
+  const finalDir =
+    res.app.locals.config.uploads.path || env === 'development'
+      ? '/tmp'
+      : '/home/hosting-user/uploads';
+
   console.info('Received POST request for sharing a file...');
   const form = new multiparty.Form();
 
