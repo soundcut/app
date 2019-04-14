@@ -1,7 +1,7 @@
 /* global ASSETS */
 
 // eslint-disable-next-line no-unused-vars
-const version = 2;
+const version = 3;
 const CACHE_NAME = new Date().toISOString();
 
 self.addEventListener('install', event => {
