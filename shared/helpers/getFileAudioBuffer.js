@@ -1,6 +1,5 @@
 const parser = require('mp3-parser');
 const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
-const concatAudioBuffer = require('../helpers/AudioBuffer.concat');
 
 const CHUNK_MAX_SIZE = 1000 * 1000;
 const CONCCURENT_DECODE_WORKERS = 4;
@@ -103,12 +102,23 @@ async function getFileAudioBuffer(file, audioCtx) {
   }
   await Promise.all(workers);
 
-  let audioBuffer;
-  let current;
-  while ((current = audioBuffers.shift())) {
-    audioBuffer = audioBuffer
-      ? concatAudioBuffer(audioCtx, audioBuffer, current)
-      : current;
+  const { numberOfChannels, sampleRate } = audioBuffers[0];
+  let length = audioBuffers.reduce((acc, current) => acc + current.length, 0);
+
+  const audioBuffer = audioCtx.createBuffer(
+    numberOfChannels,
+    length,
+    sampleRate
+  );
+
+  let offset = 0;
+  for (let j = 0; j < audioBuffers.length; j++) {
+    for (let i = 0; i < numberOfChannels; i++) {
+      audioBuffer
+        .getChannelData(i)
+        .set(audioBuffers[j].getChannelData(i), offset);
+    }
+    offset += audioBuffers[j].length;
   }
 
   return audioBuffer;
