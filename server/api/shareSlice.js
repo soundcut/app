@@ -10,9 +10,8 @@ const env = process.env.NODE_ENV || 'development';
 
 async function shareSlice(req, res) {
   const finalDir =
-    res.app.locals.config.uploads.path || env === 'development'
-      ? '/tmp'
-      : '/home/hosting-user/uploads';
+    res.app.locals.config.uploads.path ||
+    (env === 'development' ? '/tmp' : '/home/hosting-user/uploads');
 
   console.info('Received POST request for sharing a file...');
   const form = new multiparty.Form();
