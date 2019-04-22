@@ -18,7 +18,7 @@ function Title() {
 function Description() {
   return wire(Description)`
     <p>
-      Sound Slice lets you listen, extract, download and share specific moments
+      Soundcut lets you listen, extract, download and share specific moments
       of a song or an external audio source.
     </p>
   `;
@@ -38,12 +38,12 @@ class Home extends Component {
   }
 
   onconnected() {
-    document.title = 'Sound Slice | Extract sound memes in the browser';
+    document.title = 'Soundcut | Extract sound memes in the browser';
   }
 
   onFileValid(type, file, from) {
     const filename = file.name;
-    const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+    const newTitle = `${getDisplayName(filename)} | Soundcut`;
     document.title = newTitle;
     const encodedName = encode(filename);
     const historyState = { filename: encodedName };

@@ -1,5 +1,5 @@
 server:
-  hostname: 'https://www.soundslice.pw'
+  hostname: 'https://www.soundcut.pw'
 
 uploads:
   path: '/home/hosting-user/uploads'

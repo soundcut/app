@@ -23,7 +23,7 @@ class Saved extends Component {
     try {
       const item = await getItem({ store: 'file', key: this.id });
       const filename = item.file.name;
-      const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+      const newTitle = `${getDisplayName(filename)} | Soundcut`;
       document.title = newTitle;
 
       this.setState({
