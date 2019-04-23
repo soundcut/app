@@ -20,12 +20,12 @@ class Link extends Component {
   }
 
   onconnected() {
-    document.title = 'Sound Slice | Link external media';
+    document.title = 'Soundcut | Link external media';
   }
 
   onFileValid(file) {
     const filename = file.name;
-    const newTitle = `${getDisplayName(filename)} | Sound Slice`;
+    const newTitle = `${getDisplayName(filename)} | Soundcut`;
     document.title = newTitle;
     const encodedName = encode(file.name);
     const historyState = { filename: encodedName };

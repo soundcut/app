@@ -38,9 +38,9 @@ const assetPath = makeAssetPath(base, publicPath);
 
 app.locals.config = config;
 app.locals.hostname = hostname;
-app.locals.title = 'Sound Slice';
+app.locals.title = 'Soundcut';
 app.locals.description =
-  'Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.';
+  'Soundcut lets you listen, extract, download and share specific moments of a song or an external audio source.';
 app.locals.assetPath = assetPath;
 app.locals.queue = new Queue(5);
 
@@ -121,7 +121,7 @@ app.delete('/api/slice/:id', api.deleteSlice);
 app.post('/api/share', api.shareSlice);
 
 app.listen(port, async function start() {
-  console.info(`Sound Slice HTTP Server now listening on port ${port}`);
+  console.info(`Soundcut HTTP Server now listening on port ${port}`);
   try {
     const client = await getClient();
     client.release();

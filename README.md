@@ -1,6 +1,6 @@
-# Sound Slice App - prototype - Extract sound memes in the browser
+# Soundcut - prototype - Extract sound memes in the browser
 
-Sound Slice is a Progressive Web App which lets you to extract, share, save, download or simply listen to specific moments (a `slice`) of a song or any audio source.
+Soundcut is a Progressive Web App which lets you to extract, share, save, download or simply listen to specific moments (a `slice` or `cut`) of a song or any audio source.
 
 Created and developed by [Tim](https://twitter.com/tpillard).
 
@@ -29,11 +29,11 @@ Created and developed by [Tim](https://twitter.com/tpillard).
 
 # Philosophy
 
-Sound Slice's is a mean to experiment manipulating audio files in the browser, be privacy-focused as well as trying to avoid being network-dependant, therefore even though some operations might be more efficiently done on the server (such as decoding audio data and computing waveform points), __as much work as possible will be performed in the browser__.
+Soundcut is a mean to experiment manipulating audio files in the browser, be privacy-focused as well as trying to avoid being network-dependant, therefore even though some operations might be more efficiently done on the server (such as decoding audio data and computing waveform points), __as much work as possible will be performed in the browser__.
 
 # Technical Stack
 
-Sound Slice is meant to be a simple, lightweight and quickly evolving web app.
+Soundcut is meant to be a simple, lightweight and quickly evolving web app.
 It is mainly built on top of the following tools:
 - [hyperHTML](https://github.com/WebReflection/hyperHTML)
 - [viperHTML](https://github.com/WebReflection/viperHTML) for SSR
@@ -57,7 +57,7 @@ npm run dev
 npm run deploy
 ```
 
-Sound Slice staging is deployed to [GANDI Simple Hosting Node.js](https://www.gandi.net/en/simple-hosting)
+Soundcut staging is deployed to [GANDI Simple Hosting Node.js](https://www.gandi.net/en/simple-hosting)
 
 ## Useful links..
 

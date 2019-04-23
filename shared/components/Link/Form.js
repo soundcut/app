@@ -54,7 +54,7 @@ class LinkForm extends Component {
 
   handleReset() {
     const historyState = { value: '' };
-    document.title = 'Sound Slice';
+    document.title = 'Soundcut';
     history.pushState(historyState, document.title, '/link');
     this.reset();
   }

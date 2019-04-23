@@ -1,12 +1,12 @@
 {
-  "name": "Sound Slice",
-  "short_name": "Sound Slice",
+  "name": "Soundcut",
+  "short_name": "Soundcut",
   "lang": "en",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#17384b",
-  "description": "Sound Slice lets you listen, extract, download and share specific moments of a song or an external audio source.",
+  "description": "Soundcut lets you listen, extract, download and share specific moments of a song or an external audio source.",
   "icons": [
     {
       "src": "/favicon.ico",
