@@ -12,13 +12,13 @@ header {
   background-color: $color-blue-darker;
   box-shadow: 0 -5px $spacing 0 rgba(0,0,0,.2);
 
-  & a,
-  & img {
+  & a#logo,
+  & a#logo img {
     height: 100%;
   }
 
   margin: 0;
-  & > a {
+  & > a#logo {
     display: inline-block;
     background-color: transparent;
 

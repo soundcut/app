@@ -109,6 +109,7 @@ app.get('/manifest.webmanifest', function serveManifest(req, res) {
 });
 
 app.get('/', routes.home);
+app.get('/settings', routes.settings);
 app.get('/play', routes.play);
 app.get('/shared/:id', routes.shared);
 app.get('/link', routes.link);
