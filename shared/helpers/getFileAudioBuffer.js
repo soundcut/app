@@ -1,14 +1,30 @@
 const parser = require('mp3-parser');
-const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
 
 const CHUNK_MAX_SIZE = 1000 * 1000;
 const CONCCURENT_DECODE_WORKERS = 4;
 
+/**
+ * Creates a new Uint8Array based on two different ArrayBuffers
+ * Originally based on https://gist.github.com/72lions/4528834
+ *
+ * @private
+ * @param {Uint8Array} baseUint8Array Base Uint8Array.
+ * @param {ArrayBuffer} buffer  The buffer.
+ * @return {ArrayBuffer} The new ArrayBuffer created out of the two.
+ */
+function makeChunk(baseUint8Array, buffer) {
+  const tmp = new Uint8Array(baseUint8Array.byteLength + buffer.byteLength);
+  tmp.set(baseUint8Array, 0);
+  tmp.set(new Uint8Array(buffer), baseUint8Array.byteLength);
+  return tmp.buffer;
+}
+
 function makeSaveChunk(chunkArrayBuffers, tagsArrayBuffer, sourceArrayBuffer) {
+  const baseUint8Array = new Uint8Array(tagsArrayBuffer);
   return function saveChunk(chunk) {
     chunkArrayBuffers.push(
-      concatArrayBuffer(
-        tagsArrayBuffer,
+      makeChunk(
+        baseUint8Array,
         sourceArrayBuffer.slice(
           chunk.frames[0]._section.offset,
           chunk.frames[chunk.frames.length - 1]._section.offset +
