@@ -127,14 +127,13 @@ async function getFileAudioBuffer(file, audioCtx) {
     sampleRate
   );
 
-  let offset = 0;
-  for (let j = 0; j < audioBuffers.length; j++) {
-    for (let i = 0; i < numberOfChannels; i++) {
-      audioBuffer
-        .getChannelData(i)
-        .set(audioBuffers[j].getChannelData(i), offset);
+  for (let j = 0; j < numberOfChannels; j++) {
+    const channelData = audioBuffer.getChannelData(j);
+    let offset = 0;
+    for (let i = 0; i < audioBuffers.length; i++) {
+      channelData.set(audioBuffers[i].getChannelData(j), offset);
+      offset += audioBuffers[i].length;
     }
-    offset += audioBuffers[j].length;
   }
 
   return audioBuffer;
