@@ -4,28 +4,26 @@ const CHUNK_MAX_SIZE = 1000 * 1000;
 const CONCCURENT_DECODE_WORKERS = 4;
 
 /**
- * Creates a new Uint8Array based on two different ArrayBuffers
- * Originally based on https://gist.github.com/72lions/4528834
+ * Creates a new ArrayBuffer out of two Uint8Arrays
  *
  * @private
- * @param {Uint8Array} baseUint8Array Base Uint8Array.
- * @param {ArrayBuffer} buffer  The buffer.
- * @return {ArrayBuffer} The new ArrayBuffer created out of the two.
+ * @param   {Uint8Array}  baseUint8Array  first Uint8Array.
+ * @param   {Uint8Array}  buffer          second Uint8Array.
+ * @return  {ArrayBuffer}                  The new ArrayBuffer
  */
-function makeChunk(baseUint8Array, buffer) {
-  const tmp = new Uint8Array(baseUint8Array.byteLength + buffer.byteLength);
-  tmp.set(baseUint8Array, 0);
-  tmp.set(new Uint8Array(buffer), baseUint8Array.byteLength);
+function makeChunk(array1, array2) {
+  const tmp = new Uint8Array(array1.byteLength + array2.byteLength);
+  tmp.set(array1, 0);
+  tmp.set(array2, array1.byteLength);
   return tmp.buffer;
 }
 
-function makeSaveChunk(chunkArrayBuffers, tagsArrayBuffer, sourceArrayBuffer) {
-  const baseUint8Array = new Uint8Array(tagsArrayBuffer);
+function makeSaveChunk(chunkArrayBuffers, tagsUInt8Array, sourceUInt8Array) {
   return function saveChunk(chunk) {
     chunkArrayBuffers.push(
       makeChunk(
-        baseUint8Array,
-        sourceArrayBuffer.slice(
+        tagsUInt8Array,
+        sourceUInt8Array.subarray(
           chunk.frames[0]._section.offset,
           chunk.frames[chunk.frames.length - 1]._section.offset +
             chunk.frames[chunk.frames.length - 1]._section.byteLength
@@ -73,17 +71,17 @@ function decodeArrayBuffer(audioCtx, arrayBuffer) {
 
 async function getFileAudioBuffer(file, audioCtx) {
   const arrayBuffer = await getArrayBuffer(file);
-
   const view = new DataView(arrayBuffer);
 
   const tags = parser.readTags(view);
   const firstFrame = tags.pop();
-  const tagsArrayBuffer = arrayBuffer.slice(0, firstFrame._section.offset);
+  const uInt8Array = new Uint8Array(arrayBuffer);
+  const tagsUInt8Array = uInt8Array.subarray(0, firstFrame._section.offset);
   const chunkArrayBuffers = [];
   const saveChunk = makeSaveChunk(
     chunkArrayBuffers,
-    tagsArrayBuffer,
-    arrayBuffer
+    tagsUInt8Array,
+    uInt8Array
   );
   let chunk = { byteLength: 0, frames: [] };
   let next = firstFrame._section.offset + firstFrame._section.byteLength;
