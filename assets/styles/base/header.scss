@@ -17,10 +17,14 @@ header {
     height: 100%;
   }
 
+  img {
+    display: block;
+  }
+
   margin: 0;
   & > a {
     display: inline-block;
-    background-color: transparent;
+    background-color: $color-blue-lighter;
 
     &:hover {
       background-color: $color-green;
