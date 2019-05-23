@@ -1,8 +1,8 @@
-const { wire } = require('hypermorphic');
-const Saved = require('../../shared/components/Saved');
-const view = require('../../shared/views/default');
+import { wire } from 'hypermorphic';
+import Saved from '../../shared/components/Saved.js';
+import view from '../../shared/views/default.js';
 
-function saved(req, res) {
+export default function saved(req, res) {
   res.writeHead(200, {
     'Content-Type': 'text/html',
   });
@@ -18,5 +18,3 @@ function saved(req, res) {
   );
   res.end();
 }
-
-module.exports = saved;

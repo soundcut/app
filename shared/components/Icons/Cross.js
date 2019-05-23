@@ -1,4 +1,4 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
 function getColor(theme) {
   let color;
@@ -16,7 +16,7 @@ function getColor(theme) {
   return color;
 }
 
-function Cross(theme = 'primary', id = 'default') {
+export default function Cross(theme = 'primary', id = 'default') {
   const color = getColor(theme);
 
   return wire(Cross, `:${theme}-${id}`)`
@@ -36,5 +36,3 @@ function Cross(theme = 'primary', id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Cross;

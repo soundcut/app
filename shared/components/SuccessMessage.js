@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function SuccessMessage(messages_ = 'Yay, success!') {
+export default function SuccessMessage(messages_ = 'Yay, success!') {
   const messages = Array.isArray(messages_)
     ? messages_.filter(Boolean)
     : [messages_];
@@ -11,5 +11,3 @@ function SuccessMessage(messages_ = 'Yay, success!') {
     </p>
   `;
 }
-
-module.exports = SuccessMessage;

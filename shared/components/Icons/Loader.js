@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Loader() {
+export default function Loader() {
   return wire(Loader)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -24,5 +24,3 @@ function Loader() {
     </svg>
   `;
 }
-
-module.exports = Loader;

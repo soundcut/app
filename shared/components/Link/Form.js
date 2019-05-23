@@ -1,10 +1,10 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
-const { Component, wire } = require('hypermorphic');
+import { Component, wire } from 'hypermorphic';
 
-const ErrorMessage = require('../ErrorMessage');
-const Loader = require('../Loader');
-const CloudDownload = require('../Icons/CloudDownload');
+import ErrorMessage from '../ErrorMessage.js';
+import Loader from '../Loader.js';
+import CloudDownload from '../Icons/CloudDownload.js';
 
 const linkPath = '/api/link';
 
@@ -15,7 +15,7 @@ const initialState = {
   file: undefined,
 };
 
-class LinkForm extends Component {
+export default class LinkForm extends Component {
   constructor({ onFileValid, loadingCallback } = {}) {
     super();
     this.onFileValid = onFileValid;
@@ -172,5 +172,3 @@ class LinkForm extends Component {
     `);
   }
 }
-
-module.exports = LinkForm;

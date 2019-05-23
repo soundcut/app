@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import wire from 'hypermorphic';
 
-function AlertCircle(id = 'default') {
+export default function AlertCircle(id = 'default') {
   return wire(AlertCircle, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,5 +19,3 @@ function AlertCircle(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = AlertCircle;

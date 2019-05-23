@@ -1,15 +1,15 @@
-const { Component } = require('hypermorphic');
-const { encode } = require('punycode');
+import { Component } from 'hypermorphic';
+import { encode } from 'punycode';
 
-const LinkForm = require('./Form');
-const Source = require('../Source');
-const getDisplayName = require('../../helpers/getDisplayName');
+import LinkForm from './Form.js';
+import Source from '../Source/index.js';
+import getDisplayName from '../../helpers/getDisplayName.js';
 
 const initialState = {
   source: undefined,
 };
 
-class Link extends Component {
+export default class Link extends Component {
   constructor() {
     super();
     this.state = Object.assign({}, initialState);
@@ -49,5 +49,3 @@ class Link extends Component {
     return this.decorateContent(this.link);
   }
 }
-
-module.exports = Link;

@@ -1,8 +1,6 @@
-const getFileAudioBuffer = require('./getFileAudioBuffer');
+import getFileAudioBuffer from './getFileAudioBuffer.js';
 
-async function decodeFileAudioData(file) {
+export default async function decodeFileAudioData(file) {
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return await getFileAudioBuffer(file, audioCtx);
 }
-
-module.exports = decodeFileAudioData;

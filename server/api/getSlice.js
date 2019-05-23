@@ -1,10 +1,10 @@
-const { createReadStream } = require('fs');
-const { encode } = require('punycode');
+import { createReadStream } from 'fs';
+import { encode } from 'punycode';
 
-const { query } = require('../db');
-const { isFileReadable } = require('../../lib');
+import { query } from '../db/index.js';
+import { isFileReadable } from '../../lib/index.js';
 
-async function getSlice(req, res) {
+export default async function getSlice(req, res) {
   const id = req.params.id;
 
   if (!id) {
@@ -65,5 +65,3 @@ async function getSlice(req, res) {
   console.info('Streaming slice back to client', name);
   fileStream.pipe(res);
 }
-
-module.exports = getSlice;

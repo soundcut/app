@@ -1,7 +1,7 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
 // stroke = $color-green;
-function Headphones(ref, id, stroke = '#37f0c2') {
+export default function Headphones(ref, id, stroke = '#37f0c2') {
   return wire(ref, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,5 +19,3 @@ function Headphones(ref, id, stroke = '#37f0c2') {
     </svg>
   `;
 }
-
-module.exports = Headphones;

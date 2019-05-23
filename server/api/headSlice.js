@@ -1,7 +1,7 @@
-const { query } = require('../db');
-const { isFileReadable } = require('../../lib');
+import { query } from '../db/index.js';
+import { isFileReadable } from '../../lib/index.js';
 
-async function headSlice(req, res) {
+export default async function headSlice(req, res) {
   const id = req.params.id;
 
   if (!id) {
@@ -57,5 +57,3 @@ async function headSlice(req, res) {
   res.writeHead(204, headers);
   res.end();
 }
-
-module.exports = headSlice;

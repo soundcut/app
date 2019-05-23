@@ -1,5 +1,3 @@
-function play(req, res) {
+export default function play(req, res) {
   res.redirect('/');
 }
-
-module.exports = play;

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-const { Pool } = require('pg');
+import pg from 'pg';
 
 // FIXME: configuration file
 const config = {
@@ -11,9 +11,9 @@ const config = {
   database: 'soundslice',
 };
 
-const pool = new Pool(config);
+const pool = new pg.Pool(config);
 
-async function query(text, params) {
+export async function query(text, params) {
   const start = Date.now();
   const res = await pool.query(text, params);
   const duration = Date.now() - start;
@@ -21,11 +21,6 @@ async function query(text, params) {
   return res;
 }
 
-function getClient() {
+export function getClient() {
   return pool.connect();
 }
-
-module.exports = {
-  query,
-  getClient,
-};

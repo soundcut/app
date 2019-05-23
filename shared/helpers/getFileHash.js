@@ -10,7 +10,7 @@ function hexString(buffer) {
   return hexCodes.join('');
 }
 
-async function getFileHash(file) {
+export default async function getFileHash(file) {
   const fileReader = new FileReader();
   const arrayBuffer = await new Promise(resolve => {
     fileReader.onloadend = function onFileReaderLoadEnd() {
@@ -23,5 +23,3 @@ async function getFileHash(file) {
   const digest = await window.crypto.subtle.digest('SHA-256', arrayBuffer);
   return hexString(digest).slice(0, 10);
 }
-
-module.exports = getFileHash;

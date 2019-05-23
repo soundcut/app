@@ -1,7 +1,7 @@
-const getFileHash = require('./getFileHash');
-const { setItem, deleteItem } = require('./indexedDB');
+import getFileHash from './getFileHash.js';
+import { setItem, deleteItem } from './indexedDB.js';
 
-async function saveAudioFile(type, audio, file) {
+export async function saveAudioFile(type, audio, file) {
   try {
     const hash = await getFileHash(file);
     const duration = audio.duration;
@@ -34,7 +34,7 @@ async function saveAudioFile(type, audio, file) {
   }
 }
 
-async function deleteAudioFile(type, key, file) {
+export async function deleteAudioFile(type, key, file) {
   try {
     const hash = key || (await getFileHash(file));
     await Promise.all([
@@ -52,5 +52,3 @@ async function deleteAudioFile(type, key, file) {
     throw err;
   }
 }
-
-module.exports = { saveAudioFile, deleteAudioFile };

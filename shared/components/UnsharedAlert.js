@@ -1,7 +1,7 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
 /* eslint-disable indent */
-function UnsharedAlert() {
+export default function UnsharedAlert() {
   return wire(UnsharedAlert)`
     <h3>
       This slice is no longer saved on the server.
@@ -19,5 +19,3 @@ function UnsharedAlert() {
     <strong>share</strong> it again.
   </p>`;
 }
-
-module.exports = UnsharedAlert;

@@ -1,5 +1,5 @@
 let passiveSupported;
-module.exports = function checkPassiveEventListener() {
+export default function checkPassiveEventListener() {
   if (passiveSupported !== undefined) {
     return passiveSupported;
   }
@@ -19,4 +19,4 @@ module.exports = function checkPassiveEventListener() {
   }
 
   return passiveSupported;
-};
+}

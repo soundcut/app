@@ -7,7 +7,7 @@
  *  - no events
  *  - no job error handling
  */
-class Queue {
+export default class Queue {
   /**
    * Queue constructor.
    * @constructor
@@ -83,5 +83,3 @@ class Queue {
     }
   }
 }
-
-module.exports = Queue;

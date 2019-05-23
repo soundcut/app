@@ -1,31 +1,31 @@
 /* global MediaMetadata */
 
-const { Component, wire } = require('hypermorphic');
-const { encode } = require('punycode');
+import { Component, wire } from 'hypermorphic';
+import { encode } from 'punycode';
 
-const Loader = require('../Loader');
-const ErrorMessage = require('../ErrorMessage');
-const SavedAlert = require('../SavedAlert');
-const SharedAlert = require('../SharedAlert');
-const WaveForm = require('../WaveForm');
-const PlayerActions = require('./PlayerActions');
-const SliceActions = require('./SliceActions');
-const Tutorial = require('./Tutorial');
-const Ready = require('./Ready');
-const Form = require('./Form');
-const Reslice = require('./Reslice');
+import Loader from '../Loader.js';
+import ErrorMessage from '../ErrorMessage.js';
+import SavedAlert from '../SavedAlert.js';
+import SharedAlert from '../SharedAlert.js';
+import WaveForm from '../WaveForm.js';
+import PlayerActions from './PlayerActions.js';
+import SliceActions from './SliceActions.js';
+import Tutorial from './Tutorial.js';
+import Ready from './Ready.js';
+import Form from './Form.js';
+import Reslice from './Reslice.js';
 
-const getSliceName = require('../../helpers/getSliceName');
-const getDisplayName = require('../../helpers/getDisplayName');
-const formatTime = require('../../helpers/formatTime');
-const decodeFileAudioData = require('../../helpers/decodeFileAudioData');
-const getAudioSlice = require('../../helpers/getAudioSlice');
-const shareSlice = require('../../helpers/shareSlice');
-const {
+import getSliceName from '../../helpers/getSliceName.js';
+import getDisplayName from '../../helpers/getDisplayName.js';
+import formatTime from '../../helpers/formatTime.js';
+import decodeFileAudioData from '../../helpers/decodeFileAudioData.js';
+import getAudioSlice from '../../helpers/getAudioSlice.js';
+import shareSlice from '../../helpers/shareSlice.js';
+import {
   saveAudioFile,
   deleteAudioFile,
-} = require('../../helpers/audioFileStorage');
-const withMediaSession = require('../../helpers/withMediaSession');
+} from '../../helpers/audioFileStorage.js';
+import withMediaSession from '../../helpers/withMediaSession.js';
 
 const initialState = {
   mounted: false,
@@ -45,7 +45,7 @@ const initialState = {
   mediaMetadata: undefined,
 };
 
-class Slice extends Component {
+export default class Slice extends Component {
   constructor({ audio, file, onSubmit, onDismiss }) {
     super();
     this.reset = [];
@@ -393,15 +393,17 @@ class Slice extends Component {
           <div>
             ${!state.submitted ? Tutorial() : ''}
             ${state.submitted ? Ready() : ''}
-            ${state.submitted
-              ? Form({
-                  id: state.audio,
-                  initialValue: getDisplayName(state.file.name),
-                  onChange: this.handleNameChange,
-                  onFocus: this.handleInputFocus,
-                  onBlur: this.handleInputBlur,
-                })
-              : ''}
+            ${
+              state.submitted
+                ? Form({
+                    id: state.audio,
+                    initialValue: getDisplayName(state.file.name),
+                    onChange: this.handleNameChange,
+                    onFocus: this.handleInputFocus,
+                    onBlur: this.handleInputBlur,
+                  })
+                : ''
+            }
             ${SliceActions({
               disabled,
               submitted: state.submitted,
@@ -414,14 +416,18 @@ class Slice extends Component {
                 ? this.handleSaveClick
                 : this.handleDeleteClick,
             })}
-            ${state.sharing
-              ? Loader('Saving the slice to the server... Please wait.')
-              : ''}
+            ${
+              state.sharing
+                ? Loader('Saving the slice to the server... Please wait.')
+                : ''
+            }
             ${state.error ? ErrorMessage(state.error) : ''}
             ${state.shared ? SharedAlert(state.shared) : ''}
-            ${state.saved
-              ? SavedAlert({ type: 'slice', hash: state.saved })
-              : ''}
+            ${
+              state.saved
+                ? SavedAlert({ type: 'slice', hash: state.saved })
+                : ''
+            }
             ${state.submitted ? Reslice() : ''}
             <div class="player-container">
               <strong class="block margin-y-small text-center">
@@ -446,5 +452,3 @@ class Slice extends Component {
     }
   }
 }
-
-module.exports = Slice;

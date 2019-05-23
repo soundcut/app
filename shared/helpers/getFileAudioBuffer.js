@@ -1,4 +1,4 @@
-const parser = require('mp3-parser');
+import parser from 'mp3-parser';
 
 const CHUNK_MAX_SIZE = 1000 * 1000;
 const CONCCURENT_DECODE_WORKERS = 4;
@@ -69,7 +69,7 @@ function decodeArrayBuffer(audioCtx, arrayBuffer) {
   return new Promise(audioCtx.decodeAudioData.bind(audioCtx, arrayBuffer));
 }
 
-async function getFileAudioBuffer(file, audioCtx) {
+export default async function getFileAudioBuffer(file, audioCtx) {
   const arrayBuffer = await getArrayBuffer(file);
   const view = new DataView(arrayBuffer);
 
@@ -136,5 +136,3 @@ async function getFileAudioBuffer(file, audioCtx) {
 
   return audioBuffer;
 }
-
-module.exports = getFileAudioBuffer;

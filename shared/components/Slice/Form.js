@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Form({ id, initialValue, onChange, onFocus, onBlur }) {
+export default function Form({ id, initialValue, onChange, onFocus, onBlur }) {
   return wire(id)`
     <p>
       You can edit your slice's name before saving, downloading or sharing it.
@@ -18,5 +18,3 @@ function Form({ id, initialValue, onChange, onFocus, onBlur }) {
     ${initialValue}
   </h4>`;
 }
-
-module.exports = Form;

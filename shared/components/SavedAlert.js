@@ -1,7 +1,7 @@
-const { wire } = require('hypermorphic');
-const SuccessMessage = require('./SuccessMessage');
+import { wire } from 'hypermorphic';
+import SuccessMessage from './SuccessMessage.js';
 
-function SavedAlert({ hash, type }) {
+export default function SavedAlert({ hash, type }) {
   const messages = [
     wire(
       SavedAlert,
@@ -19,5 +19,3 @@ function SavedAlert({ hash, type }) {
 
   return SuccessMessage(messages);
 }
-
-module.exports = SavedAlert;

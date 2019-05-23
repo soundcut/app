@@ -8,7 +8,7 @@ function isMediaLoaded(media) {
   );
 }
 
-function getFileAudio(file) {
+export default function getFileAudio(file) {
   return new Promise(resolve => {
     const objectURL = URL.createObjectURL(file);
     const audio = new Audio(objectURL);
@@ -21,5 +21,3 @@ function getFileAudio(file) {
     }, 100);
   });
 }
-
-module.exports = getFileAudio;

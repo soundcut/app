@@ -1,12 +1,12 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-const Play = require('../Icons/Play');
-const Pause = require('../Icons/Pause');
-const Check = require('../Icons/Check');
-const Cross = require('../Icons/Cross');
+import Play from '../Icons/Play.js';
+import Pause from '../Icons/Pause.js';
+import Check from '../Icons/Check.js';
+import Cross from '../Icons/Cross.js';
 
 /* eslint-disable indent */
-function PlayerActions({
+export default function PlayerActions({
   submitted,
   disabled,
   paused,
@@ -31,8 +31,9 @@ function PlayerActions({
       >
         ${Check('player-actions')}
       </button>
-      ${submitted
-        ? wire(PlayerActions, ':dismiss')`
+      ${
+        submitted
+          ? wire(PlayerActions, ':dismiss')`
             <button
               type="button"
               onClick=${handleDismissClick}
@@ -42,9 +43,8 @@ function PlayerActions({
               ${Cross('player-actions')}
             </button>
           `
-        : ''}
+          : ''
+      }
     </div>
   `;
 }
-
-module.exports = PlayerActions;

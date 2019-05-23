@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Tutorial() {
+export default function Tutorial() {
   return wire(Tutorial)`<h3>What now? Create a slice!</h3>
   <ol>
     <li>
@@ -11,5 +11,3 @@ function Tutorial() {
     <li>Save, share, download or simply listen to your slice!</li>
   </ol>`;
 }
-
-module.exports = Tutorial;

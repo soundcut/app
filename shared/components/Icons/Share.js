@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Share(id = 'default') {
+export default function Share(id = 'default') {
   return wire(Share, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -21,5 +21,3 @@ function Share(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Share;

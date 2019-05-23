@@ -1,7 +1,7 @@
-const { Component, wire } = require('hypermorphic');
-const formatTime = require('../helpers/formatTime');
-const hexToRGB = require('../helpers/hexToRGB');
-const checkPassiveEventListener = require('../helpers/checkPassiveEventListener');
+import { Component, wire } from 'hypermorphic';
+import formatTime from '../helpers/formatTime.js';
+import hexToRGB from '../helpers/hexToRGB.js';
+import checkPassiveEventListener from '../helpers/checkPassiveEventListener.js';
 
 const SPACING = 20;
 const CONTAINER_HEIGHT = 240;
@@ -26,7 +26,7 @@ function Canvases({ containerWidth, width }) {
   `;
 }
 
-class WaveForm extends Component {
+export default class WaveForm extends Component {
   constructor({ editable, audio, audioBuffer, setSliceBoundary, start, end }) {
     super();
     this.audio = audio;
@@ -625,15 +625,15 @@ class WaveForm extends Component {
         style="${style}"
         class="${className}"
       >
-        <div>${this.state.mounted
-          ? Canvases({
-              containerWidth: this.containerWidth,
-              width: this.width,
-            })
-          : ''}</div>
+        <div>${
+          this.state.mounted
+            ? Canvases({
+                containerWidth: this.containerWidth,
+                width: this.width,
+              })
+            : ''
+        }</div>
       </div>
     `;
   }
 }
-
-module.exports = WaveForm;

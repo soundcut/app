@@ -1,9 +1,9 @@
-const { Component } = require('hypermorphic');
+import { Component } from 'hypermorphic';
 
-const Source = require('./Source');
-const ErrorMessage = require('./ErrorMessage');
-const getDisplayName = require('../helpers/getDisplayName');
-const { getItem } = require('../helpers/indexedDB');
+import Source from './Source/index.js';
+import ErrorMessage from './ErrorMessage.js';
+import getDisplayName from '../helpers/getDisplayName.js';
+import { getItem } from '../helpers/indexedDB.js';
 
 const initialState = {
   source: undefined,
@@ -11,7 +11,7 @@ const initialState = {
   item: undefined,
 };
 
-class Saved extends Component {
+export default class Saved extends Component {
   constructor({ id, type }) {
     super();
     this.id = id;
@@ -58,5 +58,3 @@ class Saved extends Component {
     return this.decorateContent(this.state.source);
   }
 }
-
-module.exports = Saved;

@@ -1,18 +1,13 @@
-const { unlink, rename } = require('fs');
+import { unlink, rename } from 'fs';
 
-function renameAsync(oldPath, newPath) {
+export function renameAsync(oldPath, newPath) {
   return new Promise((resolve, reject) => {
     rename(oldPath, newPath, err => (err ? reject(err) : resolve()));
   });
 }
 
-function unlinkAsync(path) {
+export function unlinkAsync(path) {
   return new Promise((resolve, reject) => {
     unlink(path, err => (err ? reject(err) : resolve()));
   });
 }
-
-module.exports = {
-  renameAsync,
-  unlinkAsync,
-};

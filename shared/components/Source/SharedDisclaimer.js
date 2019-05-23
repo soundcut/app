@@ -1,8 +1,8 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
 /* eslint-disable indent */
 
-function SharedDisclaimer({ id, owner }) {
+export default function SharedDisclaimer({ id, owner }) {
   const url = `${window.location.origin}/shared/${id.slice(0, 10)}`;
 
   return wire()`<h3>This slice was saved on the server</h3>
@@ -14,8 +14,9 @@ function SharedDisclaimer({ id, owner }) {
     </label>
     <input id="share" class="full-width" type="text" value=${url} />
   </p>
-  ${owner
-    ? wire()`
+  ${
+    owner
+      ? wire()`
         <p>
           As the <strong>creator</strong> of this slice,
           <strong>only you</strong> can <strong>unshare</strong> it.
@@ -25,7 +26,6 @@ function SharedDisclaimer({ id, owner }) {
           <strong>save it in this browser</strong>.
         </p>
       `
-    : ''}`;
+      : ''
+  }`;
 }
-
-module.exports = SharedDisclaimer;

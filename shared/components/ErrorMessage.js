@@ -1,6 +1,8 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function ErrorMessage(messages_ = 'Oops! Something went wrong.') {
+export default function ErrorMessage(
+  messages_ = 'Oops! Something went wrong.'
+) {
   const messages = Array.isArray(messages_)
     ? messages_.filter(Boolean)
     : [messages_];
@@ -11,5 +13,3 @@ function ErrorMessage(messages_ = 'Oops! Something went wrong.') {
     </p>
   `;
 }
-
-module.exports = ErrorMessage;

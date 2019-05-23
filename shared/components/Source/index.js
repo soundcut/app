@@ -1,25 +1,25 @@
 /* eslint-disable indent */
 
-const { Component, wire } = require('hypermorphic');
+import { Component, wire } from 'hypermorphic';
 
-const Slice = require('../Slice');
-const ErrorMessage = require('../ErrorMessage');
-const UnsharedAlert = require('../UnsharedAlert');
-const SharedAlert = require('../SharedAlert');
-const SavedAlert = require('../SavedAlert');
-const SourceActions = require('./SourceActions');
-const SavedDisclaimer = require('./SavedDisclaimer');
-const SharedDisclaimer = require('./SharedDisclaimer');
+import Slice from '../Slice/index.js';
+import ErrorMessage from '../ErrorMessage.js';
+import UnsharedAlert from '../UnsharedAlert.js';
+import SharedAlert from '../SharedAlert.js';
+import SavedAlert from '../SavedAlert.js';
+import SourceActions from './SourceActions.js';
+import SavedDisclaimer from './SavedDisclaimer.js';
+import SharedDisclaimer from './SharedDisclaimer.js';
 
-const getDisplayName = require('../../helpers/getDisplayName');
-const getDownloadName = require('../../helpers/getDownloadName');
-const humanizeFileSize = require('../../helpers/humanizeFileSize');
-const shareSlice = require('../../helpers/shareSlice');
-const unshareSlice = require('../../helpers/unshareSlice');
-const {
+import getDisplayName from '../../helpers/getDisplayName.js';
+import getDownloadName from '../../helpers/getDownloadName.js';
+import humanizeFileSize from '../../helpers/humanizeFileSize.js';
+import shareSlice from '../../helpers/shareSlice.js';
+import unshareSlice from '../../helpers/unshareSlice.js';
+import {
   saveAudioFile,
   deleteAudioFile,
-} = require('../../helpers/audioFileStorage');
+} from '../../helpers/audioFileStorage.js';
 
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
@@ -39,7 +39,7 @@ const initialState = {
   owner: undefined,
 };
 
-class Source extends Component {
+export default class Source extends Component {
   constructor({ file, owner, type, saved, shared, disconnectCallback }) {
     super();
     this.state = Object.assign({}, initialState, {
@@ -227,9 +227,11 @@ class Source extends Component {
 
     const source = wire()`
       ${this.state.saved && !this.justSaved ? SavedDisclaimer(this.type) : ''}
-      ${this.shared && this.state.shared
-        ? SharedDisclaimer({ owner: this.state.owner, id: this.shared })
-        : ''}
+      ${
+        this.shared && this.state.shared
+          ? SharedDisclaimer({ owner: this.state.owner, id: this.shared })
+          : ''
+      }
       <div class="flex flex-wrap flex-justify-between flex-items-center margin-bottom">
         <h2 class="flex flex-items-center flex-grow1 no-margin-bottom margin-right-small">
           <span class="margin-right-small">${displayName}</span>
@@ -251,9 +253,11 @@ class Source extends Component {
         })}
       </div>
       ${this.state.error ? ErrorMessage(this.state.error) : ''}
-      ${this.justSaved
-        ? SavedAlert({ type: 'sound', hash: this.state.saved })
-        : ''}
+      ${
+        this.justSaved
+          ? SavedAlert({ type: 'sound', hash: this.state.saved })
+          : ''
+      }
       ${this.justShared ? SharedAlert(this.state.shared) : ''}
       ${this.shared && !this.state.shared ? UnsharedAlert() : ''}
     `;
@@ -266,5 +270,3 @@ class Source extends Component {
     `;
   }
 }
-
-module.exports = Source;

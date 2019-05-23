@@ -1,23 +1,23 @@
 /* Copyright (C) 2019  Timothée 'tim' Pillard (AGPL-3.0-only) */
 /* eslint-disable no-console */
 
-const url = require('url');
-const path = require('path');
-const fs = require('fs');
+import * as url from 'url';
+import path from 'path';
+import fs from 'fs';
 
-const yaml = require('js-yaml');
-const express = require('express');
-const favicon = require('serve-favicon');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const serveStatic = require('serve-static');
+import yaml from 'js-yaml';
+import express from 'express';
+import favicon from 'serve-favicon';
+import morgan from 'morgan';
+import bodyParser from 'body-parser';
+import serveStatic from 'serve-static';
 
-const makeAssetPath = require('./assetPath');
-const Queue = require('./queue');
-const { getClient } = require('./db');
+import makeAssetPath from './assetPath.js';
+import Queue from './queue.js';
+import { getClient } from './db/index.js';
 
-const routes = require('./routes');
-const api = require('./api');
+import routes from './routes/index.js';
+import api from './api/index.js';
 
 const env = process.env.NODE_ENV || 'development';
 const DEV = env !== 'production';

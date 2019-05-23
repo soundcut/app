@@ -1,8 +1,8 @@
-const { ensureBrowserId } = require('./browserId');
+import { ensureBrowserId } from './browserId.js';
 
 const SLICE_PATH = '/api/slice';
 
-async function fetchSlice(id, head = false) {
+export default async function fetchSlice(id, head = false) {
   let browserId = 'anonymous';
   try {
     browserId = ensureBrowserId();
@@ -51,5 +51,3 @@ async function fetchSlice(id, head = false) {
     throw err;
   }
 }
-
-module.exports = fetchSlice;

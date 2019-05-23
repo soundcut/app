@@ -1,8 +1,8 @@
-const { getClient, query } = require('../db');
-const { isFileReadable } = require('../../lib');
-const { unlinkAsync } = require('../utils');
+import { getClient, query } from '../db/index.js';
+import { isFileReadable } from '../../lib/index.js';
+import { unlinkAsync } from '../utils.js';
 
-async function deleteSlice(req, res) {
+export default async function deleteSlice(req, res) {
   const id = req.params.id;
 
   if (!id) {
@@ -92,5 +92,3 @@ async function deleteSlice(req, res) {
   res.writeHead(204);
   res.end();
 }
-
-module.exports = deleteSlice;

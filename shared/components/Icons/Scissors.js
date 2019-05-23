@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Scissors(id = 'default') {
+export default function Scissors(id = 'default') {
   return wire(Scissors, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -21,5 +21,3 @@ function Scissors(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Scissors;
