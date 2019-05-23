@@ -11,6 +11,7 @@ const WaveForm = require('../WaveForm');
 const PlayerActions = require('./PlayerActions');
 const SliceActions = require('./SliceActions');
 const Tutorial = require('./Tutorial');
+const Advanced = require('./Advanced');
 const Ready = require('./Ready');
 const Form = require('./Form');
 const Reslice = require('./Reslice');
@@ -43,6 +44,7 @@ const initialState = {
   blob: undefined,
   sourceAudioBuffer: undefined,
   mediaMetadata: undefined,
+  overwriteMetadata: true,
 };
 
 class Slice extends Component {
@@ -53,6 +55,9 @@ class Slice extends Component {
 
     this.onSubmit = onSubmit;
     this.onDismiss = onDismiss;
+    this.handleOverwriteMetadataChange = this.handleOverwriteMetadataChange.bind(
+      this
+    );
     this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handlePlayPauseClick = this.handlePlayPauseClick.bind(this);
@@ -179,7 +184,12 @@ class Slice extends Component {
   }
 
   async createSlice() {
-    return getAudioSlice(this.state.file, this.state.start, this.state.end);
+    return getAudioSlice(
+      this.state.file,
+      this.state.start,
+      this.state.end,
+      this.state.overwriteMetadata
+    );
   }
 
   async handleSubmitClick(evt) {
@@ -292,6 +302,12 @@ class Slice extends Component {
     }
   }
 
+  handleOverwriteMetadataChange(evt) {
+    this.setState({
+      overwriteMetadata: evt.target.checked,
+    });
+  }
+
   handlePlayPauseClick(evt) {
     evt.preventDefault();
     this.togglePlayPause();
@@ -392,6 +408,14 @@ class Slice extends Component {
         wire(this, ':with-waveform')`
           <div>
             ${!state.submitted ? Tutorial() : ''}
+            ${
+              !state.submitted
+                ? Advanced({
+                    id: this,
+                    onChange: this.handleOverwriteMetadataChange,
+                  })
+                : ''
+            }
             ${state.submitted ? Ready() : ''}
             ${
               state.submitted
