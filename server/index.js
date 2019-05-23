@@ -1,3 +1,4 @@
+/* Copyright (C) 2019  Timothée 'tim' Pillard (AGPL-3.0-only) */
 /* eslint-disable no-console */
 
 const url = require('url');

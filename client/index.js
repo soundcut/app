@@ -1,3 +1,5 @@
+/* Copyright (C) 2019  Timothée 'tim' Pillard (AGPL-3.0-only) */
+
 import hyperApp from 'hyperhtml-app';
 
 import Home from '../shared/components/Home';

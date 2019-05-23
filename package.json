@@ -1,7 +1,7 @@
 {
   "name": "soundcut",
   "version": "1.0.0",
-  "description": "",
+  "description": "Extract sound memes in the browser",
   "scripts": {
     "start": "NODE_ENV=production node server/index.js",
     "dev": "npm run build:dev; npm run watch & nodemon --delay 2 --watch 'dist' --watch 'server' --watch 'shared/views' server/index.js;",
@@ -19,8 +19,28 @@
     "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build:prod",
     "deploy": "ssh $SOUNDSLICE_DEPLOY deploy default.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Timothée 'Tim' Pillard <tim@tpillard.fr> (https://twitter.com/tpillard)",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soundcut/app.git"
+  },
+  "keywords": [
+    "sound",
+    "cut",
+    "audio",
+    "mp3",
+    "file",
+    "slice",
+    "meme",
+    "progressive",
+    "web",
+    "app",
+    "pwa"
+  ],
+  "bugs": {
+    "url": "https://github.com/soundcut/app/issues"
+  },
   "config": {
     "NODE_ENV": "development"
   },
