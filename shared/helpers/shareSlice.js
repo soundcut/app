@@ -1,11 +1,11 @@
-const { ensureBrowserId } = require('./browserId');
-const getFileHash = require('./getFileHash');
-const { getItem, setItem, deleteItem } = require('./indexedDB');
-const fetchSlice = require('./fetchSlice');
+import { ensureBrowserId } from './browserId.js';
+import getFileHash from './getFileHash.js';
+import { getItem, setItem, deleteItem } from './indexedDB.js';
+import fetchSlice from './fetchSlice.js';
 
 const SHARE_PATH = '/api/share';
 
-async function shareSlice(file) {
+export default async function shareSlice(file) {
   let browserId = 'anonymous';
   try {
     browserId = ensureBrowserId();
@@ -92,5 +92,3 @@ async function shareSlice(file) {
     throw err;
   }
 }
-
-module.exports = shareSlice;

@@ -1,11 +1,11 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-const Download = require('../Icons/Download');
-const Floppy = require('../Icons/Floppy');
-const Cross = require('../Icons/Cross');
-const Share = require('../Icons/Share');
+import Download from '../Icons/Download.js';
+import Floppy from '../Icons/Floppy.js';
+import Cross from '../Icons/Cross.js';
+import Share from '../Icons/Share.js';
 
-function SliceActions({
+export default function SliceActions({
   saved,
   shared,
   disabled,
@@ -66,5 +66,3 @@ function SliceActions({
     </div>
   `;
 }
-
-module.exports = SliceActions;

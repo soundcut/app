@@ -8,7 +8,7 @@ function generateId() {
   return Array.from(arr, dec2hex).join('');
 }
 
-function ensureBrowserId() {
+export function ensureBrowserId() {
   let id = window.localStorage.getItem('browser');
   if (!id) {
     id = generateId();
@@ -16,5 +16,3 @@ function ensureBrowserId() {
   }
   return id;
 }
-
-module.exports = { ensureBrowserId };

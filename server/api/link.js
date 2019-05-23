@@ -1,7 +1,7 @@
-const { encode } = require('punycode');
-const { spawnYouTubeDL } = require('../../lib');
+import { encode } from 'punycode';
+import { spawnYouTubeDL } from '../../lib/index.js';
 
-async function link(req, res) {
+export default async function link(req, res) {
   if (!req.body) return res.sendStatus(400);
 
   const queue = req.app.locals.queue;
@@ -25,5 +25,3 @@ async function link(req, res) {
     res.sendStatus(500);
   }
 }
-
-module.exports = link;

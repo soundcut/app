@@ -1,9 +1,7 @@
-const { encode } = require('punycode');
-const getDisplayName = require('./getDisplayName');
+import { encode } from 'punycode';
+import getDisplayName from './getDisplayName.js';
 
-function getSliceName(file, start, end) {
+export default function getSliceName(file, start, end) {
   const filename = getDisplayName(file.name);
   return encode(`${filename} [${`${start}-${end}`}]`);
 }
-
-module.exports = getSliceName;

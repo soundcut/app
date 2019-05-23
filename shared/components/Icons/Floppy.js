@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Floppy(id = 'default') {
+export default function Floppy(id = 'default') {
   return wire(Floppy, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,5 +19,3 @@ function Floppy(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Floppy;

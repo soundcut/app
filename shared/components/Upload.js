@@ -1,8 +1,8 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
-const { Component, wire } = require('hypermorphic');
-const ErrorMessage = require('./ErrorMessage');
-const UploadIcon = require('./Icons/Upload');
+import { Component, wire } from 'hypermorphic';
+import ErrorMessage from './ErrorMessage.js';
+import UploadIcon from './Icons/Upload.js';
 
 const requiredFileTypes = ['audio/mpeg', 'audio/mp3'];
 const humanizedRequiredFileType = requiredFileTypes.join(', ');
@@ -62,7 +62,7 @@ const initialState = {
   file: undefined,
 };
 
-class Upload extends Component {
+export default class Upload extends Component {
   constructor(onFileValid) {
     super();
     this.state = Object.assign({}, initialState);
@@ -145,12 +145,14 @@ class Upload extends Component {
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
           </legend>
-          ${file
-            ? [
-                !isFileSizeValid(file.size) && InvalidFileSize(file.size),
-                !isFileTypeValid(file.type) && InvalidFileType(file.type),
-              ].filter(Boolean)
-            : ''}
+          ${
+            file
+              ? [
+                  !isFileSizeValid(file.size) && InvalidFileSize(file.size),
+                  !isFileTypeValid(file.type) && InvalidFileType(file.type),
+                ].filter(Boolean)
+              : ''
+          }
           <input
             onChange=${this.handleChange}
             type="file"
@@ -170,5 +172,3 @@ class Upload extends Component {
     `;
   }
 }
-
-module.exports = Upload;

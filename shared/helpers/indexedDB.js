@@ -72,12 +72,10 @@ const doGetAllItems = store => {
   });
 };
 
-const getItem = ({ store, key }) =>
+export const getItem = ({ store, key }) =>
   init().then(() => doGetItem({ store, key }));
-const setItem = ({ store, item }) =>
+export const setItem = ({ store, item }) =>
   init().then(() => doSetItem({ store, item }));
-const deleteItem = ({ store, key }) =>
+export const deleteItem = ({ store, key }) =>
   init().then(() => doDeleteItem({ store, key }));
-const getAllItems = store => init().then(() => doGetAllItems(store));
-
-module.exports = { getItem, getAllItems, setItem, deleteItem };
+export const getAllItems = store => init().then(() => doGetAllItems(store));

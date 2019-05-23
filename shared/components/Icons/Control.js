@@ -1,22 +1,22 @@
-const { Component } = require('hypermorphic');
+import { Component } from 'hypermorphic';
 
-const AlertCircle = require('./Icons/AlertCircle');
-const Check = require('./Icons/Check');
-const CheckCircle = require('./Icons/CheckCircle');
-const Floppy = require('./Icons/Floppy');
-const Forbidden = require('./Icons/Forbidden');
-const Info = require('./Icons/Info');
-const Link = require('./Icons/Link');
-const List = require('./Icons/List');
-const Loader = require('./Icons/Loader');
-const Pause = require('./Icons/Pause');
-const Play = require('./Icons/Play');
-const Scissors = require('./Icons/Scissors');
-const Settings = require('./Icons/Settings');
-const Share = require('./Icons/Share');
-const Start = require('./Icons/Start');
+import AlertCircle from './Icons/AlertCircle';
+import Check from './Icons/Check';
+import CheckCircle from './Icons/CheckCircle';
+import Floppy from './Icons/Floppy';
+import Forbidden from './Icons/Forbidden';
+import Info from './Icons/Info';
+import Link from './Icons/Link';
+import List from './Icons/List';
+import Loader from './Icons/Loader';
+import Pause from './Icons/Pause';
+import Play from './Icons/Play';
+import Scissors from './Icons/Scissors';
+import Settings from './Icons/Settings';
+import Share from './Icons/Share';
+import Start from './Icons/Start';
 
-class Control extends Component {
+export default class Control extends Component {
   constructor(...args) {
     super(...args);
   }
@@ -104,5 +104,3 @@ class Control extends Component {
     `;
   }
 }
-
-module.exports = Control;

@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Pause(id = 'default') {
+export default function Pause(id = 'default') {
   return wire(Pause, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -18,5 +18,3 @@ function Pause(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Pause;

@@ -1,7 +1,7 @@
-const { wire } = require('hypermorphic');
-const SuccessMessage = require('./SuccessMessage');
+import { wire } from 'hypermorphic';
+import SuccessMessage from './SuccessMessage.js';
 
-function SharedAlert(id) {
+export default function SharedAlert(id) {
   const url = `${window.location.origin}/shared/${id.slice(0, 10)}`;
 
   const messages = [
@@ -19,5 +19,3 @@ function SharedAlert(id) {
 
   return SuccessMessage(messages);
 }
-
-module.exports = SharedAlert;

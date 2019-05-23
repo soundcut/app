@@ -1,6 +1,6 @@
-const { decode } = require('punycode');
+import { decode } from 'punycode';
 
-module.exports = function getDisplayName(str) {
+export default function getDisplayName(str) {
   let ret = str;
   try {
     ret = decode(str);
@@ -9,4 +9,4 @@ module.exports = function getDisplayName(str) {
   }
 
   return ret || 'Untitled';
-};
+}

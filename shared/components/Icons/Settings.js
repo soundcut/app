@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Settings(id = 'default') {
+export default function Settings(id = 'default') {
   return wire(Settings, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -18,5 +18,3 @@ function Settings(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Settings;

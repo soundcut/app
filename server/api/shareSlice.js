@@ -1,14 +1,14 @@
-const path = require('path');
-const { createHash } = require('crypto');
-const get = require('lodash/get');
-const multiparty = require('multiparty');
+import path from 'path';
+import { createHash } from 'crypto';
+import { get } from 'lodash';
+import multiparty from 'multiparty';
 
-const { renameAsync } = require('../utils');
-const { getClient } = require('../db');
+import { renameAsync } from '../utils.js';
+import { getClient } from '../db/index.js';
 
 const env = process.env.NODE_ENV || 'development';
 
-async function shareSlice(req, res) {
+export default async function shareSlice(req, res) {
   const finalDir =
     res.app.locals.config.uploads.path ||
     (env === 'development' ? '/tmp' : '/home/hosting-user/uploads');
@@ -99,5 +99,3 @@ async function shareSlice(req, res) {
 
   return;
 }
-
-module.exports = shareSlice;

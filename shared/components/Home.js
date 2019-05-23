@@ -1,10 +1,10 @@
-const { Component, wire } = require('hypermorphic');
-const { encode } = require('punycode');
-const Upload = require('./Upload');
-const LinkForm = require('./Link/Form');
-const Source = require('./Source');
-const List = require('./List');
-const getDisplayName = require('../helpers/getDisplayName');
+import { Component, wire } from 'hypermorphic';
+import { encode } from 'punycode';
+import Upload from './Upload.js';
+import LinkForm from './Link/Form.js';
+import Source from './Source/index.js';
+import List from './List/index.js';
+import getDisplayName from '../helpers/getDisplayName.js';
 
 const initialState = {
   linkLoading: false,
@@ -24,7 +24,7 @@ function Description() {
   `;
 }
 
-class Home extends Component {
+export default class Home extends Component {
   constructor() {
     super();
     this.state = Object.assign({}, initialState);
@@ -93,5 +93,3 @@ class Home extends Component {
     );
   }
 }
-
-module.exports = Home;

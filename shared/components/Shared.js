@@ -1,11 +1,11 @@
 /* eslint-disable indent */
 /* prettier-ignore-start */
-const { Component } = require('hypermorphic');
+import { Component } from 'hypermorphic';
 
-const Source = require('./Source');
-const ErrorMessage = require('./ErrorMessage');
-const Loader = require('./Loader');
-const fetchSlice = require('../helpers/fetchSlice');
+import Source from './Source/index.js';
+import ErrorMessage from './ErrorMessage.js';
+import Loader from './Loader.js';
+import fetchSlice from '../helpers/fetchSlice.js';
 
 const initialState = {
   error: false,
@@ -14,7 +14,7 @@ const initialState = {
   owner: false,
 };
 
-class Shared extends Component {
+export default class Shared extends Component {
   constructor(id) {
     super();
     this.id = id;
@@ -54,12 +54,12 @@ class Shared extends Component {
       <div onconnected=${this}>
         ${state.error ? ErrorMessage() : ''}
         ${state.loading ? Loader() : ''}
-        ${file
-          ? new Source({ shared: this.id, file, owner, type: 'shared' })
-          : ''}
+        ${
+          file
+            ? new Source({ shared: this.id, file, owner, type: 'shared' })
+            : ''
+        }
       </div>
     `;
   }
 }
-
-module.exports = Shared;

@@ -1,7 +1,7 @@
-const parser = require('mp3-parser');
-const ID3Writer = require('browser-id3-writer');
-const getDuration = require('../helpers/getDuration');
-const concatArrayBuffer = require('../helpers/ArrayBuffer.concat');
+import parser from 'mp3-parser';
+import ID3Writer from 'browser-id3-writer';
+import getDuration from '../helpers/getDuration.js';
+import concatArrayBuffer from '../helpers/ArrayBuffer.concat.js';
 
 /**
  * Get a audio/mpeg Blob out of an ArrayBuffer.
@@ -29,7 +29,7 @@ function getObjectURL(blob) {
  * @param   {File}  file  source file.
  * @return  {object}      { blob, audio }
  */
-function getAudioSlice(file, start, end) {
+export default function getAudioSlice(file, start, end) {
   return new Promise(function getAudioSlicePromise(resolve) {
     let fileReader = new FileReader();
     fileReader.onloadend = function onFileReaderLoadEnd() {
@@ -99,5 +99,3 @@ function getAudioSlice(file, start, end) {
     fileReader.readAsArrayBuffer(file);
   });
 }
-
-module.exports = getAudioSlice;

@@ -1,8 +1,8 @@
-const { ensureBrowserId } = require('./browserId');
+import { ensureBrowserId } from './browserId.js';
 
 const SLICE_PATH = '/api/slice';
 
-async function unshareSlice(id) {
+export default async function unshareSlice(id) {
   let browserId = 'anonymous';
   try {
     browserId = ensureBrowserId();
@@ -33,5 +33,3 @@ async function unshareSlice(id) {
     throw err;
   }
 }
-
-module.exports = unshareSlice;

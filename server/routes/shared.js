@@ -1,10 +1,10 @@
-const { wire } = require('hypermorphic');
-const Home = require('../../shared/components/Home');
-const Shared = require('../../shared/components/Shared');
-const view = require('../../shared/views/default');
-const { query } = require('../db');
+import { wire } from 'hypermorphic';
+import Home from '../../shared/components/Home.js';
+import Shared from '../../shared/components/Shared.js';
+import view from '../../shared/views/default.js';
+import { query } from '../db/index.js';
 
-async function shared(req, res) {
+export default async function shared(req, res) {
   const id = req.params.id;
 
   if (!id) {
@@ -92,5 +92,3 @@ async function shared(req, res) {
   );
   res.end();
 }
-
-module.exports = shared;

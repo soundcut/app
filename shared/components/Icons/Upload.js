@@ -1,6 +1,6 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-function Upload(id = 'default') {
+export default function Upload(id = 'default') {
   return wire(Upload, `:${id}`)`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -17,5 +17,3 @@ function Upload(id = 'default') {
     </svg>
   `;
 }
-
-module.exports = Upload;

@@ -1,6 +1,6 @@
-const { Component, wire } = require('hypermorphic');
-const ListItem = require('./Item');
-const { getAllItems } = require('../../helpers/indexedDB');
+import { Component, wire } from 'hypermorphic';
+import ListItem from './Item.js';
+import { getAllItems } from '../../helpers/indexedDB.js';
 
 const initialState = {
   items: [],
@@ -26,7 +26,7 @@ function getTitle(type) {
   return title;
 }
 
-class List extends Component {
+export default class List extends Component {
   constructor(type) {
     super();
     this.type = type;
@@ -65,5 +65,3 @@ class List extends Component {
     return this.decorateContent(title, items);
   }
 }
-
-module.exports = List;

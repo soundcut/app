@@ -1,13 +1,13 @@
-const { wire } = require('hypermorphic');
+import { wire } from 'hypermorphic';
 
-const Download = require('../Icons/Download');
-const Floppy = require('../Icons/Floppy');
-const Cross = require('../Icons/Cross');
-const Share = require('../Icons/Share');
+import Download from '../Icons/Download.js';
+import Floppy from '../Icons/Floppy.js';
+import Cross from '../Icons/Cross.js';
+import Share from '../Icons/Share.js';
 
 const shareAllowedTypes = ['slice', 'shared'];
 
-function SourceActions({
+export default function SourceActions({
   type,
   saved,
   shared,
@@ -79,5 +79,3 @@ function SourceActions({
     </div>
   `;
 }
-
-module.exports = SourceActions;

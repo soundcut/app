@@ -1,5 +1,5 @@
-const { async, wire } = require('viperhtml');
-const path = require('path');
+import { async, wire } from 'viperhtml';
+import path from 'path';
 const view = new Proxy(
   new String(path.join(__dirname, '..', '..', 'shared', 'view')),
   { get: (base, module) => require(base + path.sep + module) }
@@ -10,7 +10,7 @@ const renderers = {
   header: wire(),
 };
 
-module.exports = {
+export default {
   // async wires - parent
   page: (chunks, model) => view.index(renderers.page(chunks), model),
 
