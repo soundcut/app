@@ -6,11 +6,6 @@ a.button {
 
 a.button,
 button {
-  padding: $spacing-small;
-  &.button--xsmall {
-    padding: $spacing-xsmall;
-  }
-
   &.button--withicon {
     display: flex;
     align-items: center;
@@ -21,30 +16,55 @@ button {
     }
   }
 
-  border: 1px solid transparent;
-  border-radius: $border-radius;
-  background-color: $color-blue-lighter;
-  color: $color-green;
+  &:not(.button--link) {
+    padding: $spacing-small;
+    &.button--xsmall {
+      padding: $spacing-xsmall;
+    }
+
+    border: 1px solid transparent;
+    border-radius: $border-radius;
+    background-color: $color-blue-lighter;
+    color: $color-green;
+
+    &:focus {
+      outline: 0;
+      border-color: $color-blue-light;
+    }
+
+    &.button--danger {
+      background-color: $color-danger;
+      color: $color-sand;
+
+      &:focus {
+        border-color: $color-cement;
+      }
+    }
+  }
+
+  &.button--link {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    overflow: visible;
+    line-height: normal;
+    -webkit-font-smoothing: inherit;
+    -moz-osx-font-smoothing: inherit;
+    -webkit-appearance: none;
+    &::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+  }
+
   cursor: pointer;
 
   &[disabled] {
     opacity: 0.65;
     cursor: not-allowed;
     pointer-events: none;
-  }
-
-  &:focus {
-    outline: 0;
-    border-color: $color-blue-light;
-  }
-}
-
-.button--danger {
-  background-color: $color-danger;
-  color: $color-sand;
-
-  &:focus {
-    border-color: $color-cement;
   }
 }
 
