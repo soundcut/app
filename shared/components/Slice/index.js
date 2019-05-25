@@ -205,6 +205,7 @@ class Slice extends Component {
     const { audio, blob } = await this.createSlice();
     this.setState(
       Object.assign({}, initialState, {
+        overwriteMetadata: this.state.overwriteMetadata,
         blob,
         audio,
         file: new File([blob], filename),
