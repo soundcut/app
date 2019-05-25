@@ -29,16 +29,18 @@ function getObjectURL(blob) {
  * @param   {File}  file  source file.
  * @return  {object}      { blob, audio }
  */
-function getAudioSlice(file, start, end) {
+function getAudioSlice(file, start, end, scrubSourceMetadata = true) {
   return new Promise(function getAudioSlicePromise(resolve) {
     let fileReader = new FileReader();
     fileReader.onloadend = function onFileReaderLoadEnd() {
-      const _sourceArrayBuffer = fileReader.result;
+      let sourceArrayBuffer = fileReader.result;
 
       // scrub source's metadata..
-      const writer = new ID3Writer(_sourceArrayBuffer);
-      writer.addTag();
-      const sourceArrayBuffer = writer.arrayBuffer;
+      if (scrubSourceMetadata) {
+        const writer = new ID3Writer(sourceArrayBuffer);
+        writer.addTag();
+        sourceArrayBuffer = writer.arrayBuffer;
+      }
 
       const view = new DataView(sourceArrayBuffer);
 
