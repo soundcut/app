@@ -31,8 +31,9 @@ function PlayerActions({
       >
         ${Check('player-actions')}
       </button>
-      ${submitted
-        ? wire(PlayerActions, ':dismiss')`
+      ${
+        submitted
+          ? wire(PlayerActions, ':dismiss')`
             <button
               type="button"
               onClick=${handleDismissClick}
@@ -42,7 +43,8 @@ function PlayerActions({
               ${Cross('player-actions')}
             </button>
           `
-        : ''}
+          : ''
+      }
     </div>
   `;
 }

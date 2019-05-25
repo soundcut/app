@@ -18,9 +18,11 @@ function ListItem({ type, item }) {
         <strong>${getDisplayName(item.filename)}</strong>
         <em class="flex flex-items-center">
           <span>
-            ${typeof item.duration === 'undefined'
-              ? ''
-              : formatTime(item.duration)}
+            ${
+              typeof item.duration === 'undefined'
+                ? ''
+                : formatTime(item.duration)
+            }
           </span>
           <span>${humanizeFileSize(item.filesize)}</span>
           ${Headphones(item, item.key)}

@@ -145,12 +145,14 @@ class Upload extends Component {
             <span>Upload a file</span>
             <em>Click to browse or Drag and Drop</em>
           </legend>
-          ${file
-            ? [
-                !isFileSizeValid(file.size) && InvalidFileSize(file.size),
-                !isFileTypeValid(file.type) && InvalidFileType(file.type),
-              ].filter(Boolean)
-            : ''}
+          ${
+            file
+              ? [
+                  !isFileSizeValid(file.size) && InvalidFileSize(file.size),
+                  !isFileTypeValid(file.type) && InvalidFileType(file.type),
+                ].filter(Boolean)
+              : ''
+          }
           <input
             onChange=${this.handleChange}
             type="file"

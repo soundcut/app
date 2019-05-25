@@ -227,9 +227,11 @@ class Source extends Component {
 
     const source = wire()`
       ${this.state.saved && !this.justSaved ? SavedDisclaimer(this.type) : ''}
-      ${this.shared && this.state.shared
-        ? SharedDisclaimer({ owner: this.state.owner, id: this.shared })
-        : ''}
+      ${
+        this.shared && this.state.shared
+          ? SharedDisclaimer({ owner: this.state.owner, id: this.shared })
+          : ''
+      }
       <div class="flex flex-wrap flex-justify-between flex-items-center margin-bottom">
         <h2 class="flex flex-items-center flex-grow1 no-margin-bottom margin-right-small">
           <span class="margin-right-small">${displayName}</span>
@@ -251,9 +253,11 @@ class Source extends Component {
         })}
       </div>
       ${this.state.error ? ErrorMessage(this.state.error) : ''}
-      ${this.justSaved
-        ? SavedAlert({ type: 'sound', hash: this.state.saved })
-        : ''}
+      ${
+        this.justSaved
+          ? SavedAlert({ type: 'sound', hash: this.state.saved })
+          : ''
+      }
       ${this.justShared ? SharedAlert(this.state.shared) : ''}
       ${this.shared && !this.state.shared ? UnsharedAlert() : ''}
     `;

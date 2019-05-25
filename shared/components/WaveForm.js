@@ -625,12 +625,14 @@ class WaveForm extends Component {
         style="${style}"
         class="${className}"
       >
-        <div>${this.state.mounted
-          ? Canvases({
-              containerWidth: this.containerWidth,
-              width: this.width,
-            })
-          : ''}</div>
+        <div>${
+          this.state.mounted
+            ? Canvases({
+                containerWidth: this.containerWidth,
+                width: this.width,
+              })
+            : ''
+        }</div>
       </div>
     `;
   }

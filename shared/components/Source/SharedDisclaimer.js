@@ -14,8 +14,9 @@ function SharedDisclaimer({ id, owner }) {
     </label>
     <input id="share" class="full-width" type="text" value=${url} />
   </p>
-  ${owner
-    ? wire()`
+  ${
+    owner
+      ? wire()`
         <p>
           As the <strong>creator</strong> of this slice,
           <strong>only you</strong> can <strong>unshare</strong> it.
@@ -25,7 +26,8 @@ function SharedDisclaimer({ id, owner }) {
           <strong>save it in this browser</strong>.
         </p>
       `
-    : ''}`;
+      : ''
+  }`;
 }
 
 module.exports = SharedDisclaimer;

@@ -10,8 +10,9 @@ function SavedDisclaimer(type) {
     Sharing the <strong>current URL</strong> with others or accessing it in a
     different browser <strong>will not work</strong>.
   </p>
-  ${type === 'slice'
-    ? wire()`
+  ${
+    type === 'slice'
+      ? wire()`
         <p>
           You can <strong>share</strong>, <strong>download</strong>,
           <strong>play</strong> this <strong>${type}</strong> or
@@ -21,7 +22,8 @@ function SavedDisclaimer(type) {
           slice out of it.
         </p>
       `
-    : ''}`;
+      : ''
+  }`;
 }
 
 module.exports = SavedDisclaimer;
