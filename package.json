@@ -19,7 +19,11 @@
     "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build:prod",
     "deploy": "ssh $SOUNDSLICE_DEPLOY deploy default.git"
   },
-  "author": "Timothée 'Tim' Pillard <tim@tpillard.fr> (https://twitter.com/tpillard)",
+  "author": {
+    "name": "Timothée 'Tim' Pillard",
+    "email": "tim@tpillard.fr",
+    "url": "https://twitter.com/tpillar"
+  },
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
