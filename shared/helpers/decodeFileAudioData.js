@@ -1,4 +1,4 @@
-const getFileAudioBuffer = require('./getFileAudioBuffer');
+const getFileAudioBuffer = require('@soundcut/decode-audio-data-fast');
 
 async function decodeFileAudioData(file) {
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
