@@ -24,7 +24,7 @@ module.exports = {
     },
   },
   optimization: {
-    minimizer: [new TerserPlugin(), new OptimizeCSSPlugin()],
+    minimizer: [new TerserPlugin({ sourceMap: true }), new OptimizeCSSPlugin()],
   },
   module: {
     rules: [
@@ -78,5 +78,6 @@ module.exports = {
       },
     }),
   ],
+  devtool: 'source-map',
   mode: ENV,
 };
