@@ -35,26 +35,12 @@ function InvalidFileSize(size) {
   return ErrorMessage(message);
 }
 
-function InvalidFileType(type) {
-  const message = wire()`
-    Selected file type (<strong>${type}</strong>) is not supported.
-    <br />
-    Please upload a <strong>${humanizedRequiredFileType}</strong> file.
-  `;
-
-  return ErrorMessage(message);
-}
-
 function isFileSizeValid(bytes) {
   return bytes > 0 && bytes <= fileSizeLimit;
 }
 
-function isFileTypeValid(type) {
-  return requiredFileTypes.indexOf(type) > -1;
-}
-
 function isFileValid(file) {
-  return !!(file && isFileSizeValid(file.size) && isFileTypeValid(file.type));
+  return !!(file && isFileSizeValid(file.size));
 }
 
 const initialState = {
@@ -149,7 +135,6 @@ class Upload extends Component {
             file
               ? [
                   !isFileSizeValid(file.size) && InvalidFileSize(file.size),
-                  !isFileTypeValid(file.type) && InvalidFileType(file.type),
                 ].filter(Boolean)
               : ''
           }

@@ -67,6 +67,17 @@ class Source extends Component {
   onconnected() {
     this.objectURL = URL.createObjectURL(this.file);
     this.audio = new Audio(this.objectURL);
+    this.audio.addEventListener('error', () => {
+      clearInterval(this.interval);
+      let error = 'Unable to handle this file as Audio.';
+      if (this.audio.error) {
+        error = this.audio.error.message;
+      }
+
+      this.setState({
+        error: [error, 'Please try again using a different browser :('],
+      });
+    });
     this.audio.loop = true;
     this.audio.volume = 0.5;
     this.interval = setInterval(() => {
