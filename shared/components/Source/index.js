@@ -23,12 +23,7 @@ const {
 
 function isMediaLoaded(media) {
   const seekable = !!media && media.seekable;
-  return (
-    seekable &&
-    seekable.length > 0 &&
-    media.seekable.start(0) === 0 &&
-    seekable.end(0) === media.duration
-  );
+  return seekable && seekable.length > 0 && seekable.start(0) === 0;
 }
 
 const initialState = {
@@ -78,6 +73,7 @@ class Source extends Component {
         error: [error, 'Please try again using a different browser :('],
       });
     });
+    this.audio.preload = 'auto';
     this.audio.loop = true;
     this.audio.volume = 0.5;
     this.interval = setInterval(() => {
