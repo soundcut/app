@@ -48,8 +48,19 @@ class Home extends Component {
     const encodedName = encode(filename);
     const historyState = { filename: encodedName };
     if (type === 'upload') {
-      const pathname = `/play?title=${encodedName}`;
-      history.pushState(historyState, document.title, pathname);
+      /*
+       * Firefox Mobile doesn't allow using `history.pushState`
+       * between File retrieval and URL.createObjectURL()
+       * https://gist.github.com/ziir/aa8ae3af995df6a40de0ead650a81ac3
+       */
+      const userAgent = navigator.userAgent.toLowerCase();
+      const firefoxMobile = ['firefox', 'mobile'].every(
+        word => userAgent.indexOf(word) > -1
+      );
+      if (!firefoxMobile) {
+        const pathname = `/play?title=${encodedName}`;
+        history.pushState(historyState, document.title, pathname);
+      }
     } else if (from) {
       const pathname = `/link?title=${encodedName}&from=${from}`;
       history.pushState(historyState, document.title, pathname);
