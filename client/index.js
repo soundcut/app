@@ -44,23 +44,3 @@ if (document.readyState !== 'loading') {
 if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
   navigator.serviceWorker.register('/service-worker.js');
 }
-
-window.addEventListener('appinstalled', function onAppInstalled() {
-  const installBtn = document.getElementById('btn-install');
-  if (installBtn) {
-    installBtn.parentNode.removeChild(installBtn);
-  }
-});
-
-window.addEventListener('beforeinstallprompt', function onBeforeInstallPrompt(
-  evt
-) {
-  // Prevent Chrome 67 and earlier from automatically showing the prompt
-  evt.preventDefault();
-  const installBtn = document.getElementById('btn-install');
-  installBtn.addEventListener('click', function onInstallBtnClick() {
-    installBtn.parentNode.removeChild(installBtn);
-    evt.prompt();
-  });
-  installBtn.style.display = 'block';
-});
