@@ -12,6 +12,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const serveStatic = require('serve-static');
 
+const cleanup = require('./cleanup');
 const makeAssetPath = require('./assetPath');
 const Queue = require('./queue');
 const { getClient } = require('./db');
@@ -74,9 +75,16 @@ if (!DEV) {
   });
 }
 
-const manifest = JSON.parse(
-  fs.readFileSync(path.join(distDir, assetPath('manifest.webmanifest', false)))
-);
+let manifest;
+try {
+  manifest = JSON.parse(
+    fs.readFileSync(
+      path.join(distDir, assetPath('manifest.webmanifest', false))
+    )
+  );
+} catch (err) {
+  cleanup(err);
+}
 manifest.icons.push(
   {
     src: assetPath('img/logo-192.png'),
