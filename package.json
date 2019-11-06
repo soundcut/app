@@ -17,7 +17,7 @@
     "watch:server": "nodemon --watch dist --watch server --watch shared/views server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "echo \"Error: no release script specified\" && exit 1",
-    "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build",
+    "postinstall": "[ -z \"$VHOST\" ] && exit 0; echo \"env: $NODE_ENV\"; npm run build",
     "deploy": "ssh $SOUNDSLICE_DEPLOY deploy default.git"
   },
   "author": {
