@@ -46,9 +46,6 @@
   "bugs": {
     "url": "https://github.com/soundcut/app/issues"
   },
-  "config": {
-    "NODE_ENV": "development"
-  },
   "dependencies": {
     "@soundcut/decode-audio-data-fast": "^1.0.1",
     "browser-id3-writer": "^4.1.0",
