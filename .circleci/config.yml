@@ -30,11 +30,21 @@ jobs:
           at: .
       - run: npm run size
 
+  bundlesize:
+    executor: soundcut-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - run: npm run bundlesize
+
 workflows:
     version: 2
     build-and-measure:
       jobs:
         - build
         - size:
+            requires:
+              - build
+        - bundlesize:
             requires:
               - build
