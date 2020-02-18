@@ -17,9 +17,16 @@
     "watch:server": "nodemon --watch dist --watch server --watch shared/views server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "echo \"Error: no release script specified\" && exit 1",
+    "size": "size-limit",
     "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build",
     "deploy": "ssh $SOUNDSLICE_DEPLOY deploy default.git"
   },
+  "size-limit": [
+    {
+      "path": "dist/js/app.*.js",
+      "limit": "40 KB"
+    }
+  ],
   "author": {
     "name": "Timothée 'Tim' Pillard",
     "email": "tim@tpillard.fr",
@@ -68,6 +75,7 @@
     "serve-static": "^1.13.2"
   },
   "devDependencies": {
+    "@size-limit/preset-app": "^4.0.1",
     "chokidar-cli": "^1.2.2",
     "copy-webpack-plugin": "^5.0.2",
     "css-loader": "^2.1.1",
@@ -82,6 +90,7 @@
     "prettier": "^1.14.2",
     "prettier-plugin-html-template-literals": "^1.0.5",
     "sass-loader": "^7.1.0",
+    "size-limit": "^4.0.1",
     "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
