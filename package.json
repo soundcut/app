@@ -18,6 +18,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "echo \"Error: no release script specified\" && exit 1",
     "size": "size-limit",
+    "bundlesize": "bundlesize",
     "postinstall": "[ -z \"$VHOST\" ] && exit 0; npm run build",
     "deploy": "ssh $SOUNDSLICE_DEPLOY deploy default.git"
   },
@@ -25,6 +26,13 @@
     {
       "path": "dist/js/app.*.js",
       "limit": "40 KB"
+    }
+  ],
+  "bundlesize": [
+    {
+      "path": "dist/js/app.*.js",
+      "maxSize": "130 kB",
+      "compression": "none"
     }
   ],
   "author": {
@@ -76,6 +84,7 @@
   },
   "devDependencies": {
     "@size-limit/preset-app": "^4.0.1",
+    "bundlesize": "^0.18.0",
     "chokidar-cli": "^1.2.2",
     "copy-webpack-plugin": "^5.0.2",
     "css-loader": "^2.1.1",
