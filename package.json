@@ -25,7 +25,8 @@
   "size-limit": [
     {
       "path": "dist/js/app.*.js",
-      "limit": "40 KB"
+      "limit": "120 KB",
+      "gzip": false
     }
   ],
   "bundlesize": [
@@ -99,7 +100,7 @@
     "prettier": "^1.14.2",
     "prettier-plugin-html-template-literals": "^1.0.5",
     "sass-loader": "^7.1.0",
-    "size-limit": "^4.0.1",
+    "size-limit": "^4.0.2",
     "terser-webpack-plugin": "^1.2.3",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
