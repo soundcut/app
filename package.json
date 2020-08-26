@@ -28,13 +28,6 @@
       "gzip": false
     }
   ],
-  "bundlesize": [
-    {
-      "path": "dist/js/app.*.js",
-      "maxSize": "130 kB",
-      "compression": "none"
-    }
-  ],
   "author": {
     "name": "Timothée 'Tim' Pillard",
     "email": "tim@tpillard.fr",
